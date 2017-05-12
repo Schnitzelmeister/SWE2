@@ -30,7 +30,7 @@ public class Application implements ActionListener {
 	private JPanel panelMain;
 
 	
-	private Workbook activeWorkbook = null;
+	public static Workbook activeWorkbook = null;
 	private JTable table;
 	private JTextField textField;
 	
@@ -61,7 +61,14 @@ public class Application implements ActionListener {
 	
 	public void actionPerformed(ActionEvent e) {
 	}
+
 	
+	public void Test() {
+		Worksheet wsht = this.activeWorkbook.getSheet("");
+		wsht.getCell(1, 1).setNumericValue(12.23);
+		wsht.getCell(1, 2).setFormula("=R[-1]C+2");
+	}
+
 	public static void main(String[] args) {
 
 		/*
@@ -80,7 +87,14 @@ public class Application implements ActionListener {
 					}										
 						Application gui = new Application();	
 				
-						gui.frmClientInterface.setVisible(true);			
+						gui.frmClientInterface.setVisible(true);	
+						
+						
+						
+						//test
+						gui.testFormulas();
+						
+
 				} catch (Exception e) {
 					e.printStackTrace();				
 				}		
@@ -127,5 +141,24 @@ public class Application implements ActionListener {
 		textField.setColumns(10);
 		
 		
+	}
+	
+	
+	
+	
+	public void testFormulas() 
+	{
+		Workbook wbk  = this.activeWorkbook;
+		Worksheet sheet = wbk.addSheet("sheet1");
+		sheet.getCell(1, 1).setNumericValue(11);
+		sheet.getCell(2, 1).setNumericValue(12);
+		sheet.getCell(3, 1).setNumericValue(13);
+		sheet.getCell(1, 2).setFormula("=SUM(RC[-1]:R[3]C[-1])+COUNT(RC[-1]:R[3]C[-1]))+MEAN(RC[-1]:R[3]C[-1]))");;
+		org.junit.Assert.assertEquals(51.0, sheet.getCell(1, 2).getNumericValue(), 0 );
+
+		sheet = wbk.addSheet("sheet2");
+		sheet.getCell(1, 2).setFormula("=SUM(sheet1!RC[-1]:R[3]C[-1])+COUNT(sheet1!RC[-1]:R[3]C[-1]))+MEAN(sheet1!RC[-1]:R[3]C[-1]))");;
+
+		org.junit.Assert.assertEquals(51.0, sheet.getCell(1, 2).getNumericValue(), 0 );
 	}
 }
