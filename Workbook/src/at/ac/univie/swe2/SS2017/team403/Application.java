@@ -21,6 +21,10 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.JTable;
+import javax.swing.JMenuBar;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.ImageIcon;
 
 
 public class Application implements ActionListener {
@@ -28,16 +32,17 @@ public class Application implements ActionListener {
 	//gui controls
 	private JFrame frmClientInterface;
 	private JPanel panelMain;
-
 	
 	private Workbook activeWorkbook = null;
-	private JTable table;
-	private JTextField textField;
+	private JTable table_1;
+	private JMenuBar menuBar;
+	
+	
 	
 	/**
 	 * Open proprietary format File
 	 */
-	public void OpenFile(String fileName) 
+	public void openFile(String fileName) 
 	{
 		//activeWorkbook
 	}
@@ -45,7 +50,7 @@ public class Application implements ActionListener {
 	/**
 	 * Open CSV format File
 	 */
-	public void OpenCSV(String fileName, String delimiter, String quotation) 
+	public void openCSV(String fileName, String delimiter, String quotation) 
 	{
 		
 	}
@@ -53,13 +58,13 @@ public class Application implements ActionListener {
 	/**
 	 * Calculate Data in worksheet
 	 */
-	public void Calculate() 
+	public void calculate() 
 	{
 		
 	}
-	
-	
-	public void actionPerformed(ActionEvent e) {
+		
+	public void actionPerformed(ActionEvent e){
+		
 	}
 	
 	public static void main(String[] args) {
@@ -102,10 +107,11 @@ public class Application implements ActionListener {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-	
+		String[] columns = {"ID", "Vorname", "Nachname", "Jahr"};
+		
 		frmClientInterface = new JFrame();
 		frmClientInterface.setTitle("Workbook");
-		frmClientInterface.setBounds(100, 100, 613, 520);
+		frmClientInterface.setBounds(100, 100, 613, 553);
 		frmClientInterface.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmClientInterface.getContentPane().setLayout(null);
 		
@@ -117,14 +123,29 @@ public class Application implements ActionListener {
 		tabbedPane.addTab("Sheet1", null, panelConnection, null);
 		panelConnection.setLayout(null);
 		
-		table = new JTable();
-		table.setBounds(27, 30, 527, 371);
-		panelConnection.add(table);
+		table_1 = new JTable();
+		table_1.setBounds(27, 30, 527, 371);
+		panelConnection.add(table_1);
 		
-		textField = new JTextField();
-		textField.setBounds(67, 11, 530, 20);
-		frmClientInterface.getContentPane().add(textField);
-		textField.setColumns(10);
+		menuBar = new JMenuBar();
+		frmClientInterface.setJMenuBar(menuBar);
+		
+		JMenu fileMenu = new JMenu("Datei");
+		menuBar.add(fileMenu);
+		
+		JMenuItem mntmNeu = new JMenuItem("Neu");
+		fileMenu.add(mntmNeu);
+		
+		JMenuItem openFileMenuItem = new JMenuItem("Datei \u00F6ffnen...");
+		openFileMenuItem.setSelectedIcon(new ImageIcon(Application.class.getResource("/com/sun/java/swing/plaf/windows/icons/File.gif")));
+		fileMenu.add(openFileMenuItem);
+		
+		JMenuItem saveFileMenutItem = new JMenuItem("Speichern");
+		saveFileMenutItem.setSelectedIcon(new ImageIcon(Application.class.getResource("/com/sun/java/swing/plaf/windows/icons/FloppyDrive.gif")));
+		fileMenu.add(saveFileMenutItem);
+		
+		JMenuItem mntmSpeichernUnter = new JMenuItem("Speichern unter...");
+		fileMenu.add(mntmSpeichernUnter);
 		
 		
 	}
