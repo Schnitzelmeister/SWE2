@@ -1,29 +1,16 @@
 package at.ac.univie.swe2.SS2017.team403;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.EventQueue;
-import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import javax.swing.ButtonGroup;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
-import javax.swing.SwingConstants;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.JTable;
 import javax.swing.JMenuBar;
@@ -180,12 +167,56 @@ public class Application implements ActionListener {
 		//open JFileChooser in order to search for CSV file
 		//openFileMenuItem
 		
-		JMenuItem saveFileMenutItem = new JMenuItem("Speichern");
-		saveFileMenutItem.setSelectedIcon(new ImageIcon(Application.class.getResource("/com/sun/java/swing/plaf/windows/icons/FloppyDrive.gif")));
-		fileMenu.add(saveFileMenutItem);
+		JMenuItem saveFileMenuItem = new JMenuItem("Speichern");
+		saveFileMenuItem.setSelectedIcon(new ImageIcon(Application.class.getResource("/com/sun/java/swing/plaf/windows/icons/FloppyDrive.gif")));
+		fileMenu.add(saveFileMenuItem);
+		
+		saveFileMenuItem.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				
+			}
+			
+		});
+		
 		
 		JMenuItem mntmSpeichernUnter = new JMenuItem("Speichern unter...");
 		fileMenu.add(mntmSpeichernUnter);
+		
+		mntmSpeichernUnter.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				JFileChooser chooser = new JFileChooser();
+		        Component parent = null;
+		        FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV (durch Trennzeichen getrennt) (*.csv)", "csv");
+		        FileNameExtensionFilter filter2 = new FileNameExtensionFilter("beispiel (*.bsp)", "beispiel"); // proprietäres Datenformat
+		        chooser.setFileFilter(filter);
+		        chooser.addChoosableFileFilter(filter2);
+		        int returnVal = chooser.showSaveDialog(parent);
+		        
+		        
+		        if(returnVal == JFileChooser.APPROVE_OPTION) {
+		        
+		        // Sobald Workbook implementiert ist
+		        //	try {
+				//		writeCSV(workbook, tabbedPane.getTitleAt(tabbedPane.getSelectedIndex())) ,
+		        //		chooser.getSelectedFile().getAbsolutePath());  
+				//	} catch (IOException e1) {
+				//		System.out.println("Fehler beim Auslesen!");
+				//		e1.printStackTrace();
+				//	}
+		        	
+		        	chooser.getSelectedFile().getName();
+		            System.out.println("Die Datei wurde gespeichert!");
+		        }else{
+		        	System.out.println("Das Fenster wurde geschlossen!");
+		        }               
+			}
+			
+		});
 		
 		
 	}
