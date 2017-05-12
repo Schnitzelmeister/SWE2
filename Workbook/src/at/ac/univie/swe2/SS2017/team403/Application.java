@@ -8,7 +8,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.io.FileFilter;
+import java.io.FileWriter;
+import java.io.IOException;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -49,6 +50,19 @@ public class Application implements ActionListener {
 	public void openFile(String fileName) 
 	{
 		//activeWorkbook
+	}
+	
+	/**
+	 * Write Csv Format File
+	 * @throws IOException 
+	 */
+	public void writeCSV(Workbook workbook, String workSheetName, String filePath) throws IOException{
+		
+		FileWriter writer = new FileWriter(filePath);	
+		CsvWriteUtility.convertWorkSheetToCsv(workbook.getSheet(workSheetName), writer);
+		
+		writer.flush();
+		writer.close();
 	}
 
 	/**
