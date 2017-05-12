@@ -1,16 +1,19 @@
 package at.ac.univie.swe2.SS2017.team403;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.FileFilter;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -20,6 +23,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.JTable;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
@@ -64,7 +68,7 @@ public class Application implements ActionListener {
 	}
 		
 	public void actionPerformed(ActionEvent e){
-		
+	
 	}
 	
 	public static void main(String[] args) {
@@ -130,6 +134,7 @@ public class Application implements ActionListener {
 		menuBar = new JMenuBar();
 		frmClientInterface.setJMenuBar(menuBar);
 		
+		
 		JMenu fileMenu = new JMenu("Datei");
 		menuBar.add(fileMenu);
 		
@@ -139,6 +144,27 @@ public class Application implements ActionListener {
 		JMenuItem openFileMenuItem = new JMenuItem("Datei \u00F6ffnen...");
 		openFileMenuItem.setSelectedIcon(new ImageIcon(Application.class.getResource("/com/sun/java/swing/plaf/windows/icons/File.gif")));
 		fileMenu.add(openFileMenuItem);
+		
+		/*
+		 * CSV Datei öffnen (Nur CSV Dateien lassen sich öffnen)
+		 */
+		openFileMenuItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e){
+				JFileChooser chooser = new JFileChooser();
+		        Component parent = null;
+		        FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV File", "csv");
+		        chooser.setFileFilter(filter);
+		        int returnVal = chooser.showOpenDialog(parent);
+		        if(returnVal == JFileChooser.APPROVE_OPTION) {
+		            System.out.println("You chose to open this file: " + chooser.getSelectedFile().getName());
+		        }else{
+		        	System.out.println("The user pressed the CANCEL or X Button");
+		        }               
+			}
+		}
+		);
+		//open JFileChooser in order to search for CSV file
+		//openFileMenuItem
 		
 		JMenuItem saveFileMenutItem = new JMenuItem("Speichern");
 		saveFileMenutItem.setSelectedIcon(new ImageIcon(Application.class.getResource("/com/sun/java/swing/plaf/windows/icons/FloppyDrive.gif")));
