@@ -21,6 +21,7 @@ import javax.swing.table.TableModel;
 import com.opencsv.CSVReader;
 
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -29,9 +30,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JScrollPane;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
-import com.jgoodies.forms.layout.FormLayout;
-import com.jgoodies.forms.layout.ColumnSpec;
-import com.jgoodies.forms.layout.RowSpec;
 
 public class Application implements ActionListener {
 
@@ -111,23 +109,7 @@ public class Application implements ActionListener {
 		 * 
 		
 		 */
-		*/
-		EventQueue.invokeLater(new Runnable() {			
-			public void run() {	
-				try {		
-					if (System.getSecurityManager() == null) {			       
-						//    System.setSecurityManager(new SecurityManager());			       
-					}										
-						Application gui = new Application();	
-				
-						gui.frmClientInterface.setVisible(true);	
-						
-						
-						
-						//test
-						gui.testFormulas();
-						
-
+		
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -136,6 +118,9 @@ public class Application implements ActionListener {
 					}
 					Application gui = new Application();
 
+					//test
+					//gui.testFormulas();
+					
 					gui.frmClientInterface.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -157,6 +142,29 @@ public class Application implements ActionListener {
 	 */
 	private void initialize() {
 		frmClientInterface = new JFrame();
+		frmClientInterface.setTitle("Workbook");
+		frmClientInterface.setBounds(100, 100, 613, 520);
+		frmClientInterface.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frmClientInterface.getContentPane().setLayout(null);
+		
+		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.BOTTOM);
+		tabbedPane.setBounds(12, 26, 584, 452);
+		frmClientInterface.getContentPane().add(tabbedPane);
+		
+		JPanel panelConnection = new JPanel();
+		tabbedPane.addTab("Sheet1", null, panelConnection, null);
+		panelConnection.setLayout(null);
+		
+		JTable table = new JTable();
+		table.setBounds(27, 30, 527, 371);
+		panelConnection.add(table);
+		
+		JTextField textField = new JTextField();
+		textField.setBounds(67, 11, 530, 20);
+		frmClientInterface.getContentPane().add(textField);
+		textField.setColumns(10);
+		
+		/*frmClientInterface = new JFrame();
 		frmClientInterface.setTitle("Workbook");
 		frmClientInterface.setBounds(100, 100, 732, 599);
 		frmClientInterface.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -193,9 +201,9 @@ public class Application implements ActionListener {
 				new ImageIcon(Application.class.getResource("/com/sun/java/swing/plaf/windows/icons/File.gif")));
 		fileMenu.add(openFileMenuItem);
 
-		/*
+		/
 		 * CSV Datei öffnen (Nur CSV Dateien lassen sich öffnen)
-		 */
+		 /
 		openFileMenuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
@@ -273,7 +281,7 @@ public class Application implements ActionListener {
 				}
 			}
 
-		});
+		});*/
 
 	}
 	
@@ -282,17 +290,17 @@ public class Application implements ActionListener {
 	
 	public void testFormulas() 
 	{
-		Workbook wbk  = this.activeWorkbook;
+		Workbook wbk  = Application.activeWorkbook;
 		Worksheet sheet = wbk.addSheet("sheet1");
 		sheet.getCell(1, 1).setNumericValue(11);
 		sheet.getCell(2, 1).setNumericValue(12);
 		sheet.getCell(3, 1).setNumericValue(13);
 		sheet.getCell(1, 2).setFormula("=SUM(RC[-1]:R[3]C[-1])+COUNT(RC[-1]:R[3]C[-1]))+MEAN(RC[-1]:R[3]C[-1]))");;
-		org.junit.Assert.assertEquals(51.0, sheet.getCell(1, 2).getNumericValue(), 0 );
+		//org.junit.Assert.assertEquals(51.0, sheet.getCell(1, 2).getNumericValue(), 0 );
 
 		sheet = wbk.addSheet("sheet2");
 		sheet.getCell(1, 2).setFormula("=SUM(sheet1!RC[-1]:R[3]C[-1])+COUNT(sheet1!RC[-1]:R[3]C[-1]))+MEAN(sheet1!RC[-1]:R[3]C[-1]))");;
 
-		org.junit.Assert.assertEquals(51.0, sheet.getCell(1, 2).getNumericValue(), 0 );
+		//org.junit.Assert.assertEquals(51.0, sheet.getCell(1, 2).getNumericValue(), 0 );
 	}
 }
