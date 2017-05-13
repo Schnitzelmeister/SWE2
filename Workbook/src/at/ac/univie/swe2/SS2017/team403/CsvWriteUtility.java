@@ -11,7 +11,6 @@ public class CsvWriteUtility {
 		StringBuilder cellContents = new StringBuilder();
 		
 		for(int i=0;i<numberOfRows;++i){	
-			
 			for(int j=0;j<numberOfColumns;++j){
 				cellContents.append((worksheet.getCell(i, j).toString()));
 				cellContents.append(";");
@@ -21,7 +20,6 @@ public class CsvWriteUtility {
 			writer.append(System.lineSeparator());
 			cellContents = new StringBuilder();
 		}
-		
 		writer.flush();
 		writer.close();
 	}	
