@@ -12,8 +12,10 @@ public class CsvWriteUtility {
 		
 		for(int i=0;i<numberOfRows;++i){	
 			for(int j=0;j<numberOfColumns;++j){
-				cellContents.append((worksheet.getCell(i, j).toString()));
-				cellContents.append(";");
+				if(!worksheet.getCell(i, j).toString().isEmpty()){
+					cellContents.append((worksheet.getCell(i, j).toString()));
+				}
+				cellContents.append(",");
 			}
 			
 			writer.append(cellContents.toString());
