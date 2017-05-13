@@ -2,8 +2,10 @@ package at.ac.univie.swe2.SS2017.team403;
 
 import java.awt.Component;
 import java.awt.EventQueue;
+import java.util.List;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -12,10 +14,16 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
+
+import com.opencsv.CSVReader;
+
 import javax.swing.JTable;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.ImageIcon;
 
 
@@ -55,9 +63,22 @@ public class Application implements ActionListener {
 	/**
 	 * Open CSV format File
 	 */
-	public void openCSV(String fileName, String delimiter, String quotation) 
-	{
+	public void openCSV(String fileLocation, char delimiter, String quotation) throws IOException{
 		
+		CSVReader reader = new CSVReader(new FileReader(fileLocation), ';');
+		List<String[]> csvValues = reader.readAll();
+		System.out.println(csvValues.size());
+		 
+		String[] columnNames = csvValues.get(0);		
+		String[][] emptyString = null;
+		
+		
+		
+		
+		TableModel model = new DefaultTableModel(emptyString, columnNames);
+		table_1.setModel(model);
+		
+		reader.close();
 	}
 
 	/**
@@ -111,9 +132,7 @@ public class Application implements ActionListener {
 	/**
 	 * Initialize the contents of the frame.
 	 */
-	private void initialize() {
-		String[] columns = {"ID", "Vorname", "Nachname", "Jahr"};
-		
+	private void initialize() {		
 		frmClientInterface = new JFrame();
 		frmClientInterface.setTitle("Workbook");
 		frmClientInterface.setBounds(100, 100, 613, 553);
@@ -151,16 +170,31 @@ public class Application implements ActionListener {
 		 */
 		openFileMenuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e){
-				JFileChooser chooser = new JFileChooser();
-		        Component parent = null;
-		        FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV File", "csv");
-		        chooser.setFileFilter(filter);
-		        int returnVal = chooser.showOpenDialog(parent);
-		        if(returnVal == JFileChooser.APPROVE_OPTION) {
-		            System.out.println("You chose to open this file: " + chooser.getSelectedFile().getName());
-		        }else{
-		        	System.out.println("The user pressed the CANCEL or X Button");
-		        }               
+				try {
+					JFileChooser chooser = new JFileChooser();
+					Component parent = null;
+					FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV File", "csv");
+					chooser.setFileFilter(filter);
+					int returnVal = chooser.showOpenDialog(parent);
+					
+					if (returnVal == JFileChooser.APPROVE_OPTION) {
+						String filePath = chooser.getSelectedFile().getPath();
+						System.out.println("You chose to open this file: " + chooser.getSelectedFile().getName());
+						System.out.println("The filepath is: " + chooser.getSelectedFile().getPath());
+						System.out.println("The absolute filepath is: " + chooser.getSelectedFile().getAbsolutePath());
+
+						openCSV(filePath, ';', "not important yet");
+					} else {
+						System.out.println("The user pressed the CANCEL or X Button");
+					}
+					
+				} catch (IOException o) {
+					System.out.println("Exception occured: File could not be found. ");
+					JOptionPane.showMessageDialog(frmClientInterface,
+						    "Die Datei konnte nicht gefunden werden ",
+						    "Fehler",
+						    JOptionPane.ERROR_MESSAGE);
+				}         
 			}
 		}
 		);
