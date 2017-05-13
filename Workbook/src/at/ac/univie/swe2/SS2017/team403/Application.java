@@ -25,6 +25,8 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.ImageIcon;
+import javax.swing.JScrollPane;
+import java.awt.BorderLayout;
 
 
 public class Application implements ActionListener {
@@ -34,8 +36,8 @@ public class Application implements ActionListener {
 	private JPanel panelMain;
 	
 	private Workbook activeWorkbook = null;
-	private JTable table_1;
 	private JMenuBar menuBar;
+	private JTable table_1;
 	
 	
 	
@@ -63,22 +65,13 @@ public class Application implements ActionListener {
 	/**
 	 * Open CSV format File
 	 */
-	public void openCSV(String fileLocation, char delimiter, String quotation) throws IOException{
-		
-		CSVReader reader = new CSVReader(new FileReader(fileLocation), ';');
+	public void openCSV(String fileLocation, char delimiter, String quotation) throws IOException{	
+		CSVReader reader = new CSVReader(new FileReader(fileLocation), ',');
 		List<String[]> csvValues = reader.readAll();
-		System.out.println(csvValues.size());
-		 
-		String[] columnNames = csvValues.get(0);		
-		String[][] emptyString = null;
-		
-		
-		
-		
-		TableModel model = new DefaultTableModel(emptyString, columnNames);
-		table_1.setModel(model);
-		
 		reader.close();
+		
+		TableModel model = new CustomTableModel(csvValues);
+		table_1.setModel(model);
 	}
 
 	/**
@@ -135,21 +128,8 @@ public class Application implements ActionListener {
 	private void initialize() {		
 		frmClientInterface = new JFrame();
 		frmClientInterface.setTitle("Workbook");
-		frmClientInterface.setBounds(100, 100, 613, 553);
+		frmClientInterface.setBounds(100, 100, 620, 533);
 		frmClientInterface.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frmClientInterface.getContentPane().setLayout(null);
-		
-		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.BOTTOM);
-		tabbedPane.setBounds(12, 26, 584, 452);
-		frmClientInterface.getContentPane().add(tabbedPane);
-		
-		JPanel panelConnection = new JPanel();
-		tabbedPane.addTab("Sheet1", null, panelConnection, null);
-		panelConnection.setLayout(null);
-		
-		table_1 = new JTable();
-		table_1.setBounds(27, 30, 527, 371);
-		panelConnection.add(table_1);
 		
 		menuBar = new JMenuBar();
 		frmClientInterface.setJMenuBar(menuBar);
@@ -217,6 +197,21 @@ public class Application implements ActionListener {
 		
 		JMenuItem mntmSpeichernUnter = new JMenuItem("Speichern unter...");
 		fileMenu.add(mntmSpeichernUnter);
+		
+		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		frmClientInterface.getContentPane().add(tabbedPane, BorderLayout.CENTER);
+		
+		JScrollPane worksheet1 = new JScrollPane();
+		tabbedPane.addTab("New tab", null, worksheet1, null);
+		
+		table_1 = new JTable();
+		worksheet1.setViewportView(table_1);
+		
+		JScrollPane worksheet2 = new JScrollPane();
+		tabbedPane.addTab("New tab", null, worksheet2, null);
+		
+		JScrollPane worksheet3 = new JScrollPane();
+		tabbedPane.addTab("New tab", null, worksheet3, null);
 		
 		mntmSpeichernUnter.addActionListener(new ActionListener(){
 
