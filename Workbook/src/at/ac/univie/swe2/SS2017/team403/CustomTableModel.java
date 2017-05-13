@@ -5,11 +5,15 @@ import java.util.List;
 import javax.swing.table.AbstractTableModel;
 
 public class CustomTableModel extends AbstractTableModel {
-
 	List<String[]> list = null;
 
 	public CustomTableModel(List<String[]> values) {
 		this.list = values;
+	}
+
+	@Override
+	public String getColumnName(int index) {
+		return list.get(0)[index];
 	}
 
 	@Override
@@ -27,7 +31,6 @@ public class CustomTableModel extends AbstractTableModel {
 
 	@Override
 	public Object getValueAt(int row, int column) {
-		return list.get(row)[column];
+			return list.get(row)[column]; //vorübergehend
 	}
-
 }

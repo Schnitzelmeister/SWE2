@@ -2,7 +2,6 @@ package at.ac.univie.swe2.SS2017.team403;
 
 import java.awt.Component;
 import java.awt.EventQueue;
-import java.util.ArrayList;
 import java.util.List;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -21,43 +20,44 @@ import javax.swing.table.TableModel;
 import com.opencsv.CSVReader;
 
 import javax.swing.JTable;
-import javax.swing.JTextField;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.ImageIcon;
 import javax.swing.JScrollPane;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
+import java.awt.BorderLayout;
+
 
 public class Application implements ActionListener {
 
-	// gui controls
+	//gui controls
 	private JFrame frmClientInterface;
 	private JPanel panelMain;
-
-	public static Workbook activeWorkbook = null;
-	private JTable table_1;
+	
+	private Workbook activeWorkbook = null;
 	private JMenuBar menuBar;
-
+	private JTable table_1;
+	
+	
+	
 	/**
 	 * Open proprietary format File
 	 */
-	public void openFile(String fileName) {
-		// activeWorkbook
+	public void openFile(String fileName) 
+	{
+		//activeWorkbook
 	}
-
+	
 	/**
 	 * Write Csv Format File
-	 * 
-	 * @throws IOException
+	 * @throws IOException 
 	 */
-	public void writeCSV(Workbook workbook, String workSheetName, String filePath) throws IOException {
-
-		FileWriter writer = new FileWriter(filePath);
+	public void writeCSV(Workbook workbook, String workSheetName, String filePath) throws IOException{
+		
+		FileWriter writer = new FileWriter(filePath);	
 		CsvWriteUtility.convertWorkSheetToCsv(workbook.getSheet(workSheetName), writer);
-
+		
 		writer.flush();
 		writer.close();
 	}
@@ -65,8 +65,7 @@ public class Application implements ActionListener {
 	/**
 	 * Open CSV format File
 	 */
-	public void openCSV(String fileLocation, char delimiter, String quotation) throws IOException {
-
+	public void openCSV(String fileLocation, char delimiter, String quotation) throws IOException{	
 		CSVReader reader = new CSVReader(new FileReader(fileLocation), ',');
 		List<String[]> csvValues = reader.readAll();
 		reader.close();
@@ -78,22 +77,15 @@ public class Application implements ActionListener {
 	/**
 	 * Calculate Data in worksheet
 	 */
-	public void calculate() {
-
+	public void calculate() 
+	{
+		
 	}
-
-	public void actionPerformed(ActionEvent e) {
-
-	}
-
-
+		
+	public void actionPerformed(ActionEvent e){
 	
-	public void Test() {
-		Worksheet wsht = this.activeWorkbook.getSheet("");
-		wsht.getCell(1, 1).setNumericValue(12.23);
-		wsht.getCell(1, 2).setFormula("=R[-1]C+2");
 	}
-
+	
 	public static void main(String[] args) {
 
 		/*
@@ -102,34 +94,27 @@ public class Application implements ActionListener {
 		    	 remoteHostBoerseSOAP, remoteHostBoerseREST,
 		    	 remoteHostBroker, remotePortRMIBroker) 
 		);
-		 * EventQueue.invokeLater(new MyRunnable(brokerId, clientId,
-		 * remoteHostBoerse, remotePortUDPBoerse, remotePortRMIBoerse,
-		 * remoteHostBoerseSOAP, remoteHostBoerseREST, remoteHostBroker,
-		 * remotePortRMIBroker) );
-		 * 
 		
-		 */
-		
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					if (System.getSecurityManager() == null) {
-						// System.setSecurityManager(new SecurityManager());
-					}
-					Application gui = new Application();
-
-					//test
-					//gui.testFormulas();
-					
-					gui.frmClientInterface.setVisible(true);
+		*/
+		EventQueue.invokeLater(new Runnable() {			
+			public void run() {	
+				try {		
+					if (System.getSecurityManager() == null) {			       
+						//    System.setSecurityManager(new SecurityManager());			       
+					}										
+						Application gui = new Application();	
+				
+						gui.frmClientInterface.setVisible(true);			
 				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-
+					e.printStackTrace();				
+				}		
+				}		
+			});
+			
 	}
 
+	
+	
 	/**
 	 * Create the application.
 	 */
@@ -140,167 +125,128 @@ public class Application implements ActionListener {
 	/**
 	 * Initialize the contents of the frame.
 	 */
-	private void initialize() {
+	private void initialize() {		
 		frmClientInterface = new JFrame();
 		frmClientInterface.setTitle("Workbook");
-		frmClientInterface.setBounds(100, 100, 613, 520);
+		frmClientInterface.setBounds(100, 100, 620, 533);
 		frmClientInterface.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frmClientInterface.getContentPane().setLayout(null);
 		
-		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.BOTTOM);
-		tabbedPane.setBounds(12, 26, 584, 452);
-		frmClientInterface.getContentPane().add(tabbedPane);
-		
-		JPanel panelConnection = new JPanel();
-		tabbedPane.addTab("Sheet1", null, panelConnection, null);
-		panelConnection.setLayout(null);
-		
-		JTable table = new JTable();
-		table.setBounds(27, 30, 527, 371);
-		panelConnection.add(table);
-		
-		JTextField textField = new JTextField();
-		textField.setBounds(67, 11, 530, 20);
-		frmClientInterface.getContentPane().add(textField);
-		textField.setColumns(10);
-		
-		/*frmClientInterface = new JFrame();
-		frmClientInterface.setTitle("Workbook");
-		frmClientInterface.setBounds(100, 100, 732, 599);
-		frmClientInterface.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-				frmClientInterface.getContentPane().setLayout(new FormLayout(new ColumnSpec[] {
-						ColumnSpec.decode("584px"),},
-					new RowSpec[] {
-						RowSpec.decode("452px"),}));
-		
-				JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.BOTTOM);
-				frmClientInterface.getContentPane().add(tabbedPane, "1, 1, fill, fill");
-				
-						JPanel panelConnection = new JPanel();
-						tabbedPane.addTab("Sheet1", null, panelConnection, null);
-						panelConnection.setLayout(null);
-						
-								table_1 = new JTable();
-								table_1.setBounds(27, 30, 527, 371);
-								panelConnection.add(table_1);
-
 		menuBar = new JMenuBar();
 		frmClientInterface.setJMenuBar(menuBar);
-
-		JScrollPane scrollPane = new JScrollPane(table_1);
-		table_1.setFillsViewportHeight(true);
+		
 		
 		JMenu fileMenu = new JMenu("Datei");
 		menuBar.add(fileMenu);
-
+		
 		JMenuItem mntmNeu = new JMenuItem("Neu");
 		fileMenu.add(mntmNeu);
-
+		
 		JMenuItem openFileMenuItem = new JMenuItem("Datei \u00F6ffnen...");
-		openFileMenuItem.setSelectedIcon(
-				new ImageIcon(Application.class.getResource("/com/sun/java/swing/plaf/windows/icons/File.gif")));
+		openFileMenuItem.setSelectedIcon(new ImageIcon(Application.class.getResource("/com/sun/java/swing/plaf/windows/icons/File.gif")));
 		fileMenu.add(openFileMenuItem);
-
-		/
+		
+		/*
 		 * CSV Datei öffnen (Nur CSV Dateien lassen sich öffnen)
-		 /
+		 */
 		openFileMenuItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+			public void actionPerformed(ActionEvent e){
 				try {
 					JFileChooser chooser = new JFileChooser();
 					Component parent = null;
 					FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV File", "csv");
 					chooser.setFileFilter(filter);
 					int returnVal = chooser.showOpenDialog(parent);
-
+					
 					if (returnVal == JFileChooser.APPROVE_OPTION) {
 						String filePath = chooser.getSelectedFile().getPath();
+						System.out.println("You chose to open this file: " + chooser.getSelectedFile().getName());
+						System.out.println("The filepath is: " + chooser.getSelectedFile().getPath());
+						System.out.println("The absolute filepath is: " + chooser.getSelectedFile().getAbsolutePath());
 
 						openCSV(filePath, ';', "not important yet");
-
 					} else {
 						System.out.println("The user pressed the CANCEL or X Button");
 					}
-
+					
 				} catch (IOException o) {
 					System.out.println("Exception occured: File could not be found. ");
-					JOptionPane.showMessageDialog(frmClientInterface, "Die Datei konnte nicht gefunden werden ",
-							"Fehler", JOptionPane.ERROR_MESSAGE);
-				}
+					JOptionPane.showMessageDialog(frmClientInterface,
+						    "Die Datei konnte nicht gefunden werden ",
+						    "Fehler",
+						    JOptionPane.ERROR_MESSAGE);
+				}         
 			}
-		});
-
+		}
+		);
+		//open JFileChooser in order to search for CSV file
+		//openFileMenuItem
+		
 		JMenuItem saveFileMenuItem = new JMenuItem("Speichern");
-		saveFileMenuItem.setSelectedIcon(
-				new ImageIcon(Application.class.getResource("/com/sun/java/swing/plaf/windows/icons/FloppyDrive.gif")));
+		saveFileMenuItem.setSelectedIcon(new ImageIcon(Application.class.getResource("/com/sun/java/swing/plaf/windows/icons/FloppyDrive.gif")));
 		fileMenu.add(saveFileMenuItem);
-
+		
 		saveFileMenuItem.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-
+				
 			}
-
+			
 		});
-
+		
+		
 		JMenuItem mntmSpeichernUnter = new JMenuItem("Speichern unter...");
 		fileMenu.add(mntmSpeichernUnter);
-
-		mntmSpeichernUnter.addActionListener(new ActionListener() {
+		
+		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		frmClientInterface.getContentPane().add(tabbedPane, BorderLayout.CENTER);
+		
+		JScrollPane worksheet1 = new JScrollPane();
+		tabbedPane.addTab("New tab", null, worksheet1, null);
+		
+		table_1 = new JTable();
+		worksheet1.setViewportView(table_1);
+		
+		JScrollPane worksheet2 = new JScrollPane();
+		tabbedPane.addTab("New tab", null, worksheet2, null);
+		
+		JScrollPane worksheet3 = new JScrollPane();
+		tabbedPane.addTab("New tab", null, worksheet3, null);
+		
+		mntmSpeichernUnter.addActionListener(new ActionListener(){
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-
+				
 				JFileChooser chooser = new JFileChooser();
-				Component parent = null;
-				FileNameExtensionFilter filter = new FileNameExtensionFilter(
-						"CSV (durch Trennzeichen getrennt) (*.csv)", "csv");
-				FileNameExtensionFilter filter2 = new FileNameExtensionFilter("beispiel (*.bsp)", "beispiel"); // proprietäres
-																												// Datenformat
-				chooser.setFileFilter(filter);
-				chooser.addChoosableFileFilter(filter2);
-				int returnVal = chooser.showSaveDialog(parent);
-
-				if (returnVal == JFileChooser.APPROVE_OPTION) {
-
-					// Sobald Workbook implementiert ist
-					// try {
-					// writeCSV(workbook,
-					// tabbedPane.getTitleAt(tabbedPane.getSelectedIndex())) ,
-					// chooser.getSelectedFile().getAbsolutePath());
-					// } catch (IOException e1) {
-					// System.out.println("Fehler beim Auslesen!");
-					// e1.printStackTrace();
-					// }
-
-					chooser.getSelectedFile().getName();
-					System.out.println("Die Datei wurde gespeichert!");
-				} else {
-					System.out.println("Das Fenster wurde geschlossen!");
-				}
+		        Component parent = null;
+		        FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV (durch Trennzeichen getrennt) (*.csv)", "csv");
+		        FileNameExtensionFilter filter2 = new FileNameExtensionFilter("beispiel (*.bsp)", "beispiel"); // proprietäres Datenformat
+		        chooser.setFileFilter(filter);
+		        chooser.addChoosableFileFilter(filter2);
+		        int returnVal = chooser.showSaveDialog(parent);
+		        
+		        
+		        if(returnVal == JFileChooser.APPROVE_OPTION) {
+		        
+		        // Sobald Workbook implementiert ist
+		        //	try {
+				//		writeCSV(workbook, tabbedPane.getTitleAt(tabbedPane.getSelectedIndex())) ,
+		        //		chooser.getSelectedFile().getAbsolutePath());  
+				//	} catch (IOException e1) {
+				//		System.out.println("Fehler beim Auslesen!");
+				//		e1.printStackTrace();
+				//	}
+		        	
+		        	chooser.getSelectedFile().getName();
+		            System.out.println("Die Datei wurde gespeichert!");
+		        }else{
+		        	System.out.println("Das Fenster wurde geschlossen!");
+		        }               
 			}
-
-		});*/
-
-	}
-	
-	
-	
-	
-	public void testFormulas() 
-	{
-		Workbook wbk  = Application.activeWorkbook;
-		Worksheet sheet = wbk.addSheet("sheet1");
-		sheet.getCell(1, 1).setNumericValue(11);
-		sheet.getCell(2, 1).setNumericValue(12);
-		sheet.getCell(3, 1).setNumericValue(13);
-		sheet.getCell(1, 2).setFormula("=SUM(RC[-1]:R[3]C[-1])+COUNT(RC[-1]:R[3]C[-1]))+MEAN(RC[-1]:R[3]C[-1]))");;
-		//org.junit.Assert.assertEquals(51.0, sheet.getCell(1, 2).getNumericValue(), 0 );
-
-		sheet = wbk.addSheet("sheet2");
-		sheet.getCell(1, 2).setFormula("=SUM(sheet1!RC[-1]:R[3]C[-1])+COUNT(sheet1!RC[-1]:R[3]C[-1]))+MEAN(sheet1!RC[-1]:R[3]C[-1]))");;
-
-		//org.junit.Assert.assertEquals(51.0, sheet.getCell(1, 2).getNumericValue(), 0 );
+			
+		});
+		
+		
 	}
 }
