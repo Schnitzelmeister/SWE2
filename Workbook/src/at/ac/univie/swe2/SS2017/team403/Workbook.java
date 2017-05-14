@@ -15,7 +15,7 @@ public class Workbook implements Serializable  {
 	int getNewId() { return counter.incrementAndGet(); }
 	
 	//contained Worksheets
-	private TreeMap<String, Worksheet> sheets;
+	private static TreeMap<String, Worksheet> sheets;
 	//contained Diagrams
 	private ArrayList<Diagram> diagrams;
 	
@@ -49,7 +49,7 @@ public class Workbook implements Serializable  {
 		AddDependency(cell, exp, new Range(precedent));
 	}
 
-	public Worksheet getSheet(String name)
+	public static Worksheet getSheet(String name)
 	{
 		return sheets.get(name);		
 	}

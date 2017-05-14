@@ -30,6 +30,8 @@ import java.awt.BorderLayout;
 
 
 public class Application implements ActionListener {
+	
+	private String choosedAbsolutFile = null;
 
 	//gui controls
 	private JFrame frmClientInterface;
@@ -53,11 +55,10 @@ public class Application implements ActionListener {
 	 * Write Csv Format File
 	 * @throws IOException 
 	 */
-	public void writeCSV(Workbook workbook, String workSheetName, String filePath) throws IOException{
+	public void writeCSV(String workSheetName, String filePath) throws IOException{
 		
 		FileWriter writer = new FileWriter(filePath);	
-		CsvWriteUtility.convertWorkSheetToCsv(workbook.getSheet(workSheetName), writer);
-		
+		//CsvWriteUtility.convertWorkSheetToCsv(Workbook.getSheet(workSheetName), writer); Sobald Csv File geöffnet werden kann
 		writer.flush();
 		writer.close();
 	}
@@ -181,19 +182,6 @@ public class Application implements ActionListener {
 		//open JFileChooser in order to search for CSV file
 		//openFileMenuItem
 		
-		JMenuItem saveFileMenuItem = new JMenuItem("Speichern");
-		saveFileMenuItem.setSelectedIcon(new ImageIcon(Application.class.getResource("/com/sun/java/swing/plaf/windows/icons/FloppyDrive.gif")));
-		fileMenu.add(saveFileMenuItem);
-		
-		saveFileMenuItem.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				
-			}
-			
-		});
-		
 		
 		JMenuItem mntmSpeichernUnter = new JMenuItem("Speichern unter...");
 		fileMenu.add(mntmSpeichernUnter);
@@ -213,6 +201,55 @@ public class Application implements ActionListener {
 		JScrollPane worksheet3 = new JScrollPane();
 		tabbedPane.addTab("New tab", null, worksheet3, null);
 		
+		
+		
+		JMenuItem saveFileMenuItem = new JMenuItem("Speichern");
+		saveFileMenuItem.setSelectedIcon(new ImageIcon(Application.class.getResource("/com/sun/java/swing/plaf/windows/icons/FloppyDrive.gif")));
+		fileMenu.add(saveFileMenuItem);
+		
+		saveFileMenuItem.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				if(choosedAbsolutFile!=null){
+					try {
+						writeCSV(tabbedPane.getTitleAt(tabbedPane.getSelectedIndex()) ,choosedAbsolutFile);
+					} catch (IOException e) {
+						System.out.println("Fehler beim internen Auslesen!");
+						e.printStackTrace();
+					}
+					System.out.println("Die Datei wurde unter: "+choosedAbsolutFile+" gespeichert!");
+				}else{
+					JFileChooser chooser = new JFileChooser();
+			        Component parent = null;
+			        FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV (durch Trennzeichen getrennt) (*.csv)", "csv");
+			        FileNameExtensionFilter filter2 = new FileNameExtensionFilter("beispiel (*.bsp)", "beispiel"); // proprietäres Datenformat
+			        chooser.setFileFilter(filter);
+			        chooser.addChoosableFileFilter(filter2);
+			        int returnVal = chooser.showSaveDialog(parent);
+			        
+			        
+			        if(returnVal == JFileChooser.APPROVE_OPTION) {
+			        
+			        	try {
+							writeCSV(tabbedPane.getTitleAt(tabbedPane.getSelectedIndex()) ,choosedAbsolutFile = chooser.getSelectedFile().getAbsolutePath());  
+						} catch (IOException e1) {
+							System.out.println("Fehler beim internen Auslesen!");
+							e1.printStackTrace();
+						}
+			        	
+			        	chooser.getSelectedFile().getName();
+			        	System.out.println("Die Datei wurde unter: "+choosedAbsolutFile+" gespeichert!");
+			        }else{
+			        	System.out.println("Das Fenster wurde geschlossen!");
+			        }   
+				}
+				
+			}
+			
+		});
+		
+		
 		mntmSpeichernUnter.addActionListener(new ActionListener(){
 
 			@Override
@@ -229,17 +266,15 @@ public class Application implements ActionListener {
 		        
 		        if(returnVal == JFileChooser.APPROVE_OPTION) {
 		        
-		        // Sobald Workbook implementiert ist
-		        //	try {
-				//		writeCSV(workbook, tabbedPane.getTitleAt(tabbedPane.getSelectedIndex())) ,
-		        //		chooser.getSelectedFile().getAbsolutePath());  
-				//	} catch (IOException e1) {
-				//		System.out.println("Fehler beim Auslesen!");
-				//		e1.printStackTrace();
-				//	}
+		        	try {
+						writeCSV(tabbedPane.getTitleAt(tabbedPane.getSelectedIndex()) ,choosedAbsolutFile = chooser.getSelectedFile().getAbsolutePath());  
+					} catch (IOException e1) {
+						System.out.println("Fehler beim internen Auslesen!");
+						e1.printStackTrace();
+					}
 		        	
 		        	chooser.getSelectedFile().getName();
-		            System.out.println("Die Datei wurde gespeichert!");
+		            System.out.println("Die Datei wurde unter: "+choosedAbsolutFile+" gespeichert!");
 		        }else{
 		        	System.out.println("Das Fenster wurde geschlossen!");
 		        }               
@@ -249,4 +284,5 @@ public class Application implements ActionListener {
 		
 		
 	}
+
 }
