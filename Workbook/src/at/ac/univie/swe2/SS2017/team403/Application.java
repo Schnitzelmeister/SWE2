@@ -7,6 +7,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -19,6 +20,8 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.pdf.PdfWriter;
 import com.opencsv.CSVReader;
 
 import javax.swing.JTable;
@@ -63,10 +66,22 @@ public class Application implements ActionListener {
 	 */
 	public void writeCSV(String workSheetName, String filePath) throws IOException{
 		
-		FileWriter writer = new FileWriter(filePath);	
+		FileWriter writer = new FileWriter(filePath+".csv");	
 		//CsvWriteUtility.convertWorkSheetToCsv(Workbook.getSheet(workSheetName), writer); Sobald Csv File geöffnet werden kann
 		writer.flush();
 		writer.close();
+	}
+	
+	/**
+	 * Write csv in pdf
+	 * @param workSheetName
+	 * @param filepath
+	 * @throws IOException 
+	 * @throws DocumentException 
+	 */
+	public void writePDF(String workSheetName, String filepath) throws IOException, DocumentException{
+		writeCSV(workSheetName, filepath);
+		PDFWriteUtility.convertCSVToPDF(filepath);
 	}
 
 	/**
@@ -278,7 +293,7 @@ public class Application implements ActionListener {
 					JFileChooser chooser = new JFileChooser();
 			        Component parent = null;
 			        FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV (durch Trennzeichen getrennt) (*.csv)", "csv");
-			        FileNameExtensionFilter filter2 = new FileNameExtensionFilter("beispiel (*.bsp)", "beispiel"); // proprietäres Datenformat
+			        FileNameExtensionFilter filter2 = new FileNameExtensionFilter("PDF (*.pdf)", "pdf");
 			        chooser.setFileFilter(filter);
 			        chooser.addChoosableFileFilter(filter2);
 			        int returnVal = chooser.showSaveDialog(parent);
@@ -287,10 +302,18 @@ public class Application implements ActionListener {
 			        if(returnVal == JFileChooser.APPROVE_OPTION) {
 			        
 			        	try {
-							writeCSV(tabbedPane.getTitleAt(tabbedPane.getSelectedIndex()) ,choosedAbsolutFile = chooser.getSelectedFile().getAbsolutePath());  
-						} catch (IOException e1) {
+			        		if(chooser.getFileFilter().getDescription().contains("CSV")){
+			        			writeCSV(tabbedPane.getTitleAt(tabbedPane.getSelectedIndex()) ,choosedAbsolutFile = chooser.getSelectedFile().getAbsolutePath());
+			        		}
+			        		else if(chooser.getFileFilter().getDescription().contains("PDF")){
+			        			writePDF(tabbedPane.getTitleAt(tabbedPane.getSelectedIndex()) ,choosedAbsolutFile = chooser.getSelectedFile().getAbsolutePath());
+			        		}
+			        	} catch (IOException e1) {
 							System.out.println("Fehler beim internen Auslesen!");
 							e1.printStackTrace();
+						} catch (DocumentException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
 						}
 			        	
 			        	chooser.getSelectedFile().getName();
@@ -313,7 +336,7 @@ public class Application implements ActionListener {
 				JFileChooser chooser = new JFileChooser();
 		        Component parent = null;
 		        FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV (durch Trennzeichen getrennt) (*.csv)", "csv");
-		        FileNameExtensionFilter filter2 = new FileNameExtensionFilter("beispiel (*.bsp)", "beispiel"); // proprietäres Datenformat
+		        FileNameExtensionFilter filter2 = new FileNameExtensionFilter("PDF (*.pdf)", "pdf");
 		        chooser.setFileFilter(filter);
 		        chooser.addChoosableFileFilter(filter2);
 		        int returnVal = chooser.showSaveDialog(parent);
@@ -322,8 +345,13 @@ public class Application implements ActionListener {
 		        if(returnVal == JFileChooser.APPROVE_OPTION) {
 		        
 		        	try {
-						writeCSV(tabbedPane.getTitleAt(tabbedPane.getSelectedIndex()) ,choosedAbsolutFile = chooser.getSelectedFile().getAbsolutePath());  
-					} catch (IOException e1) {
+		        		if(chooser.getFileFilter().getDescription().contains("CSV")){
+		        			writeCSV(tabbedPane.getTitleAt(tabbedPane.getSelectedIndex()) ,choosedAbsolutFile = chooser.getSelectedFile().getAbsolutePath());
+		        		}
+		        		else if(chooser.getFileFilter().getDescription().contains("PDF")){
+		        			writePDF(tabbedPane.getTitleAt(tabbedPane.getSelectedIndex()) ,choosedAbsolutFile = chooser.getSelectedFile().getAbsolutePath());
+		        		}
+					} catch (IOException | DocumentException e1) {
 						System.out.println("Fehler beim internen Auslesen!");
 						e1.printStackTrace();
 					}
