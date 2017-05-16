@@ -3,6 +3,8 @@ package at.ac.univie.swe2.SS2017.team403;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.FileReader;
@@ -37,9 +39,13 @@ public class Application implements ActionListener {
 	private JFrame frmClientInterface;
 	private JPanel panelMain;
 	
-	private Workbook activeWorkbook = null;
+	//current Application Workbook - static object
+	private static Workbook activeWorkbook = null;
+	public static Workbook getActiveWorkbook() { return activeWorkbook; }
+	
 	private JMenuBar menuBar;
 	private JTable table_1;
+	
 	
 	
 	
@@ -66,7 +72,7 @@ public class Application implements ActionListener {
 	/**
 	 * Open CSV format File
 	 */
-	public void openCSV(String fileLocation, char delimiter, String quotation) throws IOException{	
+	public void openCSV(String fileLocation, char delimiter, char quotation) throws IOException{	
 		CSVReader reader = new CSVReader(new FileReader(fileLocation), ',');
 		List<String[]> csvValues = reader.readAll();
 		reader.close();
@@ -87,25 +93,74 @@ public class Application implements ActionListener {
 	
 	}
 	
+	
+	public static void testFormulas() 
+	{
+		Workbook wbk = Application.getActiveWorkbook();
+		Worksheet sheet = wbk.addSheet("sheet1");
+		sheet.getCell(1, 1).setNumericValue(11);
+		sheet.getCell(2, 1).setNumericValue(12);
+		sheet.getCell(3, 1).setNumericValue(13);
+		sheet.getCell(1, 2).setFormula("=SUM(RC[-1]:R[3]C[-1])+COUNT(RC[-1]:R[3]C[-1]))+MEAN(RC[-1]:R[3]C[-1]))");;
+		//org.junit.Assert.assertEquals(51.0, sheet.getCell(1, 2).getNumericValue(), 0 );
+
+		sheet = wbk.addSheet("sheet2");
+		sheet.getCell(1, 2).setFormula("=SUM(sheet1!RC[-1]:R[3]C[-1])+COUNT(sheet1!RC[-1]:R[3]C[-1]))+MEAN(sheet1!RC[-1]:R[3]C[-1]))");;
+
+		//org.junit.Assert.assertEquals(51.0, sheet.getCell(1, 2).getNumericValue(), 0 );
+	}
+	
 	public static void main(String[] args) {
 
-		/*
-		EventQueue.invokeLater(new MyRunnable(brokerId, clientId, 
-		    	 remoteHostBoerse, remotePortUDPBoerse, remotePortRMIBoerse,
-		    	 remoteHostBoerseSOAP, remoteHostBoerseREST,
-		    	 remoteHostBroker, remotePortRMIBroker) 
-		);
+	/*	
+        final String regExCellPattern = "(\\[[\\w\\-. ]+\\])?(([?\\w+]?'?\\w+'?)!)?[\\$]?[A-Z]+[\\$]?[0-9]+($|(?=[\\s\\.\\#\\+\\-\\*\\/\\=\\~\\>\\<\\!\\|\\(\\)\\,\\;]))";
+        //"(\\[[\\w\\-. ]+\\])?(([?\\w+]?'?\\w+'?)!)?[\\$]?[A-Z]+[\\$]?[0-9]+($|(?=[\\s\\.\\#\\+\\-\\*\\/\\=\\~\\>\\<\\!\\|\\(\\)\\,\\;]))";
+        //final String regExRangePattern = "(\\[[\\w\\-. ]+\\])?(([?\\w+]?'?\\w+'?)!)?[\\$]?[A-Z]+[\\$]?[0-9]+:[\\$]?[A-Z]+[\\$]?[0-9]+($|(?=[\\s\\.\\#\\+\\-\\*\\/\\=\\~\\>\\<\\!\\|\\(\\)\\,\\;]))";
+
+        final Pattern regExCell = Pattern.compile(regExCellPattern, Pattern.CASE_INSENSITIVE);
+        //final Pattern regExRange = Pattern.compile(regExRangePattern, Pattern.CASE_INSENSITIVE);
+
+        Matcher matcher = regExCell.matcher("RC[-1]ssd");
+        System.out.println(matcher.find());
+        System.out.println(matcher.start());
+        
+		return;
+
+*/		
 		
-		*/
 		EventQueue.invokeLater(new Runnable() {			
 			public void run() {	
 				try {		
 					if (System.getSecurityManager() == null) {			       
 						//    System.setSecurityManager(new SecurityManager());			       
 					}										
-						Application gui = new Application();	
+						Application gui = new Application();
+						
+						boolean createDefaultWorkbook = true;
+						if (args.length > 0) {
+							//open file
+							if (args[0].toUpperCase().endsWith(".wbk")) {
+								gui.openFile(args[0]);
+								createDefaultWorkbook = false;
+							}
+							//open csv
+							else if (args.length > 2) {
+								gui.openCSV(args[0], args[1].charAt(0), args[2].charAt(0));
+								createDefaultWorkbook = false;
+							}
+						}
+						
+						if (createDefaultWorkbook) {
+							//create default workbook
+							Application.activeWorkbook = new Workbook();
+							Application.activeWorkbook.addSheet("Sheet 1");
+							Application.activeWorkbook.addSheet("Sheet 2");
+							Application.activeWorkbook.addSheet("Sheet 3");
+						}
 				
-						gui.frmClientInterface.setVisible(true);			
+						gui.frmClientInterface.setVisible(true);
+						
+						//testFormulas();
 				} catch (Exception e) {
 					e.printStackTrace();				
 				}		
@@ -164,7 +219,7 @@ public class Application implements ActionListener {
 						System.out.println("The filepath is: " + chooser.getSelectedFile().getPath());
 						System.out.println("The absolute filepath is: " + chooser.getSelectedFile().getAbsolutePath());
 
-						openCSV(filePath, ';', "not important yet");
+						openCSV(filePath, ';', '"');
 					} else {
 						System.out.println("The user pressed the CANCEL or X Button");
 					}
