@@ -1,8 +1,20 @@
 package at.ac.univie.swe2.SS2017.team403;
 
+import java.awt.Component;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.List;
 
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.TableModel;
+
+import com.itextpdf.text.DocumentException;
+import com.opencsv.CSVReader;
 
 public class WorkbookMainGui extends javax.swing.JFrame {
 
@@ -10,16 +22,53 @@ public class WorkbookMainGui extends javax.swing.JFrame {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+
 	/**
      * Creates new form WorkbookGui
      */
     public WorkbookMainGui() {
         initComponents();
     }
+    
+    /**
+	 * Write CSV format file
+	 * @throws IOException 
+	 */
+	public void writeCSV(String workSheetName, String filePath) throws IOException{
+		
+		FileWriter writer = new FileWriter(filePath+".csv");	
+		//CsvWriteUtility.convertWorkSheetToCsv(Workbook.getSheet(workSheetName), writer); Sobald Csv File geöffnet werden kann
+		writer.flush();
+		writer.close();
+	}
+	
+	/**
+	 * Write PDF format file
+	 * @param workSheetName
+	 * @param filepath
+	 * @throws IOException 
+	 * @throws DocumentException 
+	 */
+	public void writePDF(String workSheetName, String filepath) throws IOException, DocumentException{
+		writeCSV(workSheetName, filepath);
+		PDFWriteUtility.convertCSVToPDF(filepath);
+	}
+
+	/**
+	 * Open CSV format File
+	 */
+	public void openCSV(String fileLocation, char delimiter, char quotation) throws IOException{	
+		CSVReader reader = new CSVReader(new FileReader(fileLocation), ',');
+		List<String[]> csvValues = reader.readAll();
+		reader.close();
+		
+		TableModel model = new CustomTableModel(csvValues);
+		jTable1.setModel(model);
+	}
 
     /**
      * This method is called from within the constructor to initialize the form.
-     */               
+     */                         
     private void initComponents() {
 
         jTabbedPane1 = new javax.swing.JTabbedPane();
@@ -56,12 +105,27 @@ public class WorkbookMainGui extends javax.swing.JFrame {
         fileMenu.setText("File");
 
         openMenuItem.setText("Open");
+        openMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                openMenuItemActionPerformed(evt);
+            }
+        });
         fileMenu.add(openMenuItem);
 
         saveMenuItem.setText("Save");
+        saveMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveMenuItemActionPerformed(evt);
+            }
+        });
         fileMenu.add(saveMenuItem);
 
         saveAsMenuItem.setText("Save As ...");
+        saveAsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveAsMenuItemActionPerformed(evt);
+            }
+        });
         fileMenu.add(saveAsMenuItem);
 
         exitMenuItem.setText("Exit");
@@ -137,6 +201,105 @@ public class WorkbookMainGui extends javax.swing.JFrame {
         jTabbedPane1.addTab("tab " +tabCount, jPane);
     }                                          
 
+    
+    private void openMenuItemActionPerformed(java.awt.event.ActionEvent evt) {                                             
+	try {
+        JFileChooser chooser = new JFileChooser();
+        Component parent = null;
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV File", "csv");
+        chooser.setFileFilter(filter);
+        int returnVal = chooser.showOpenDialog(parent);
+					
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+        	String filePath = chooser.getSelectedFile().getPath();
+        	System.out.println("You chose to open this file: " + chooser.getSelectedFile().getName());
+        	System.out.println("The filepath is: " + chooser.getSelectedFile().getPath());
+        	System.out.println("The absolute filepath is: " + chooser.getSelectedFile().getAbsolutePath());
+
+        	openCSV(filePath, ';', '"');
+        } else {
+        	System.out.println("The user pressed the CANCEL or X Button");
+        }
+    } catch (IOException o) {
+		System.out.println("Exception occured: File could not be found. ");
+		JOptionPane.showMessageDialog(this, "Die Datei konnte nicht gefunden werden ","Fehler",
+             JOptionPane.ERROR_MESSAGE);
+	}
+    }                                            
+
+    
+    private void saveAsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {                                               
+	JFileChooser chooser = new JFileChooser();
+	Component parent = null;
+	FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV (durch Trennzeichen getrennt) (*.csv)", "csv");
+	FileNameExtensionFilter filter2 = new FileNameExtensionFilter("PDF (*.pdf)", "pdf");
+	chooser.setFileFilter(filter);
+	chooser.addChoosableFileFilter(filter2);
+	int returnVal = chooser.showSaveDialog(parent);
+		        
+            if(returnVal == JFileChooser.APPROVE_OPTION) {
+		        
+                try {
+		    if(chooser.getFileFilter().getDescription().contains("CSV")){
+		        writeCSV(jTabbedPane1.getTitleAt(jTabbedPane1.getSelectedIndex()) ,choosedAbsolutFile = chooser.getSelectedFile().getAbsolutePath());
+		    }else if(chooser.getFileFilter().getDescription().contains("PDF")){
+		        writePDF(jTabbedPane1.getTitleAt(jTabbedPane1.getSelectedIndex()) ,choosedAbsolutFile = chooser.getSelectedFile().getAbsolutePath());
+		    }
+		} catch (IOException | DocumentException e1) {
+                    System.out.println("Fehler beim internen Auslesen!");
+                    e1.printStackTrace();
+		}
+		        	
+                    chooser.getSelectedFile().getName();
+		    System.out.println("Die Datei wurde unter: "+choosedAbsolutFile+" gespeichert!");
+            }else{
+		    System.out.println("Das Fenster wurde geschlossen!");
+            } 
+    }                                              
+
+    
+    private void saveMenuItemActionPerformed(java.awt.event.ActionEvent evt) {                                             
+        if(choosedAbsolutFile!=null){
+            try {
+            	writeCSV(jTabbedPane1.getTitleAt(jTabbedPane1.getSelectedIndex()) ,choosedAbsolutFile);
+            } catch (IOException e) {
+                System.out.println("Fehler beim internen Auslesen!");
+                e.printStackTrace();
+            }
+            System.out.println("Die Datei wurde unter: "+choosedAbsolutFile+" gespeichert!");
+        }else{
+            JFileChooser chooser = new JFileChooser();
+            Component parent = null;
+            FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV (durch Trennzeichen getrennt) (*.csv)", "csv");
+            FileNameExtensionFilter filter2 = new FileNameExtensionFilter("PDF (*.pdf)", "pdf");
+            chooser.setFileFilter(filter);
+            chooser.addChoosableFileFilter(filter2);
+            int returnVal = chooser.showSaveDialog(parent);
+			         
+            if(returnVal == JFileChooser.APPROVE_OPTION) {
+			        
+                try {
+                    if(chooser.getFileFilter().getDescription().contains("CSV")){
+                        writeCSV(jTabbedPane1.getTitleAt(jTabbedPane1.getSelectedIndex()) ,choosedAbsolutFile = chooser.getSelectedFile().getAbsolutePath());
+                    }else if(chooser.getFileFilter().getDescription().contains("PDF")){
+                        writePDF(jTabbedPane1.getTitleAt(jTabbedPane1.getSelectedIndex()) ,choosedAbsolutFile = chooser.getSelectedFile().getAbsolutePath());
+                    }
+                } catch (IOException e1) {
+                    System.out.println("Fehler beim internen Auslesen!");
+                    e1.printStackTrace();
+                } catch (DocumentException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+			        	
+                chooser.getSelectedFile().getName();
+                System.out.println("Die Datei wurde unter: "+choosedAbsolutFile+" gespeichert!");
+            }else{
+                System.out.println("Das Fenster wurde geschlossen!");
+            }   
+        }
+    }                                            
+
     /**
      * @param args the command line arguments
      */
@@ -158,14 +321,14 @@ public class WorkbookMainGui extends javax.swing.JFrame {
             java.util.logging.Logger.getLogger(WorkbookMainGui.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
 
-        /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new WorkbookMainGui().setVisible(true);
             }
         });
     }
-                  
+
+    // Variables declaration                    
     private javax.swing.JMenuItem aboutMenuItem;
     private javax.swing.JMenuItem contentsMenuItem;
     private javax.swing.JMenuItem copyMenuItem;
@@ -184,4 +347,6 @@ public class WorkbookMainGui extends javax.swing.JFrame {
     private javax.swing.JMenuItem saveAsMenuItem;
     private javax.swing.JMenuItem saveMenuItem;                  
 
+    private String choosedAbsolutFile;
+    
 }
