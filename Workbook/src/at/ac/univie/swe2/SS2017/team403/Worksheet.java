@@ -13,7 +13,7 @@ public class Worksheet {
 	private int usedAreaC = 1;
 		
 	Worksheet(String name, Workbook wbk, WorksheetRenameCallback worksheetRenameCallback) {
-		this.id = Application.getActiveWorkbook().getNewId();
+		this.id = WorkbookMainGui.getActiveWorkbook().getNewId();
 		this.name = name;
 		this.parent = wbk;
 		this.worksheetRenameCallback = worksheetRenameCallback;
