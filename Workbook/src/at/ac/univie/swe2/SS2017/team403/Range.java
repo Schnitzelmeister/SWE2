@@ -1,65 +1,44 @@
 package at.ac.univie.swe2.SS2017.team403;
-
-import java.util.Comparator;
+import java.util.TreeSet;
 
 public class Range {
 
-	private Worksheet parent;
-	private int r1, r2, c1, c2;
+	private TreeSet<Area> areas = new TreeSet<Area>(new Area.AreaComparator());
+	private TreeSet<Cell> cells = new TreeSet<Cell>(new Cell.CellComparator());
+
+	public TreeSet<Area> getAreas() { return areas; }
+	public TreeSet<Cell> getCells() { return cells; }
 	
-	public int getR1() { return r1; }
-	public int getR2() { return r2; }
-	public int getC1() { return c1; }
-	public int getC2() { return c2; }
-	
-	public Range(Cell cellTopLeft, Cell cellBottomRight) {
-		parent = cellTopLeft.getParent();
-		r1 = cellTopLeft.getRow();
-		c1 = cellTopLeft.getColumn();
-		r2 = cellBottomRight.getRow();
-		c2 = cellBottomRight.getColumn();
+	static Range getRangeByAddress(String address, Cell contextCell) {
+		Worksheet worksheet = contextCell.getParent();
+        Range ret = new Range();
+		for (String s : address.split(";"))
+        {
+            String el = s;
+
+            if (el.indexOf('!') >= 0)
+            {
+                String wshtName = el.substring(0, el.indexOf('!'));
+                if (wshtName.substring(0, 1) == "'")
+                    wshtName = wshtName.substring(1, wshtName.length() - 2);
+                
+                if (!Application.getActiveWorkbook().getSheets().containsKey(wshtName))
+        			throw new IllegalArgumentException("Worksheet " + wshtName + " doesn't exists");
+
+                worksheet = Application.getActiveWorkbook().getSheet(wshtName);
+                el = el.substring(el.indexOf('!') + 1);
+            }
+
+            if (worksheet == null)
+    			throw new IllegalArgumentException("Undefined worksheet param " + address + " to get Range object in method Range(string address, Worksheet worksheet = null)");
+
+            if (el.indexOf(':') > 0)
+                ret.areas.add(new Area(el, worksheet, contextCell));
+            else
+                ret.cells.add(worksheet.getCell(el, contextCell));
+        }
+		return ret;
 	}
 
-	public Range(Cell cell) {
-		parent = cell.getParent();
-		r1 = cell.getRow();
-		c1 = cell.getColumn();
-		r2 = r1;
-		c2 = c1;
-	}
-
 	
-	//Comparator to Range class, we can order Ranges
-	static class RangeComparator implements Comparator<Range>
-	{
-		public int compare(Range r1, Range r2)
-	    {
-			int res = r1.parent.getId() - r2.parent.getId();
-			if (res == 0) {
-				res = r1.r1 - r2.r1;
-				if (res == 0) {
-					res = r1.c1 - r2.c1;
-					if (res == 0) {
-						res = r2.r2 - r1.r2;
-						if (res == 0) {
-							return r2.c2 - r1.c2;
-						}
-						else {
-							return res;
-						}
-
-					}
-					else {
-						return res;
-					}					
-				}
-				else {
-					return res;
-				}
-			}
-			else {
-				return res;
-			}
-		}
-	}
 }

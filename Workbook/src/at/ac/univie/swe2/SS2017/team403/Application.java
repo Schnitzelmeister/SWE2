@@ -116,33 +116,26 @@ public class Application implements ActionListener {
 		sheet.getCell(1, 1).setNumericValue(11);
 		sheet.getCell(2, 1).setNumericValue(12);
 		sheet.getCell(3, 1).setNumericValue(13);
-		sheet.getCell(1, 2).setFormula("=SUM(RC[-1]:R[3]C[-1])+COUNT(RC[-1]:R[3]C[-1]))+MEAN(RC[-1]:R[3]C[-1]))");;
+
+		sheet.getCell(1, 2).setFormula("=SUM(RC[-1]:R[3]C[-1])+COUNT(RC[-1]:R[3]C[-1])+MEAN(RC[-1]:R[3]C[-1])");
+		System.out.println(sheet.getCell(1, 2).getNumericValue());
 		//org.junit.Assert.assertEquals(51.0, sheet.getCell(1, 2).getNumericValue(), 0 );
 
+		sheet.getCell(4, 1).setNumericValue(10);
+		System.out.println(sheet.getCell(1, 2).getNumericValue());
+
+		
 		sheet = wbk.addSheet("sheet2");
-		sheet.getCell(1, 2).setFormula("=SUM(sheet1!RC[-1]:R[3]C[-1])+COUNT(sheet1!RC[-1]:R[3]C[-1]))+MEAN(sheet1!RC[-1]:R[3]C[-1]))");;
+		sheet.getCell(1, 2).setFormula("=SUM(sheet1!RC[-1]:R[3]C[-1])+COUNT(sheet1!RC[-1]:R[3]C[-1])+MEAN(sheet1!RC[-1]:R[3]C[-1])");;
+		sheet.getCell(2, 2).setFormula("=SUM(RC[-1]:R[3]C[-1])+COUNT(RC[-1]:R[3]C[-1])+MEAN(RC[-1]:R[3]C[-1])");
+		System.out.println(sheet.getCell(1, 2).getNumericValue());
+		System.out.println(sheet.getCell(2, 2).getNumericValue());
 
 		//org.junit.Assert.assertEquals(51.0, sheet.getCell(1, 2).getNumericValue(), 0 );
 	}
 	
 	public static void main(String[] args) {
 
-	/*	
-        final String regExCellPattern = "(\\[[\\w\\-. ]+\\])?(([?\\w+]?'?\\w+'?)!)?[\\$]?[A-Z]+[\\$]?[0-9]+($|(?=[\\s\\.\\#\\+\\-\\*\\/\\=\\~\\>\\<\\!\\|\\(\\)\\,\\;]))";
-        //"(\\[[\\w\\-. ]+\\])?(([?\\w+]?'?\\w+'?)!)?[\\$]?[A-Z]+[\\$]?[0-9]+($|(?=[\\s\\.\\#\\+\\-\\*\\/\\=\\~\\>\\<\\!\\|\\(\\)\\,\\;]))";
-        //final String regExRangePattern = "(\\[[\\w\\-. ]+\\])?(([?\\w+]?'?\\w+'?)!)?[\\$]?[A-Z]+[\\$]?[0-9]+:[\\$]?[A-Z]+[\\$]?[0-9]+($|(?=[\\s\\.\\#\\+\\-\\*\\/\\=\\~\\>\\<\\!\\|\\(\\)\\,\\;]))";
-
-        final Pattern regExCell = Pattern.compile(regExCellPattern, Pattern.CASE_INSENSITIVE);
-        //final Pattern regExRange = Pattern.compile(regExRangePattern, Pattern.CASE_INSENSITIVE);
-
-        Matcher matcher = regExCell.matcher("RC[-1]ssd");
-        System.out.println(matcher.find());
-        System.out.println(matcher.start());
-        
-		return; 
-
-*/		
-		
 		EventQueue.invokeLater(new Runnable() {			
 			public void run() {	
 				try {		
@@ -175,7 +168,7 @@ public class Application implements ActionListener {
 				
 						gui.frmClientInterface.setVisible(true);
 						
-						//testFormulas();
+						testFormulas();
 				} catch (Exception e) {
 					e.printStackTrace();				
 				}		

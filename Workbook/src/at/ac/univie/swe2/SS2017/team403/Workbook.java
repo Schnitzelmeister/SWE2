@@ -31,6 +31,11 @@ public class Workbook implements Serializable  {
 	
 	//contained Worksheets
 	private TreeMap<String, Worksheet> sheets = new TreeMap<String, Worksheet>();
+	public TreeMap<String, Worksheet> getSheets()
+	{
+		return sheets;		
+	}
+	
 	public Worksheet getSheet(String name)
 	{
 		return sheets.get(name);		
@@ -163,12 +168,12 @@ public class Workbook implements Serializable  {
 	}
 	
 	//dependencies/precedents for Formula-Calculation
-	private transient TreeMap<Range, TreeSet<Cell> > dependencies = new TreeMap<Range, TreeSet<Cell> >(new Range.RangeComparator());
-	private transient TreeMap<Cell, ArrayList<Range> > precedents = new TreeMap<Cell, ArrayList<Range> >(new Cell.CellComparator());
+	private transient TreeMap<Area, TreeSet<Cell> > dependencies = new TreeMap<Area, TreeSet<Cell> >(new Area.AreaComparator());
+	private transient TreeMap<Cell, ArrayList<Area> > precedents = new TreeMap<Cell, ArrayList<Area> >(new Cell.CellComparator());
 		
 	void removeDependancy(Cell cell) {
 		if (precedents.containsKey(cell)) {
-			for ( Range dep : precedents.get(cell) ) {
+			for ( Area dep : precedents.get(cell) ) {
 				dependencies.get(dep).remove(cell);
 				if (dependencies.get(dep).size() == 0)
 					dependencies.remove(dep);
@@ -177,9 +182,9 @@ public class Workbook implements Serializable  {
 		}
 	}
 	
-	void addDependency(Cell cell, Expression exp, Range precedent) {
+	void addDependency(Cell cell, Expression exp, Area precedent) {
 		if (!precedents.containsKey(cell)) {
-			precedents.put(cell, new ArrayList<Range>() );
+			precedents.put(cell, new ArrayList<Area>() );
 		}
 		precedents.get(cell).add(precedent);
 
@@ -190,7 +195,7 @@ public class Workbook implements Serializable  {
 	}
 
 	void addDependency(Cell cell, Expression exp, Cell precedent) {
-		addDependency(cell, exp, new Range(precedent));
+		addDependency(cell, exp, new Area(precedent));
 	}
 	
 	//recalculated cells - dynamic TreeSet
@@ -220,8 +225,8 @@ public class Workbook implements Serializable  {
 
 	private void _calculateDependencies(Cell cell) throws IllegalArgumentException
 	{
-		for(Iterator< Map.Entry<Range, TreeSet<Cell> > > idep = dependencies.entrySet().iterator(); idep.hasNext(); ) {
-			Map.Entry<Range, TreeSet<Cell> > e = idep.next();
+		for(Iterator< Map.Entry<Area, TreeSet<Cell> > > idep = dependencies.entrySet().iterator(); idep.hasNext(); ) {
+			Map.Entry<Area, TreeSet<Cell> > e = idep.next();
 			
 			//get only overlapped with cells ranges
 			if ( e.getKey().getParent() != cell.getParent() )

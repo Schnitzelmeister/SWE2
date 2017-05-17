@@ -4,35 +4,52 @@ import java.util.Comparator;
 
 public class Cell {
 	private Worksheet parent;
+	//row, column
 	private int r, c;
 
 	private DataType dataType = DataType.General;
-	private Object value = 0d;
-	private Expression expr = null;
+	
+	//current value
+	private Object value = null;
 	private String formula;
 
+	//expression tree for a formula
+	private Expression expr = null;
+
 	public void setNumericValue(double value)
-	{ this.value = value; this.dataType = DataType.Number; }
+	{ 
+		this.expr = null;
+		this.value = value; 
+		this.dataType = DataType.Number; 
+		parent.getParent().calculateDependencies(this);
+	}
 
 	public void setTextValue(String value)
-	{ this.value = value; this.dataType = DataType.String; }
-	
-	public void setFormula(String formula)
 	{
-		this.formula = formula; 
-		try {
-			expr = Expression.Parse(this, formula);
-			dataType = expr.getDataType();
-		}
-		catch(Exception e) {
-			
-		}
+		this.expr = null;
+		this.value = value;
+		this.dataType = DataType.String;
+		parent.getParent().calculateDependencies(this);
+	}
+	
+	public void setFormula(String formula) throws IllegalArgumentException
+	{
+		if (!formula.startsWith("="))
+        	throw new IllegalArgumentException(formula + " Formula must begin with = symbol");
 		
-		//look for observers
-		//for (Dependency dep : Application.activeWorkbook.(this)) {
-			//proverit est li zikl
-		//	dep.Cell.Recalculate
-		//}
+		this.formula = formula; 
+		expr = Expression.parse(this, formula);
+		dataType = expr.getDataType();
+		
+		this.value = expr.getValue();
+
+		parent.getParent().calculateDependencies(this);
+	}
+
+	public void calculate()
+	{
+		if (expr != null)
+			this.value = expr.getValue(); 
 	}
 
 	public DataType getDataType()
