@@ -1,20 +1,20 @@
 package at.ac.univie.swe2.SS2017.team403;
 
+import com.itextpdf.text.DocumentException;
+import com.opencsv.CSVReader;
 import java.awt.Component;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
-
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
-import com.itextpdf.text.DocumentException;
-import com.opencsv.CSVReader;
 
 public class WorkbookMainGui extends javax.swing.JFrame {
 
@@ -22,16 +22,15 @@ public class WorkbookMainGui extends javax.swing.JFrame {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-
 	/**
      * Creates new form WorkbookGui
      */
     public WorkbookMainGui() {
         initComponents();
     }
-    
-    /**
-	 * Write CSV format file
+
+        /**
+	 * Write Csv Format File
 	 * @throws IOException 
 	 */
 	public void writeCSV(String workSheetName, String filePath) throws IOException{
@@ -43,7 +42,7 @@ public class WorkbookMainGui extends javax.swing.JFrame {
 	}
 	
 	/**
-	 * Write PDF format file
+	 * Write csv in pdf
 	 * @param workSheetName
 	 * @param filepath
 	 * @throws IOException 
@@ -51,7 +50,7 @@ public class WorkbookMainGui extends javax.swing.JFrame {
 	 */
 	public void writePDF(String workSheetName, String filepath) throws IOException, DocumentException{
 		writeCSV(workSheetName, filepath);
-		PDFWriteUtility.convertCSVToPDF(filepath);
+		//PDFWriteUtility.convertCSVToPDF(filepath);
 	}
 
 	/**
@@ -65,10 +64,11 @@ public class WorkbookMainGui extends javax.swing.JFrame {
 		TableModel model = new CustomTableModel(csvValues);
 		jTable1.setModel(model);
 	}
-
+    
     /**
      * This method is called from within the constructor to initialize the form.
-     */                         
+     */
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">                          
     private void initComponents() {
 
         jTabbedPane1 = new javax.swing.JTabbedPane();
@@ -90,14 +90,22 @@ public class WorkbookMainGui extends javax.swing.JFrame {
         aboutMenuItem = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setPreferredSize(new java.awt.Dimension(800, 600));
 
-        jScrollPane1.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
-        jScrollPane1.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        jScrollPane1.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                jScrollPane1MouseWheelMoved(evt);
+            }
+        });
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [50][50],
             new String [10]
         ));
+        jTable1.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
+        jTable1.setColumnSelectionAllowed(false);
+        jTable1.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        jTable1.setGridColor(new java.awt.Color(0, 0, 0));
         jScrollPane1.setViewportView(jTable1);
 
         jTabbedPane1.addTab("tab1", jScrollPane1);
@@ -175,15 +183,15 @@ public class WorkbookMainGui extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
+            .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 800, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 279, Short.MAX_VALUE)
+            .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 579, Short.MAX_VALUE)
         );
 
         pack();
-    }                       
+    }// </editor-fold>                        
 
     private void exitMenuItemActionPerformed(java.awt.event.ActionEvent evt) {                                             
         System.exit(0);
@@ -195,39 +203,41 @@ public class WorkbookMainGui extends javax.swing.JFrame {
         albumTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [50][50],
             new String [10] 
-        ));     
+        ));
+        
+        jPane.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+        jPane.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        
         jPane.setViewportView(albumTable);
         int tabCount = jTabbedPane1.getTabCount()+1;
         jTabbedPane1.addTab("tab " +tabCount, jPane);
     }                                          
 
-    
     private void openMenuItemActionPerformed(java.awt.event.ActionEvent evt) {                                             
 	try {
-        JFileChooser chooser = new JFileChooser();
-        Component parent = null;
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV File", "csv");
-        chooser.setFileFilter(filter);
-        int returnVal = chooser.showOpenDialog(parent);
+            JFileChooser chooser = new JFileChooser();
+            Component parent = null;
+            FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV File", "csv");
+            chooser.setFileFilter(filter);
+            int returnVal = chooser.showOpenDialog(parent);
 					
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-        	String filePath = chooser.getSelectedFile().getPath();
-        	System.out.println("You chose to open this file: " + chooser.getSelectedFile().getName());
-        	System.out.println("The filepath is: " + chooser.getSelectedFile().getPath());
-        	System.out.println("The absolute filepath is: " + chooser.getSelectedFile().getAbsolutePath());
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+		String filePath = chooser.getSelectedFile().getPath();
+		System.out.println("You chose to open this file: " + chooser.getSelectedFile().getName());
+		System.out.println("The filepath is: " + chooser.getSelectedFile().getPath());
+		System.out.println("The absolute filepath is: " + chooser.getSelectedFile().getAbsolutePath());
 
-        	openCSV(filePath, ';', '"');
-        } else {
-        	System.out.println("The user pressed the CANCEL or X Button");
-        }
-    } catch (IOException o) {
+		openCSV(filePath, ';', '"');
+            } else {
+		System.out.println("The user pressed the CANCEL or X Button");
+            }
+            } catch (IOException o) {
 		System.out.println("Exception occured: File could not be found. ");
 		JOptionPane.showMessageDialog(this, "Die Datei konnte nicht gefunden werden ","Fehler",
-             JOptionPane.ERROR_MESSAGE);
-	}
+                    JOptionPane.ERROR_MESSAGE);
+				}
     }                                            
 
-    
     private void saveAsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {                                               
 	JFileChooser chooser = new JFileChooser();
 	Component parent = null;
@@ -257,17 +267,16 @@ public class WorkbookMainGui extends javax.swing.JFrame {
             } 
     }                                              
 
-    
     private void saveMenuItemActionPerformed(java.awt.event.ActionEvent evt) {                                             
         if(choosedAbsolutFile!=null){
             try {
-            	writeCSV(jTabbedPane1.getTitleAt(jTabbedPane1.getSelectedIndex()) ,choosedAbsolutFile);
+		writeCSV(jTabbedPane1.getTitleAt(jTabbedPane1.getSelectedIndex()) ,choosedAbsolutFile);
             } catch (IOException e) {
                 System.out.println("Fehler beim internen Auslesen!");
                 e.printStackTrace();
             }
-            System.out.println("Die Datei wurde unter: "+choosedAbsolutFile+" gespeichert!");
-        }else{
+		System.out.println("Die Datei wurde unter: "+choosedAbsolutFile+" gespeichert!");
+	}else{
             JFileChooser chooser = new JFileChooser();
             Component parent = null;
             FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV (durch Trennzeichen getrennt) (*.csv)", "csv");
@@ -297,9 +306,27 @@ public class WorkbookMainGui extends javax.swing.JFrame {
             }else{
                 System.out.println("Das Fenster wurde geschlossen!");
             }   
+	}
+    }                                            
+
+    
+    private void jScrollPane1MouseWheelMoved(java.awt.event.MouseWheelEvent evt) {                                             
+        int verticalExtent = jScrollPane1.getVerticalScrollBar().getModel().getExtent();
+        int horizontalExtent = jScrollPane1.getHorizontalScrollBar().getModel().getExtent();
+        
+        if((jScrollPane1.getVerticalScrollBar().getValue()+verticalExtent)==jScrollPane1.getVerticalScrollBar().getMaximum()){
+            sizeRows++;
+            DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+            model.setRowCount(++sizeRows);
+        }
+        if((jScrollPane1.getHorizontalScrollBar().getValue()+horizontalExtent)==jScrollPane1.getHorizontalScrollBar().getMaximum()){
+            sizeColumns++;
+            DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+            model.setColumnCount(++sizeColumns);
         }
     }                                            
 
+    
     /**
      * @param args the command line arguments
      */
@@ -328,7 +355,7 @@ public class WorkbookMainGui extends javax.swing.JFrame {
         });
     }
 
-    // Variables declaration                    
+    // Variables declaration                     
     private javax.swing.JMenuItem aboutMenuItem;
     private javax.swing.JMenuItem contentsMenuItem;
     private javax.swing.JMenuItem copyMenuItem;
@@ -345,8 +372,10 @@ public class WorkbookMainGui extends javax.swing.JFrame {
     private javax.swing.JMenuItem openMenuItem;
     private javax.swing.JMenuItem openNewTab;
     private javax.swing.JMenuItem saveAsMenuItem;
-    private javax.swing.JMenuItem saveMenuItem;                  
+    private javax.swing.JMenuItem saveMenuItem;                   
 
-    private String choosedAbsolutFile;
+    private String choosedAbsolutFile = null;
+    private Integer sizeRows =50;
+    private Integer sizeColumns = 10;
     
 }
