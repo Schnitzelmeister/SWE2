@@ -64,11 +64,17 @@ public class Cell {
 	public Object getValue()
 	{ return value; }
 
-	public double getNumericValue()
-	{ return (double)value; }
+	public double getNumericValue()	{
+		if (value == null)
+			return 0d;
+		return (double)value; 
+	}
 
-	public String getTextValue()
-	{ return (String)value; }
+	public String getTextValue() {
+		if (value == null)
+			return "";
+		return (String)value;
+	}
 
 	
 	public Cell(Worksheet parent, int row, int column) {
