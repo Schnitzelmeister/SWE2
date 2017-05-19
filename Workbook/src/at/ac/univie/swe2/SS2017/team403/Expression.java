@@ -8,8 +8,6 @@ import java.util.regex.Pattern;
 public class Expression {
 	
 	private enum TOKEN {
-		FUNCTION_VALUE,
-        CELL_VALUE,
         CELL,
         RANGE,
 
@@ -61,7 +59,6 @@ public class Expression {
 		UNDEF
 	}
 
-	
 	private static class ExpressionParser {
 	
 	    private char[] charFormula;
@@ -70,19 +67,31 @@ public class Expression {
 	    private int len;
 	    private Object data;
 	    private TOKEN token = TOKEN.UNDEF;
+	    private Cell cell;
 	    
 	    
-        private static final String regExCellPattern = "(\\[[\\w\\-. ]+\\])?(([?\\w+]?'?\\w+'?)!)?[\\$]?[A-Z]+[\\$]?[0-9]+($|(?=[\\s\\.\\#\\+\\-\\*\\/\\=\\~\\>\\<\\!\\|\\(\\)\\,\\;]))";
-        private static final String regExRangePattern = "(\\[[\\w\\-. ]+\\])?(([?\\w+]?'?\\w+'?)!)?[\\$]?[A-Z]+[\\$]?[0-9]+:[\\$]?[A-Z]+[\\$]?[0-9]+($|(?=[\\s\\.\\#\\+\\-\\*\\/\\=\\~\\>\\<\\!\\|\\(\\)\\,\\;]))";
-        private static final String regExBooleanPattern = "\\b(TRUE|FALSE)\\b($|(?=[\\s\\.\\#\\+\\-\\*\\/\\=\\~\\>\\<\\!\\|\\(\\)\\,\\;]))";
+        private static final String regExCellPattern = "(((\\w+)|('([\\w\\s]+)'))!)?"
+	       		 + "R((\\d+)|(\\[([+-]?\\d+)\\]))?"
+	       		 + "C((\\d+)|(\\[([+-]?\\d+)\\]))?";
+        //"(\\[[\\w\\-. ]+\\])?(([?\\w+]?'?\\w+'?)!)?[\\$]?[A-Z]+[\\$]?[0-9]+($|(?=[\\s\\.\\#\\+\\-\\*\\/\\=\\~\\>\\<\\!\\|\\(\\)\\,\\;]))";
+        private static final String regExRangePattern = "(((\\w+)|('([\\w\\s]+)'))!)?"
+	       		 + "R((\\d+)|(\\[([+-]?\\d+)\\]))?"
+	       		 + "C((\\d+)|(\\[([+-]?\\d+)\\]))?"
+	       		 + ":R((\\d+)|(\\[([+-]?\\d+)\\]))?"
+	       		 + "C((\\d+)|(\\[([+-]?\\d+)\\]))?"; 
+        //"(\\[[\\w\\-. ]+\\])?(([?\\w+]?'?\\w+'?)!)?[\\$]?[A-Z]+[\\$]?[0-9]+:[\\$]?[A-Z]+[\\$]?[0-9]+($|(?=[\\s\\.\\#\\+\\-\\*\\/\\=\\~\\>\\<\\!\\|\\(\\)\\,\\;]))";
+
+        private static final String regExBooleanPattern = "(TRUE|FALSE)";
+        //"\\b(TRUE|FALSE)\\b($|(?=[\\s\\.\\#\\+\\-\\*\\/\\=\\~\\>\\<\\!\\|\\(\\)\\,\\;]))";
 
         private static final Pattern regExCell = Pattern.compile(regExCellPattern, Pattern.CASE_INSENSITIVE);
         private static final Pattern regExRange = Pattern.compile(regExRangePattern, Pattern.CASE_INSENSITIVE);
         private static final Pattern regExBool = Pattern.compile(regExBooleanPattern, Pattern.CASE_INSENSITIVE);
 
 	
-	    public ExpressionParser(String formula)
+	    public ExpressionParser(String formula, Cell cell)
 	    {
+	    	this.cell = cell;
 	        this.formula = formula;
 	        this.charFormula = this.formula.toCharArray();
 	        this.len = this.formula.length();
@@ -105,11 +114,11 @@ public class Expression {
 	
 	        {
 		        Matcher matcher = regExRange.matcher(formula.substring(pos));
-	            if (matcher.find() && (matcher.start() == pos))
+		        if (matcher.find() && (matcher.start() == 0))
 	            {
 	                token = TOKEN.RANGE;	
 	                pos += matcher.end();
-	                data = null;
+	                data = Range.getRangeByAddress(matcher.group(0), cell);
 	            }
 	        }
 
@@ -117,12 +126,12 @@ public class Expression {
             if (token == TOKEN.UNDEF)
             {
             	Matcher matcher = regExCell.matcher(formula.substring(pos));
-            	if (matcher.find() && (matcher.start() == pos))
+            	if (matcher.find() && (matcher.start() == 0))
                 {
                     token = TOKEN.CELL;
 
                     pos += matcher.end();
-                    data = null;
+	                data = Range.getRangeByAddress(matcher.group(0), cell).getCells().first();
                 }
             }
 
@@ -178,7 +187,7 @@ public class Expression {
 	
 	            if (pos + 1 < len && token == TOKEN.UNDEF)
 	            {
-	                switch (formula.substring(pos, 2))
+	                switch (formula.substring(pos, pos + 2))
 	                {
 	                    case "||": pos += 2; token = TOKEN.OR; break;
 	                    case "&&": pos += 2; token = TOKEN.AND; break;
@@ -186,23 +195,23 @@ public class Expression {
 	                    case "!=": pos += 2; token = TOKEN.NOT_EQUAL; break;
 	                }
 	
-	                if (token == TOKEN.UNDEF && pos + 8 < len && (formula.substring(pos, 8).toUpperCase() == "BETWEEN " || formula.substring(pos, 8).toUpperCase() == "BETWEEN("))
+	                if (token == TOKEN.UNDEF && pos + 8 < len && (formula.substring(pos, pos + 8).toUpperCase() == "BETWEEN " || formula.substring(pos, pos + 8).toUpperCase() == "BETWEEN("))
 	                {
 	                    pos += 7; token = TOKEN.BETWEEN;
 	                }
 	
 	
-	                if (token == TOKEN.UNDEF && pos + 3 < len && (formula.substring(pos, 3).toUpperCase() == "IN(" || formula.substring(pos, 3).toUpperCase() == "IN "))
+	                if (token == TOKEN.UNDEF && pos + 3 < len && (formula.substring(pos, pos + 3).toUpperCase() == "IN(" || formula.substring(pos, pos + 3).toUpperCase() == "IN "))
 	                {
 	                    pos += 2; token = TOKEN.IN;
 	                }
 	
-	                if (token == TOKEN.UNDEF && pos + 5 < len && (formula.substring(pos, 5).toUpperCase() == "LIKE " || formula.substring(pos, 5).toUpperCase() == "LIKE\""))
+	                if (token == TOKEN.UNDEF && pos + 5 < len && (formula.substring(pos, pos + 5).toUpperCase() == "LIKE " || formula.substring(pos, pos + 5).toUpperCase() == "LIKE\""))
 	                {
 	                    pos += 4; token = TOKEN.LIKE;
 	                }
 	
-	                if (token == TOKEN.UNDEF && pos + 4 < len && (formula.substring(pos, 5).toUpperCase() == "NOT " || formula.substring(pos, 5).toUpperCase() == "NOT("))
+	                if (token == TOKEN.UNDEF && pos + 4 < len && (formula.substring(pos, pos + 5).toUpperCase() == "NOT " || formula.substring(pos, pos + 5).toUpperCase() == "NOT("))
 	                {
 	                    pos += 3; token = TOKEN.NOT;
 	                }
@@ -212,7 +221,7 @@ public class Expression {
 	        if (token == TOKEN.UNDEF)
 	        {
 	        	Matcher matcher = regExBool.matcher(formula.substring(pos));
-	            if (matcher.find() && (matcher.start() == pos) )
+	            if (matcher.find() && (matcher.start() == 0) )
                 {
                     pos += matcher.end();
                     int tmpPos = pos;
@@ -230,7 +239,6 @@ public class Expression {
 	
 	        if (token == TOKEN.NUMBER || token == TOKEN.STRING)
 	        {
-	            int _p = pos;
 	            switch (token)
 	            {
 	                case NUMBER:
@@ -290,25 +298,25 @@ public class Expression {
             _p = pos;
             pos = _p2 + 1;
 
-            return formula.substring(_p, _p2 - _p).replace("\"\"", "\"");
+            return formula.substring(_p, _p2).replace("\"\"", "\"");
         }
 	
         private FUNCTION _readFunctionToken()
         {
             if (pos + 5 < len)
-                switch (formula.substring(pos, 5))
+                switch (formula.substring(pos, pos + 5))
                 {
                     case "COUNT": pos += 5; return FUNCTION.COUNT;
                 }
 
             if (pos + 4 < len)
-                switch (formula.substring(pos, 4))
+                switch (formula.substring(pos, pos + 4))
                 {
                     case "MEAN": pos += 4; return FUNCTION.MEAN;
                 }
 
             if (pos + 3 < len)
-                switch (formula.substring(pos, 3))
+                switch (formula.substring(pos, pos + 3))
                 {
                     case "SUM": pos += 3; return FUNCTION.SUM;
                 }
@@ -332,7 +340,7 @@ public class Expression {
                 case SUM:
                 case MEAN:
 
-                	_readThis(TOKEN.RANGE, "param for sum must be range");
+                	_readThis(TOKEN.RANGE, "param for functions must be range");
                     ret.add(_readOr());
                     while (token != TOKEN.RIGHT_BRACKET)
                     {
@@ -388,8 +396,6 @@ public class Expression {
 	    {
 	        if (token == TOKEN.NOT)
 	        {
-	            TOKEN _t = token;
-	
 	            _readToken();
 	
 	            Expression ret = _readCondition();
@@ -540,8 +546,6 @@ public class Expression {
 	    {
 	        Expression r = null;
 	
-	        TOKEN _token = token;
-	
 	        switch (token)
 	        {
 	            case MINUS:
@@ -572,8 +576,9 @@ public class Expression {
 	            case FUNCTION:
 	                r = new Expression((FUNCTION)data); r.expressions.addAll(_readFunction()); _readToken(); break;
 	            case CELL:
+	                r = new Expression(token, (Cell)data); _readToken(); break;
 	            case RANGE:
-	                r = new Expression(token, data); _readToken(); break;
+	                r = new Expression(token, (Range)data); _readToken(); break;
 	            default:
 	                throw new IllegalArgumentException("unexpected element " + token.toString() + ": " + this.token.toString() + "," + this.pos + "," + this.formula);
 	        }
@@ -582,7 +587,6 @@ public class Expression {
 	    }
 	};
 
-	
     public Expression()
     {
         dataType = DataType.General;
@@ -591,10 +595,11 @@ public class Expression {
     public Expression(TOKEN token, Object value)
     {
         this.token = token;
-        if (token != TOKEN.CELL && token != TOKEN.CELL_VALUE && token != TOKEN.ERROR && token != TOKEN.EXPRESSION && token != TOKEN.FUNCTION_VALUE && token != TOKEN.RANGE && token != TOKEN.UNDEF)
+        if (token != TOKEN.CELL && token != TOKEN.ERROR && token != TOKEN.EXPRESSION && token != TOKEN.UNDEF)
         {
             switch (token)
             {
+            	case RANGE: data = (Range)value; this.dataType = DataType.RANGE; break;
                 case NUMBER: data = Double.valueOf(value.toString()); this.dataType = DataType.Number; break;
                 case STRING: data = value.toString(); this.dataType = DataType.String; break;
                 default:
@@ -617,6 +622,7 @@ public class Expression {
         }
     }
     
+    //unary operation constructor
     public Expression(TOKEN token, Expression e)
     {
         this.token = token;
@@ -625,6 +631,7 @@ public class Expression {
         expressions.add(e);
     }
 
+    //binary operation constructor
     public Expression(TOKEN token, Expression e1, Expression e2)
     {
         this.token = token;
@@ -634,6 +641,7 @@ public class Expression {
         dataType = DataType.General;
     }
 
+    //string constant constructor
     public Expression(String v)
     {
         token = TOKEN.STRING;
@@ -641,12 +649,14 @@ public class Expression {
         data = v;
     }
 
+    //boolean constant constructor
     public Expression(boolean v)
     {
         token = (v) ? TOKEN.TRUE : TOKEN.FALSE;
         dataType = DataType.Boolean;
     }
 
+    //double constant constructor
     public Expression(double v)
     {
         token = TOKEN.NUMBER;
@@ -654,6 +664,7 @@ public class Expression {
         data = v;
     }
 
+    //function constructor
     public Expression(FUNCTION v)
     {
         token = TOKEN.FUNCTION;
@@ -664,20 +675,72 @@ public class Expression {
     
     
 	public Object getValue()
-	{ return data; }
+	{
+        switch (this.token)
+        {
+            case NUMBER:
+                return (double)this.data;
+
+            case PLUS:
+                return this.expressions.get(0).getNumericValue() + this.expressions.get(1).getNumericValue();
+
+            case MINUS:
+                return this.expressions.get(0).getNumericValue() - this.expressions.get(1).getNumericValue();
+
+            case MULTIPLY:
+                return this.expressions.get(0).getNumericValue() * this.expressions.get(1).getNumericValue();
+
+            case DIVIDE:
+                double ex2 = this.expressions.get(1).getNumericValue();
+                if (ex2 == 0)
+        			throw new IllegalArgumentException("divide by 0");
+                return this.expressions.get(0).getNumericValue() / ex2;
+
+            case POWER:
+                return Math.pow(this.expressions.get(0).getNumericValue(), this.expressions.get(1).getNumericValue());
+
+            case REMAINDER:
+                return this.expressions.get(0).getNumericValue() % this.expressions.get(1).getNumericValue();
+
+            case FUNCTION:
+            	
+            	FunctionRangeStrategy strategy;
+                switch ((FUNCTION)this.data)
+                {
+	                case SUM:
+	                	strategy = new FunctionSUM();
+	                	break;
+	
+	                case COUNT:
+	                	strategy = new FunctionCOUNT();
+	                	break;
+	
+	                case MEAN:
+	                	strategy = new FunctionMEAN();
+	                	break;
+                	
+                	default:
+                		strategy = null;
+                		break;
+                }
+                
+                return strategy.calculate((Range)this.expressions.get(0).data);
+        }
+        
+        throw new RuntimeException("Expression token " + this.token.toString() + " is not defined");
+	}
 
 	public double getNumericValue()
-	{ return (double)data; }
+	{ return (double)getValue(); }
 
 	public String getTextValue()
-	{ return (String)data; }
+	{ return (String)getValue(); }
 
 	
 	private TOKEN token = TOKEN.UNDEF;
     private DataType dataType;
-    private ArrayList<Expression> expressions;
+    private ArrayList<Expression> expressions = new ArrayList<Expression>();
     private Object data = null;
-    private boolean dirty = true;
     
     public DataType getDataType() {
     	return dataType;
@@ -687,37 +750,42 @@ public class Expression {
     	dataType = value;
     }
     
-    public static Expression Parse(Cell cell, String formula) throws IllegalArgumentException
+    public static Expression parse(Cell cell, String formula) throws IllegalArgumentException
     {
-    	Expression.ExpressionParser parser = new Expression.ExpressionParser(formula);
+    	Expression.ExpressionParser parser = new Expression.ExpressionParser(formula, cell);
+    	parser._readToken();
     	Expression ret = parser._readOr();
+    	if (parser.pos != formula.length() || parser.token != TOKEN.UNDEF)
+        	throw new IllegalArgumentException(formula + " Formula has false structure");
+
     	
-    	//remove observers, if exists
-    	Application.activeWorkbook.RemoveDependancy(cell);
+    	//remove dependency, if exists
+    	Application.getActiveWorkbook().removeDependancy(cell);
     	
-    	//add new observer
-    	AddDependency(cell, ret);
+    	//add new dependency
+    	addDependency(cell, ret);
     	
     	return ret;
     }
     
-    private static void AddDependency(Cell cell, Expression ex)
+    private static void addDependency(Cell cell, Expression ex)
     {
-    	if (ex.token == TOKEN.RANGE) 
-    		Application.activeWorkbook.AddDependency(cell, ex, (Range)ex.data);
-    	else if (ex.token == TOKEN.CELL) 
-    		Application.activeWorkbook.AddDependency(cell, ex, (Cell)ex.data);
+    	if (ex.token == TOKEN.RANGE) {
+    		Range r = (Range)ex.data;
+    		for (Area a : r.getAreas())
+    			Application.getActiveWorkbook().addDependency(cell, ex, a);
+
+    		for (Cell c : r.getCells())
+    			Application.getActiveWorkbook().addDependency(cell, ex, c);
+    	}
+    	else if (ex.token == TOKEN.CELL) { 
+    		Application.getActiveWorkbook().addDependency(cell, ex, (Cell)ex.data);
+    	}
     	
     	if (ex.expressions != null) {
     		for(Expression e : ex.expressions)
-    			AddDependency(cell, e);
+    			addDependency(cell, e);
     	}
     }
-    
-    
-    
-    
-    
-    
     
 }
