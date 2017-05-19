@@ -52,8 +52,6 @@ public class PDFWriteUtility {
 		}
 		
 		pdfFile.add(pdfTable);
-		
-		pdfFile.close();
 		reader.close();
 		csvFile.delete();
 		

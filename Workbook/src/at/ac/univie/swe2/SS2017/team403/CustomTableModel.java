@@ -31,6 +31,11 @@ public class CustomTableModel extends AbstractTableModel {
 
 	@Override
 	public Object getValueAt(int row, int column) {
-			return list.get(row)[column]; //vorübergehend
+		return list.get(row)[column]; // vorübergehend
+	}
+
+	public void emptyModel() {
+		for (int i = 0; i < list.size(); i++)
+			list.remove(i);
 	}
 }
