@@ -5,7 +5,7 @@ public interface WorkbookListener {
 	void AfterWorksheetAdded(String worksheetName);
 	void AfterWorksheetRemoved(String worksheetName);
 	void AfterWorksheetRenamed(String worksheetOldName, String worksheetNewName);
-	void AfterCellChanged(String worksheetName, int row, int column);
+	void AfterCellChanged(String worksheetName, int row, int column, Object newValue);
 
 	void AfterDiagramAdded(String diagramName);
 	void AfterDiagramRemoved(String diagramName);

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Iterator;
 import java.util.ArrayList;
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
@@ -169,11 +170,13 @@ public class Workbook implements Serializable  {
 	
 	//dependencies/precedents for Formula-Calculation
 	private transient TreeMap<Area, TreeSet<Cell> > dependencies = new TreeMap<Area, TreeSet<Cell> >(new Area.AreaComparator());
-	private transient TreeMap<Cell, ArrayList<Area> > precedents = new TreeMap<Cell, ArrayList<Area> >(new Cell.CellComparator());
+	private transient TreeMap<Cell, TreeSet<Area> > precedents = new TreeMap<Cell, TreeSet<Area> >(new Cell.CellComparator());
 		
 	void removeDependancy(Cell cell) {
 		if (precedents.containsKey(cell)) {
 			for ( Area dep : precedents.get(cell) ) {
+				//System.out.println(cell.getAddress() + " remove " + dep.getAddress());
+
 				dependencies.get(dep).remove(cell);
 				if (dependencies.get(dep).size() == 0)
 					dependencies.remove(dep);
@@ -182,9 +185,9 @@ public class Workbook implements Serializable  {
 		}
 	}
 	
-	void addDependency(Cell cell, Expression exp, Area precedent) {
+	void addDependency(Cell cell, Area precedent) {
 		if (!precedents.containsKey(cell)) {
-			precedents.put(cell, new ArrayList<Area>() );
+			precedents.put(cell, new TreeSet<Area>(new Area.AreaComparator()) );
 		}
 		precedents.get(cell).add(precedent);
 
@@ -192,10 +195,12 @@ public class Workbook implements Serializable  {
 			dependencies.put(precedent, new TreeSet<Cell>( new Cell.CellComparator() ) );
 		}
 		dependencies.get(precedent).add(cell);
+		
+		//System.out.println(cell.getAddress() + " -> " + precedent.getAddress());
 	}
 
-	void addDependency(Cell cell, Expression exp, Cell precedent) {
-		addDependency(cell, exp, new Area(precedent));
+	void addDependency(Cell cell, Cell precedent) {
+		addDependency(cell, new Area(precedent));
 	}
 	
 	//recalculated cells - dynamic TreeSet
@@ -203,8 +208,10 @@ public class Workbook implements Serializable  {
 	
 	void calculateDependencies(Cell cell) throws IllegalArgumentException
 	{
-		//empty dependencies
+		//empty dependency cells
 		calcCells.clear();
+		
+		calcCells.add(cell);
 		
 		//get dependencies
 		try {
@@ -215,9 +222,11 @@ public class Workbook implements Serializable  {
 			throw new IllegalArgumentException(e.getMessage() + ", source cell R"+cell.getRow()+"C"+cell.getColumn());
 		}
 		
-		//calculate dependencies
-		for (Cell c : calcCells)
-			c.calculate();
+		
+		// inform observers
+		for(Cell c : calcCells)
+			for(WorkbookListener l : listeners)
+				l.AfterCellChanged(c.getParent().getName(), c.getRow(), c.getColumn(), c.getValue());
 		
 		//empty dependencies
 		calcCells.clear();
@@ -241,10 +250,16 @@ public class Workbook implements Serializable  {
 				continue;
 
 			for(Cell c : e.getValue() ) {
-				//cellular cell
+				
+				//calculate dependencies
+				c.calculate();
+				//cellular cell check
 				if (calcCells.contains(c))
-					throw new IllegalArgumentException("Circular reference R" + c.getRow() + "C" + c.getColumn());
+					throw new IllegalArgumentException("Circular reference " + c.getAddress());
 				calcCells.add(c);
+
+				_calculateDependencies(c);
+
 			}
 		}
 	}

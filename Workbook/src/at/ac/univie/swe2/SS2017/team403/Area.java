@@ -42,6 +42,9 @@ public class Area {
     }
 
 	
+	public String getAddress()
+	{ return "'"+ parent.getName() +"'!R" + r1 + "C" + c1 + ":" + "R" + r2 + "C" + c2; }
+	
 	//Comparator to Area class, we can order Areas
 	static class AreaComparator implements Comparator<Area>
 	{

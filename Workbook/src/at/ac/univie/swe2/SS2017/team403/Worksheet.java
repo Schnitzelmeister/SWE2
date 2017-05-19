@@ -23,17 +23,8 @@ public class Worksheet {
 	public String getName() { return name; }
 	public void setName(String name) throws IllegalArgumentException
 	{
-		boolean worksheetExists = true;
 		//check if sheet with new name exists
-		try {
-			parent.getSheet(name);
-			worksheetExists = true;
-		}
-		catch(IllegalArgumentException e) {
-			worksheetExists = false;
-		}
-		
-		if (worksheetExists)
+		if (parent.getSheets().containsKey(name))
 			throw new IllegalArgumentException("Sheet with name " + name + " already exists");
 		
 		String oldName = this.name;
@@ -82,8 +73,8 @@ public class Worksheet {
     {
     	int r, c;
     	String[] els = address.toUpperCase().split("C");
-    	assert els.length == 2;
-    	assert els[0].charAt(0) == 'R';
+    	//System.out.println(address);
+    	org.junit.Assert.assertEquals('R', els[0].charAt(0));
     	
     	//relative row address without offset
     	if (els[0].length() == 1) {
@@ -96,7 +87,7 @@ public class Worksheet {
     		r = Integer.valueOf(els[0].substring(1));
     	
     	//relative column address without offset
-    	if (els[1].length() == 0) {
+    	if (els.length == 1 || els[1].length() == 0) {
     		c = contextCell.getColumn();
     	}
     	//relative column address

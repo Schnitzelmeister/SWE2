@@ -78,7 +78,13 @@ public class Expression {
 	       		 + "R((\\d+)|(\\[([+-]?\\d+)\\]))?"
 	       		 + "C((\\d+)|(\\[([+-]?\\d+)\\]))?"
 	       		 + ":R((\\d+)|(\\[([+-]?\\d+)\\]))?"
-	       		 + "C((\\d+)|(\\[([+-]?\\d+)\\]))?"; 
+	       		 + "C((\\d+)|(\\[([+-]?\\d+)\\]))?" 
+	       		 
+	       		 + "(;(((\\w+)|('([\\w\\s]+)'))!)?"
+	       		 + "R((\\d+)|(\\[([+-]?\\d+)\\]))?"
+	       		 + "C((\\d+)|(\\[([+-]?\\d+)\\]))?"
+	       		 + ":R((\\d+)|(\\[([+-]?\\d+)\\]))?"
+	       		 + "C((\\d+)|(\\[([+-]?\\d+)\\]))?)?"; 
         //"(\\[[\\w\\-. ]+\\])?(([?\\w+]?'?\\w+'?)!)?[\\$]?[A-Z]+[\\$]?[0-9]+:[\\$]?[A-Z]+[\\$]?[0-9]+($|(?=[\\s\\.\\#\\+\\-\\*\\/\\=\\~\\>\\<\\!\\|\\(\\)\\,\\;]))";
 
         private static final String regExBooleanPattern = "(TRUE|FALSE)";
@@ -131,7 +137,7 @@ public class Expression {
                     token = TOKEN.CELL;
 
                     pos += matcher.end();
-	                data = Range.getRangeByAddress(matcher.group(0), cell).getCells().first();
+	                data = Range.getRangeByAddress(matcher.group(0), cell).getCells().firstKey();
                 }
             }
 
@@ -304,19 +310,19 @@ public class Expression {
         private FUNCTION _readFunctionToken()
         {
             if (pos + 5 < len)
-                switch (formula.substring(pos, pos + 5))
+                switch (formula.substring(pos, pos + 5).toUpperCase())
                 {
                     case "COUNT": pos += 5; return FUNCTION.COUNT;
                 }
 
             if (pos + 4 < len)
-                switch (formula.substring(pos, pos + 4))
+                switch (formula.substring(pos, pos + 4).toUpperCase())
                 {
                     case "MEAN": pos += 4; return FUNCTION.MEAN;
                 }
 
             if (pos + 3 < len)
-                switch (formula.substring(pos, pos + 3))
+                switch (formula.substring(pos, pos + 3).toUpperCase())
                 {
                     case "SUM": pos += 3; return FUNCTION.SUM;
                 }
@@ -595,10 +601,14 @@ public class Expression {
     public Expression(TOKEN token, Object value)
     {
         this.token = token;
-        if (token != TOKEN.CELL && token != TOKEN.ERROR && token != TOKEN.EXPRESSION && token != TOKEN.UNDEF)
+        if (token != TOKEN.ERROR && token != TOKEN.EXPRESSION && token != TOKEN.UNDEF)
         {
             switch (token)
             {
+        		case CELL: 
+        			Cell c = (Cell)value;
+        			data = c; this.dataType = c.getDataType();
+        			break;
             	case RANGE: data = (Range)value; this.dataType = DataType.RANGE; break;
                 case NUMBER: data = Double.valueOf(value.toString()); this.dataType = DataType.Number; break;
                 case STRING: data = value.toString(); this.dataType = DataType.String; break;
@@ -682,10 +692,16 @@ public class Expression {
                 return (double)this.data;
 
             case PLUS:
-                return this.expressions.get(0).getNumericValue() + this.expressions.get(1).getNumericValue();
+            	if (this.expressions.size() == 1)
+            		return this.expressions.get(0).getNumericValue();
+            	else
+            		return this.expressions.get(0).getNumericValue() + this.expressions.get(1).getNumericValue();
 
             case MINUS:
-                return this.expressions.get(0).getNumericValue() - this.expressions.get(1).getNumericValue();
+            	if (this.expressions.size() == 1)
+            		return -this.expressions.get(0).getNumericValue();
+            	else
+            		return this.expressions.get(0).getNumericValue() - this.expressions.get(1).getNumericValue();
 
             case MULTIPLY:
                 return this.expressions.get(0).getNumericValue() * this.expressions.get(1).getNumericValue();
@@ -701,6 +717,9 @@ public class Expression {
 
             case REMAINDER:
                 return this.expressions.get(0).getNumericValue() % this.expressions.get(1).getNumericValue();
+
+            case CELL:
+                return ((Cell)this.data).getValue();
 
             case FUNCTION:
             	
@@ -730,12 +749,19 @@ public class Expression {
         throw new RuntimeException("Expression token " + this.token.toString() + " is not defined");
 	}
 
-	public double getNumericValue()
-	{ return (double)getValue(); }
+	public double getNumericValue()	{
+		Object o = getValue();
+		if (o == null)
+			return 0d;
+		return (double)o; 
+	}
 
-	public String getTextValue()
-	{ return (String)getValue(); }
-
+	public String getTextValue()	{
+		Object o = getValue();
+		if (o == null)
+			return "";
+		return (String)o; 
+	}
 	
 	private TOKEN token = TOKEN.UNDEF;
     private DataType dataType;
@@ -772,14 +798,14 @@ public class Expression {
     {
     	if (ex.token == TOKEN.RANGE) {
     		Range r = (Range)ex.data;
-    		for (Area a : r.getAreas())
-    			Application.getActiveWorkbook().addDependency(cell, ex, a);
+    		for (Area a : r.getAreas().keySet())
+    			Application.getActiveWorkbook().addDependency(cell, a);
 
-    		for (Cell c : r.getCells())
-    			Application.getActiveWorkbook().addDependency(cell, ex, c);
+    		for (Cell c : r.getCells().keySet())
+    			Application.getActiveWorkbook().addDependency(cell, c);
     	}
     	else if (ex.token == TOKEN.CELL) { 
-    		Application.getActiveWorkbook().addDependency(cell, ex, (Cell)ex.data);
+    		Application.getActiveWorkbook().addDependency(cell, (Cell)ex.data);
     	}
     	
     	if (ex.expressions != null) {

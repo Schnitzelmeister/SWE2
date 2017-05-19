@@ -1,6 +1,7 @@
 package at.ac.univie.swe2.SS2017.team403;
 
 import java.awt.Component;
+
 import java.awt.EventQueue;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -34,7 +35,7 @@ import javax.swing.JScrollPane;
 import java.awt.BorderLayout;
 
 
-public class Application implements ActionListener {
+public class Application implements ActionListener, WorkbookListener {
 	
 	private String choosedAbsolutFile = null;
 
@@ -43,14 +44,11 @@ public class Application implements ActionListener {
 	private JPanel panelMain;
 	
 	//current Application Workbook - static object
-	private static Workbook activeWorkbook = null;
+	private static Workbook activeWorkbook = new Workbook();
 	public static Workbook getActiveWorkbook() { return activeWorkbook; }
 	
 	private JMenuBar menuBar;
 	private JTable table_1;
-	
-	
-	
 	
 	/**
 	 * Open proprietary format File
@@ -88,7 +86,7 @@ public class Application implements ActionListener {
 	 * Open CSV format File
 	 */
 	public void openCSV(String fileLocation, char delimiter, char quotation) throws IOException{	
-		CSVReader reader = new CSVReader(new FileReader(fileLocation), ',');
+		CSVReader reader = new CSVReader(new FileReader(fileLocation), delimiter, quotation);
 		List<String[]> csvValues = reader.readAll();
 		reader.close();
 		
@@ -108,46 +106,20 @@ public class Application implements ActionListener {
 	
 	}
 	
-	
-	public static void testFormulas() 
-	{
-		Workbook wbk = Application.getActiveWorkbook();
-		Worksheet sheet = wbk.addSheet("sheet1");
-		sheet.getCell(1, 1).setNumericValue(11);
-		sheet.getCell(2, 1).setNumericValue(12);
-		sheet.getCell(3, 1).setNumericValue(13);
-
-		sheet.getCell(1, 2).setFormula("=SUM(RC[-1]:R[3]C[-1])+COUNT(RC[-1]:R[3]C[-1])+MEAN(RC[-1]:R[3]C[-1])");
-		System.out.println(sheet.getCell(1, 2).getNumericValue());
-		//org.junit.Assert.assertEquals(51.0, sheet.getCell(1, 2).getNumericValue(), 0 );
-
-		sheet.getCell(4, 1).setNumericValue(10);
-		System.out.println(sheet.getCell(1, 2).getNumericValue());
-
-		
-		sheet = wbk.addSheet("sheet2");
-		sheet.getCell(1, 2).setFormula("=SUM(sheet1!RC[-1]:R[3]C[-1])+COUNT(sheet1!RC[-1]:R[3]C[-1])+MEAN(sheet1!RC[-1]:R[3]C[-1])");;
-		sheet.getCell(2, 2).setFormula("=SUM(RC[-1]:R[3]C[-1])+COUNT(RC[-1]:R[3]C[-1])+MEAN(RC[-1]:R[3]C[-1])");
-		System.out.println(sheet.getCell(1, 2).getNumericValue());
-		System.out.println(sheet.getCell(2, 2).getNumericValue());
-
-		//org.junit.Assert.assertEquals(51.0, sheet.getCell(1, 2).getNumericValue(), 0 );
-	}
-	
 	public static void main(String[] args) {
 
 		EventQueue.invokeLater(new Runnable() {			
 			public void run() {	
 				try {		
 					if (System.getSecurityManager() == null) {			       
-						//    System.setSecurityManager(new SecurityManager());			       
+						//System.setSecurityManager(new SecurityManager());			       
 					}										
 						Application gui = new Application();
 						
 						boolean createDefaultWorkbook = true;
 						if (args.length > 0) {
 							//open file
-							if (args[0].toUpperCase().endsWith(".wbk")) {
+							if (args[0].toUpperCase().endsWith(".WBK")) {
 								gui.openFile(args[0]);
 								createDefaultWorkbook = false;
 							}
@@ -164,11 +136,20 @@ public class Application implements ActionListener {
 							Application.activeWorkbook.addSheet("Sheet 1");
 							Application.activeWorkbook.addSheet("Sheet 2");
 							Application.activeWorkbook.addSheet("Sheet 3");
+							
+							//observe Application
+							Application.activeWorkbook.addListener(gui);
+
+							/*
+							at.ac.univie.swe2.SS2017.team403.test.TestJunit.testFormulas();
+							Application.activeWorkbook.getSheet("sheet1").setName("SHEEET1");
+							Application.activeWorkbook.getSheet("SHEEET1").getCell(1, 1).setFormula("=657-33");
+							Application.activeWorkbook.removeSheet("SHEEET1");
+							*/
 						}
 				
 						gui.frmClientInterface.setVisible(true);
 						
-						testFormulas();
 				} catch (Exception e) {
 					e.printStackTrace();				
 				}		
@@ -361,4 +342,37 @@ public class Application implements ActionListener {
 		
 	}
 
+	
+	
+	public void AfterWorksheetAdded(String worksheetName) {
+		System.out.println("AfterWorksheetAdded " + worksheetName);
+	}
+	
+	public void AfterWorksheetRemoved(String worksheetName) {
+		System.out.println("AfterWorksheetRemoved " + worksheetName);
+	}
+	
+	public void AfterWorksheetRenamed(String worksheetOldName, String worksheetNewName) {
+		System.out.println("AfterWorksheetRenamed " + worksheetOldName + " " + worksheetNewName);
+	}
+	
+	public void AfterCellChanged(String worksheetName, int row, int column, Object newValue){
+		System.out.println("AfterCellChanged '" + worksheetName + "'!R" + row + "C" + column + " = " + newValue.toString());
+	}
+	
+	public void AfterDiagramAdded(String diagramName){
+		System.out.println("AfterDiagramAdded " + diagramName);
+	}
+	
+	public void AfterDiagramRemoved(String diagramName){
+		System.out.println("AfterDiagramRemoved " + diagramName);
+	}
+	
+	public void AfterDiagramRenamed(String diagramOldName, String diagramNewName){
+		System.out.println("AfterDiagramRenamed " + diagramOldName + " " + diagramNewName);
+	}
+	
+	public void AfterDiagramChanged(String diagramName){
+		System.out.println("AfterDiagramChanged " + diagramName);
+	}
 }

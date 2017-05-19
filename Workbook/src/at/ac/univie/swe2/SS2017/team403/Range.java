@@ -1,13 +1,14 @@
 package at.ac.univie.swe2.SS2017.team403;
-import java.util.TreeSet;
+
+import java.util.TreeMap;
 
 public class Range {
 
-	private TreeSet<Area> areas = new TreeSet<Area>(new Area.AreaComparator());
-	private TreeSet<Cell> cells = new TreeSet<Cell>(new Cell.CellComparator());
+	private TreeMap<Area, Integer> areas = new TreeMap<Area, Integer>(new Area.AreaComparator());
+	private TreeMap<Cell, Integer> cells = new TreeMap<Cell, Integer>(new Cell.CellComparator());
 
-	public TreeSet<Area> getAreas() { return areas; }
-	public TreeSet<Cell> getCells() { return cells; }
+	public TreeMap<Area, Integer> getAreas() { return areas; }
+	public TreeMap<Cell, Integer> getCells() { return cells; }
 	
 	static Range getRangeByAddress(String address, Cell contextCell) {
 		Worksheet worksheet = contextCell.getParent();
@@ -30,12 +31,22 @@ public class Range {
             }
 
             if (worksheet == null)
-    			throw new IllegalArgumentException("Undefined worksheet param " + address + " to get Range object in method Range(string address, Worksheet worksheet = null)");
+    			throw new IllegalArgumentException("Undefined worksheet param " + address + " to get Range object in method getRangeByAddress(String address, Cell contextCell)");
 
-            if (el.indexOf(':') > 0)
-                ret.areas.add(new Area(el, worksheet, contextCell));
-            else
-                ret.cells.add(worksheet.getCell(el, contextCell));
+            if (el.indexOf(':') > 0) {
+            	Area a = new Area(el, worksheet, contextCell);
+                if (!ret.areas.containsKey(a))
+                	ret.areas.put(a, 1);
+                else
+                	ret.areas.put(a, ret.areas.get(a) + 1);
+            }
+            else {
+            	Cell c = worksheet.getCell(el, contextCell);
+                if (!ret.cells.containsKey(c))
+                	ret.cells.put(c, 1);
+                else
+                	ret.cells.put(c, ret.cells.get(c) + 1);
+            }
         }
 		return ret;
 	}

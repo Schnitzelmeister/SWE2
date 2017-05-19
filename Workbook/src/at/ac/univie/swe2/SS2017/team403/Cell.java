@@ -11,14 +11,18 @@ public class Cell {
 	
 	//current value
 	private Object value = null;
-	private String formula;
+	private String formula = null;
 
 	//expression tree for a formula
 	private Expression expr = null;
 
 	public void setNumericValue(double value)
 	{ 
+    	//remove dependency, if exists
+    	Application.getActiveWorkbook().removeDependancy(this);
+
 		this.expr = null;
+		this.formula = null;
 		this.value = value; 
 		this.dataType = DataType.Number; 
 		parent.getParent().calculateDependencies(this);
@@ -26,7 +30,11 @@ public class Cell {
 
 	public void setTextValue(String value)
 	{
+    	//remove dependency, if exists
+    	Application.getActiveWorkbook().removeDependancy(this);
+    	
 		this.expr = null;
+		this.formula = null;
 		this.value = value;
 		this.dataType = DataType.String;
 		parent.getParent().calculateDependencies(this);
@@ -60,6 +68,9 @@ public class Cell {
 	
 	public String getFormula()
 	{ return formula; }
+
+	public String getAddress()
+	{ return "'"+ parent.getName() +"'!R" + r + "C" + c; }
 
 	public Object getValue()
 	{ return value; }
