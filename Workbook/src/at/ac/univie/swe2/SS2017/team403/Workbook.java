@@ -23,7 +23,7 @@ public class Workbook implements Serializable  {
 	private transient TreeMap<Range, TreeSet<Cell> > dependencies = new TreeMap<Range, TreeSet<Cell> >(new Range.RangeComparator());
 	private transient TreeMap<Cell, ArrayList<Range> > precedents = new TreeMap<Cell, ArrayList<Range> >(new Cell.CellComparator());
 		
-	void RemoveDependancy(Cell cell) {
+	void RemoveDependency(Cell cell) {
 		if (precedents.containsKey(cell)) {
 			for ( Range dep : precedents.get(cell) ) {
 				dependencies.get(dep).remove(cell);
@@ -49,8 +49,7 @@ public class Workbook implements Serializable  {
 		AddDependency(cell, exp, new Range(precedent));
 	}
 
-	public Worksheet getSheet(String name)
-	{
+	public Worksheet getSheet(String name){
 		return sheets.get(name);		
 	}
 	
