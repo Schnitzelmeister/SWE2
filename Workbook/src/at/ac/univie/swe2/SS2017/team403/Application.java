@@ -97,8 +97,7 @@ public class Application implements ActionListener, WorkbookListener {
 	/**
 	 * Calculate Data in worksheet
 	 */
-	public void calculate() 
-	{
+	public void calculate(){
 		
 	}
 		
@@ -344,35 +343,35 @@ public class Application implements ActionListener, WorkbookListener {
 
 	
 	
-	public void AfterWorksheetAdded(String worksheetName) {
+	public void afterWorksheetAdded(String worksheetName) {
 		System.out.println("AfterWorksheetAdded " + worksheetName);
 	}
 	
-	public void AfterWorksheetRemoved(String worksheetName) {
+	public void afterWorksheetRemoved(String worksheetName) {
 		System.out.println("AfterWorksheetRemoved " + worksheetName);
 	}
 	
-	public void AfterWorksheetRenamed(String worksheetOldName, String worksheetNewName) {
+	public void afterWorksheetRenamed(String worksheetOldName, String worksheetNewName) {
 		System.out.println("AfterWorksheetRenamed " + worksheetOldName + " " + worksheetNewName);
 	}
 	
-	public void AfterCellChanged(String worksheetName, int row, int column, Object newValue){
+	public void afterCellChanged(String worksheetName, int row, int column, Object newValue){
 		System.out.println("AfterCellChanged '" + worksheetName + "'!R" + row + "C" + column + " = " + newValue.toString());
 	}
 	
-	public void AfterDiagramAdded(String diagramName){
+	public void afterDiagramAdded(String diagramName){
 		System.out.println("AfterDiagramAdded " + diagramName);
 	}
 	
-	public void AfterDiagramRemoved(String diagramName){
+	public void afterDiagramRemoved(String diagramName){
 		System.out.println("AfterDiagramRemoved " + diagramName);
 	}
 	
-	public void AfterDiagramRenamed(String diagramOldName, String diagramNewName){
+	public void afterDiagramRenamed(String diagramOldName, String diagramNewName){
 		System.out.println("AfterDiagramRenamed " + diagramOldName + " " + diagramNewName);
 	}
 	
-	public void AfterDiagramChanged(String diagramName){
+	public void afterDiagramChanged(String diagramName){
 		System.out.println("AfterDiagramChanged " + diagramName);
 	}
 }
