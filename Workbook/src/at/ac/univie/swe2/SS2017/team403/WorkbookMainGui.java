@@ -20,6 +20,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
+import javax.swing.text.AttributeSet;
 
 public class WorkbookMainGui extends javax.swing.JFrame {
 
@@ -67,7 +68,7 @@ public class WorkbookMainGui extends javax.swing.JFrame {
 	 * Open CSV format File
 	 */
 	public void openCSV(String fileLocation, char delimiter, char quotation) throws IOException {
-		CSVReader reader = new CSVReader(new FileReader(fileLocation), ',');
+		CSVReader reader = new CSVReader(new FileReader(fileLocation), ','); //TODO, quotation parameter missing
 		List<String[]> csvValues = reader.readAll();
 		reader.close();
 
@@ -227,7 +228,6 @@ public class WorkbookMainGui extends javax.swing.JFrame {
 				String filePath = chooser.getSelectedFile().getAbsolutePath();
 				System.out.println("The absolute filepath is: " + chooser.getSelectedFile().getAbsolutePath());
 				showMultipleInputMessageDialog(filePath);
-
 			} else {
 				System.out.println("The user pressed the CANCEL or X Button");
 			}
@@ -235,22 +235,31 @@ public class WorkbookMainGui extends javax.swing.JFrame {
 			System.out.println("Exception occured: File could not be found. ");
 			JOptionPane.showMessageDialog(this, "Die Datei konnte nicht gefunden werden ", "Fehler",
 					JOptionPane.ERROR_MESSAGE);
+		} catch (IllegalArgumentException i) {
+			System.out.println("showMultipleInputMessageDialog threw IllegalArgumentException ");
+			JOptionPane.showMessageDialog(this, i.getMessage(), "Fehler",
+					JOptionPane.ERROR_MESSAGE);
 		}
 	}
 
-	private void showMultipleInputMessageDialog(String absolutePath) throws IOException {
+	private void showMultipleInputMessageDialog(String absolutePath) throws IOException, IllegalArgumentException {
 
 		// JOption Pane code
 		final JCheckBox checkBoxForSemiColon = new JCheckBox();
 		final JCheckBox checkBoxForComma = new JCheckBox();
 		final JCheckBox checkBoxForQuotation = new JCheckBox();
 		final JCheckBox checkBoxForAlternativeDelimiter = new JCheckBox();
-		// final JCheckBox checkBoxForAlternativeQuote = new JCheckBox();
+		final JCheckBox checkBoxForDefaultQuote = new JCheckBox();
+		final JCheckBox checkBoxForAlternativeQuote = new JCheckBox();
 		final JTextField alternativeDelimiter = new JTextField();
-		alternativeDelimiter.setEnabled(false);
+		final JTextField alternativeQotation = new JTextField();
 
+		alternativeDelimiter.setEnabled(false);
+		alternativeQotation.setEnabled(false);
+		
 		Object[] inputFields = { "Semicolon as delimiter: ;", checkBoxForSemiColon, "Comma as delimiter: ,",
-				checkBoxForComma, "Default Quotation: \" ", checkBoxForQuotation, };
+				checkBoxForComma,"Optional delimiter: ", checkBoxForAlternativeDelimiter, alternativeDelimiter, "Default quotation: \" ", checkBoxForDefaultQuote
+				, "Alternative quotation: ", checkBoxForAlternativeQuote, alternativeQotation};
 
 		checkBoxForAlternativeDelimiter.addActionListener(new ActionListener() {
 			@Override
@@ -270,29 +279,108 @@ public class WorkbookMainGui extends javax.swing.JFrame {
 			public void actionPerformed(ActionEvent e) {
 				if (e.getSource() == checkBoxForSemiColon) {
 					checkBoxForComma.setSelected(false);
+					checkBoxForAlternativeDelimiter.setSelected(false);
+					alternativeDelimiter.setEnabled(false);
 				}
 			}
 		});
 
+		checkBoxForAlternativeDelimiter.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (e.getSource() == checkBoxForAlternativeDelimiter) {
+					checkBoxForComma.setSelected(false);
+					checkBoxForSemiColon.setSelected(false);
+					alternativeDelimiter.setEnabled(false);
+				}
+			}
+		});
+		
 		checkBoxForComma.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (e.getSource() == checkBoxForComma) {
 					checkBoxForSemiColon.setSelected(false);
+					checkBoxForAlternativeDelimiter.setSelected(false);
+					alternativeDelimiter.setEnabled(false);
 				}
 			}
 		});
 
+		checkBoxForDefaultQuote.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (e.getSource() == checkBoxForDefaultQuote) {
+					checkBoxForAlternativeQuote.setSelected(false);
+					alternativeQotation.setEnabled(false);
+				}
+			}
+		});
+		
+		checkBoxForAlternativeQuote.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (e.getSource() == checkBoxForAlternativeQuote) {
+					checkBoxForDefaultQuote.setSelected(false);
+					alternativeQotation.setEnabled(true);
+				}
+			}
+		});
+		
 		int option = JOptionPane.showConfirmDialog(this, inputFields, "Please Choose a delimiter",
 				JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
 
-		if (option == JOptionPane.OK_OPTION && checkBoxForSemiColon.isSelected() && checkBoxForQuotation.isSelected())
+		if(option == JOptionPane.CANCEL_OPTION)
+			return;
+		
+		if (option == JOptionPane.OK_OPTION && checkBoxForSemiColon.isSelected() && checkBoxForDefaultQuote.isSelected()){
 			openCSV(absolutePath, ';', '"');
-
-		if (option == JOptionPane.OK_OPTION && checkBoxForComma.isSelected() && checkBoxForQuotation.isSelected())
+			return;
+		}
+			
+		if (option == JOptionPane.OK_OPTION && checkBoxForComma.isSelected() && checkBoxForDefaultQuote.isSelected()){
 			openCSV(absolutePath, ',', '"');
+			return;
+		}
+			
+		if (option == JOptionPane.OK_OPTION && checkBoxForSemiColon.isSelected() && checkBoxForAlternativeQuote.isSelected()){
+			String alternativeQuoteString = alternativeQotation.getText();
+			if(alternativeQuoteString.length() > 1 || alternativeQuoteString.length() == 0) throw new IllegalArgumentException("The value entered cannot be used as a quote");
+			char alternativeQuoteChar = alternativeQuoteString.charAt(0);
+			openCSV(absolutePath, ';', alternativeQuoteChar);
+			return;
+		}
+		
+		if (option == JOptionPane.OK_OPTION && checkBoxForComma.isSelected() && checkBoxForAlternativeQuote.isSelected()){
+			String alternativeQuoteString = alternativeQotation.getText();
+			if(alternativeQuoteString.length() > 1 || alternativeQuoteString.length() == 0) throw new IllegalArgumentException("The value entered cannot be used as a quote");
+			char alternativeQuoteChar = alternativeQuoteString.charAt(0);
+			openCSV(absolutePath, ',', alternativeQuoteChar);
+			return;
+		}
+		
+		if (option == JOptionPane.OK_OPTION && checkBoxForAlternativeDelimiter.isSelected() && checkBoxForAlternativeQuote.isSelected()){
+			String alternativeDelimiterString = alternativeDelimiter.getText();
+			if(alternativeDelimiterString.length() > 1 || alternativeDelimiterString.length() == 0) throw new IllegalArgumentException("The value entered cannot be used as a delimiter");
+			char alternativeDelimiterChar = alternativeDelimiterString.charAt(0);  
+			
+			String alternativeQuoteString = alternativeQotation.getText();
+			if(alternativeQuoteString.length() > 1 || alternativeQuoteString.length() == 0) throw new IllegalArgumentException("The value entered cannot be used as a quote");
+			char alternativeQuoteChar = alternativeQuoteString.charAt(0);
+			
+			openCSV(absolutePath, alternativeDelimiterChar, alternativeQuoteChar);
+			return;
+		}
+		
+		if (option == JOptionPane.OK_OPTION && checkBoxForAlternativeDelimiter.isSelected() && checkBoxForDefaultQuote.isSelected()){
+			String alternativeDelimiterString = alternativeDelimiter.getText();
+			if(alternativeDelimiterString.length() > 1 || alternativeDelimiterString.length() == 0) throw new IllegalArgumentException("The value entered cannot be used as a delimiter");
+			char alternativeDelimiterChar = alternativeDelimiterString.charAt(0);  
+			openCSV(absolutePath, alternativeDelimiterChar, '"');
+			return;
+		}
 
-		// TODO implement third option with optional imput through textfield
+		throw new IllegalArgumentException("Missing input");
 	}
 
 	private void saveAsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {
