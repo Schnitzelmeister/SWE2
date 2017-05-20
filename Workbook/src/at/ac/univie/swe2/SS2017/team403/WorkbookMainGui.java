@@ -227,7 +227,7 @@ public class WorkbookMainGui extends javax.swing.JFrame {
 				String filePath = chooser.getSelectedFile().getAbsolutePath();
 				System.out.println("The absolute filepath is: " + chooser.getSelectedFile().getAbsolutePath());
 				showMultipleInputMessageDialog(filePath);
-				
+
 			} else {
 				System.out.println("The user pressed the CANCEL or X Button");
 			}
@@ -238,63 +238,63 @@ public class WorkbookMainGui extends javax.swing.JFrame {
 		}
 	}
 
-	private void showMultipleInputMessageDialog(String absolutePath) throws IOException{
-		
+	private void showMultipleInputMessageDialog(String absolutePath) throws IOException {
+
 		// JOption Pane code
 		final JCheckBox checkBoxForSemiColon = new JCheckBox();
 		final JCheckBox checkBoxForComma = new JCheckBox();
 		final JCheckBox checkBoxForQuotation = new JCheckBox();
 		final JCheckBox checkBoxForAlternativeDelimiter = new JCheckBox();
-		//final JCheckBox checkBoxForAlternativeQuote = new JCheckBox();
+		// final JCheckBox checkBoxForAlternativeQuote = new JCheckBox();
 		final JTextField alternativeDelimiter = new JTextField();
 		alternativeDelimiter.setEnabled(false);
-		
-		Object[] inputFields = { "Semicolon as delimiter: ;", checkBoxForSemiColon, "Comma as delimiter: ,", checkBoxForComma, 
-				"Default Quotation: \" ", checkBoxForQuotation,
-		};
-		
+
+		Object[] inputFields = { "Semicolon as delimiter: ;", checkBoxForSemiColon, "Comma as delimiter: ,",
+				checkBoxForComma, "Default Quotation: \" ", checkBoxForQuotation, };
+
 		checkBoxForAlternativeDelimiter.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (e.getSource() == checkBoxForAlternativeDelimiter) {
-                    if (checkBoxForAlternativeDelimiter.isSelected()) {
-                    	alternativeDelimiter.setEnabled(true);
-                    }else{
-                    	alternativeDelimiter.setEnabled(false);
-                    }
-                }
+					if (checkBoxForAlternativeDelimiter.isSelected()) {
+						alternativeDelimiter.setEnabled(true);
+					} else {
+						alternativeDelimiter.setEnabled(false);
+					}
+				}
 			}
-        });
-		
+		});
+
 		checkBoxForSemiColon.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (e.getSource() == checkBoxForSemiColon) {
 					checkBoxForComma.setSelected(false);
-                }
+				}
 			}
-        });
-		
+		});
+
 		checkBoxForComma.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (e.getSource() == checkBoxForComma) {
 					checkBoxForSemiColon.setSelected(false);
-                }
+				}
 			}
-        });
-		
-        int option = JOptionPane.showConfirmDialog(this, inputFields, "Please Choose a delimiter", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
-		
-		if (option == JOptionPane.OK_OPTION && checkBoxForSemiColon.isSelected() && checkBoxForQuotation.isSelected()) 
-            openCSV(absolutePath, ';', '"');
-        
-		if (option == JOptionPane.OK_OPTION && checkBoxForComma.isSelected() && checkBoxForQuotation.isSelected()) 
-	        openCSV(absolutePath, ',', '"');
-	      
-		//TODO implement third option with optional imput through textfield 
+		});
+
+		int option = JOptionPane.showConfirmDialog(this, inputFields, "Please Choose a delimiter",
+				JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+
+		if (option == JOptionPane.OK_OPTION && checkBoxForSemiColon.isSelected() && checkBoxForQuotation.isSelected())
+			openCSV(absolutePath, ';', '"');
+
+		if (option == JOptionPane.OK_OPTION && checkBoxForComma.isSelected() && checkBoxForQuotation.isSelected())
+			openCSV(absolutePath, ',', '"');
+
+		// TODO implement third option with optional imput through textfield
 	}
-	
+
 	private void saveAsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {
 		JFileChooser chooser = new JFileChooser();
 		Component parent = null;
