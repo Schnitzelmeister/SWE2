@@ -87,7 +87,8 @@ public class WorkbookMainGui extends javax.swing.JFrame implements WorkbookListe
 		}
 		reader.close();
 
-		//System.out.println("gelesen rows=" + r + ", cols=" + sheet.getUsedArea().getC2());
+		// System.out.println("gelesen rows=" + r + ", cols=" +
+		// sheet.getUsedArea().getC2());
 
 		TableModel model = new CustomTableModel(sheet);
 		returnTableForCurrentTab().setModel(model);
@@ -127,7 +128,7 @@ public class WorkbookMainGui extends javax.swing.JFrame implements WorkbookListe
 		setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
 		Integer numberOfWorksheets = activeWorkbook.getNumberOfSheets() + 1;
-		Worksheet worksheet = activeWorkbook.addSheet("Worksheet "+ numberOfWorksheets );
+		Worksheet worksheet = activeWorkbook.addSheet("Worksheet " + numberOfWorksheets);
 
 		jScrollPane1.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
 			public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
@@ -138,8 +139,7 @@ public class WorkbookMainGui extends javax.swing.JFrame implements WorkbookListe
 		jTable1.setModel(new CustomTableModel(worksheet));
 
 		jTable1.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
-		jTable1.setCursor(new
-		java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+		jTable1.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
 		jTable1.setGridColor(new java.awt.Color(0, 0, 0));
 		jScrollPane1.setViewportView(jTable1);
 
@@ -229,10 +229,10 @@ public class WorkbookMainGui extends javax.swing.JFrame implements WorkbookListe
 		menuBar.add(helpMenu);
 
 		setJMenuBar(menuBar);
-		
+
 		mnCharts = new JMenu("Charts");
 		menuBar.add(mnCharts);
-		
+
 		createLinechartMenu = new JMenuItem("Create Linechart");
 		mnCharts.add(createLinechartMenu);
 		createLinechartMenu.addActionListener(new java.awt.event.ActionListener() {
@@ -240,7 +240,7 @@ public class WorkbookMainGui extends javax.swing.JFrame implements WorkbookListe
 				createLineChartActionPerformed(evt);
 			}
 		});
-		
+
 		createBarchartMenu = new JMenuItem("Create Barchart");
 		mnCharts.add(createBarchartMenu);
 		createBarchartMenu.addActionListener(new java.awt.event.ActionListener() {
@@ -248,8 +248,7 @@ public class WorkbookMainGui extends javax.swing.JFrame implements WorkbookListe
 				createBarchartMenuActionPerformed(evt);
 			}
 		});
-		
-		
+
 		javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
 		getContentPane().setLayout(layout);
 		layout.setHorizontalGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -261,14 +260,14 @@ public class WorkbookMainGui extends javax.swing.JFrame implements WorkbookListe
 		setLocationRelativeTo(null);
 	}
 
-	private void createLineChartActionPerformed(java.awt.event.ActionEvent evt){
-		//TODO open new tab and place linechart on tab
+	private void createLineChartActionPerformed(java.awt.event.ActionEvent evt) {
+		// TODO open new tab and place linechart on tab
 	}
-	
-	private void createBarchartMenuActionPerformed(java.awt.event.ActionEvent evt){
-		//TODO open new tab and place linechart on tab
+
+	private void createBarchartMenuActionPerformed(java.awt.event.ActionEvent evt) {
+		// TODO open new tab and place linechart on tab
 	}
-	
+
 	private void exitMenuItemActionPerformed(java.awt.event.ActionEvent evt) {
 		System.exit(0);
 	}
@@ -568,13 +567,13 @@ public class WorkbookMainGui extends javax.swing.JFrame implements WorkbookListe
 				.getMaximum()) {
 			sizeRows++;
 			TableModel model = (CustomTableModel) jTable1.getModel();
-			//model.setRowCount(++sizeRows); //TODO
+			// model.setRowCount(++sizeRows); //TODO
 		}
 		if ((jScrollPane1.getHorizontalScrollBar().getValue() + horizontalExtent) == jScrollPane1
 				.getHorizontalScrollBar().getMaximum()) {
 			sizeColumns++;
 			TableModel model = (CustomTableModel) jTable1.getModel();
-			//model.setColumnCount(++sizeColumns); //TODO
+			// model.setColumnCount(++sizeColumns); //TODO
 		}
 	}
 
@@ -668,7 +667,7 @@ public class WorkbookMainGui extends javax.swing.JFrame implements WorkbookListe
 		JScrollPane jPane = new JScrollPane();
 		JTable albumTable = new JTable();
 		Worksheet sheet = Application.getActiveWorkbook().getSheet(worksheetName);
-		
+
 		TableModel model = new CustomTableModel(sheet);
 		albumTable.setModel(model);
 
@@ -696,15 +695,20 @@ public class WorkbookMainGui extends javax.swing.JFrame implements WorkbookListe
 
 	/*
 	 * (non-Javadoc)
-	 * @see at.ac.univie.swe2.SS2017.team403.WorkbookListener#afterWorksheetRenamed(java.lang.String, java.lang.String)
-	 * The method is being invoced when the user decides to rename the current worksheet which implicitely changes the name of the tab
+	 * 
+	 * @see
+	 * at.ac.univie.swe2.SS2017.team403.WorkbookListener#afterWorksheetRenamed(
+	 * java.lang.String, java.lang.String) The method is being invoced when the
+	 * user decides to rename the current worksheet which implicitely changes
+	 * the name of the tab
 	 */
 	@Override
 	public void afterWorksheetRenamed(String worksheetOldName, String worksheetNewName) {
 		JTable currentTable = returnTableForCurrentTab();
 		CustomTableModel model = (CustomTableModel) currentTable.getModel();
 		Worksheet sheet = Application.getActiveWorkbook().getSheet(model.getWorksheetName());
-		System.out.println("The worksheet with the name: "+worksheetOldName+" has been changed to the name: "+worksheetNewName);
+		System.out.println("The worksheet with the name: " + worksheetOldName + " has been changed to the name: "
+				+ worksheetNewName);
 		sheet.setWorksheetName(worksheetNewName);
 		int indexOfTab = jTabbedPane1.getSelectedIndex();
 		jTabbedPane1.setTitleAt(indexOfTab, worksheetNewName);

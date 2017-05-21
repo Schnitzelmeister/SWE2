@@ -3,7 +3,7 @@ package at.ac.univie.swe2.SS2017.team403;
 import java.util.Comparator;
 
 public class Cell {
-	
+
 	private Worksheet parentWorksheet;
 	private int cellRow, cellColumn;
 
@@ -13,7 +13,8 @@ public class Cell {
 	private ExpressionTree cellExpression = null;
 
 	/**
-	 * @param value -> cell-input-double-value
+	 * @param value
+	 *            -> cell-input-double-value
 	 */
 	public void setNumericValue(double value) {
 		WorkbookMainGui.getActiveWorkbook().removeReferenceDependencies(this);
@@ -26,7 +27,8 @@ public class Cell {
 	}
 
 	/**
-	 * @param value -> cell-input-value
+	 * @param value
+	 *            -> cell-input-value
 	 */
 	public void setTextValue(String value) {
 		WorkbookMainGui.getActiveWorkbook().removeReferenceDependencies(this);
@@ -39,12 +41,13 @@ public class Cell {
 	}
 
 	/**
-	 * @param formula -> cell-input-formula-value
+	 * @param formula
+	 *            -> cell-input-formula-value
 	 * @throws IllegalArgumentException
 	 */
 	public void setFormula(String formula) throws IllegalArgumentException {
-		if (!formula.startsWith("=")){
-			throw new IllegalArgumentException(formula + " Formula must begin with = symbol");			
+		if (!formula.startsWith("=")) {
+			throw new IllegalArgumentException(formula + " Formula must begin with = symbol");
 		}
 
 		this.cellFormula = formula;
@@ -57,8 +60,8 @@ public class Cell {
 	}
 
 	public void calculateCellExpression() {
-		if (cellExpression != null){
-			this.cellValue = cellExpression.getValue();			
+		if (cellExpression != null) {
+			this.cellValue = cellExpression.getValue();
 		}
 	}
 
@@ -76,6 +79,7 @@ public class Cell {
 
 	/**
 	 * A cell contains a referenced cell.
+	 * 
 	 * @return -> referenced cell
 	 */
 	public String getCellReferences() {
@@ -91,14 +95,14 @@ public class Cell {
 	 */
 	public double getNumericValue() {
 		if (cellValue == null) {
-			return 0d;			
+			return 0d;
 		}
 		return (double) cellValue;
 	}
 
 	public String getTextValue() {
 		if (cellValue == null) {
-			return "";			
+			return "";
 		}
 		return (String) cellValue;
 	}
@@ -139,5 +143,5 @@ public class Cell {
 			}
 		}
 	}
-	
+
 }

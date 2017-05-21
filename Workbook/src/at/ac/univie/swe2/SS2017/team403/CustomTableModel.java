@@ -9,7 +9,7 @@ public class CustomTableModel extends AbstractTableModel {
 	 */
 	private static final long serialVersionUID = 1L;
 	List<String[]> list = null;
-	
+
 	Worksheet sheet = null;
 
 	public CustomTableModel(Worksheet sheet) {
@@ -18,7 +18,7 @@ public class CustomTableModel extends AbstractTableModel {
 
 	@Override
 	public String getColumnName(int index) {
-		return "C"+(index+1);
+		return "C" + (index + 1);
 	}
 
 	@Override
@@ -27,7 +27,6 @@ public class CustomTableModel extends AbstractTableModel {
 
 		return sheet.getMaxUsedRangeArea().getLastColumn();
 	}
-	
 
 	@Override
 	public int getRowCount() {
@@ -38,18 +37,17 @@ public class CustomTableModel extends AbstractTableModel {
 
 	@Override
 	public Object getValueAt(int row, int column) {
-		
-		
-		//return list.get(row)[column]; // TODO
+
+		// return list.get(row)[column]; // TODO
 		Cell cell = sheet.getCell(row + 1, column + 1);
 		return cell.getCellValue();
 	}
-	
-	public String getWorksheetName(){
+
+	public String getWorksheetName() {
 		return sheet.getWorksheetName();
 	}
-	
-	public boolean isCellEditable(int row, int col) { 
-	    return true; 
+
+	public boolean isCellEditable(int row, int col) {
+		return true;
 	}
 }

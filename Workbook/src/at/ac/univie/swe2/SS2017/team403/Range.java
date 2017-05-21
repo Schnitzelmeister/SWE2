@@ -17,6 +17,7 @@ public class Range {
 
 	/**
 	 * This is a method for creating cell references to rows and columns.
+	 * 
 	 * @param address
 	 * @param contextCell
 	 * @return

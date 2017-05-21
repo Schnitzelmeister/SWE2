@@ -3,7 +3,7 @@ package at.ac.univie.swe2.SS2017.team403;
 import java.util.Comparator;
 
 public class Area {
-	
+
 	private Worksheet parentWorksheet;
 
 	public Worksheet getParent() {
@@ -31,6 +31,7 @@ public class Area {
 	/**
 	 * This constructor is used to set a range which contains different cells.
 	 * We need only two cells to build a rectangle to define the range.
+	 * 
 	 * @param cellTopLeft
 	 * @param cellBottomRight
 	 */
@@ -44,6 +45,7 @@ public class Area {
 
 	/**
 	 * This constructor is used to set a specific cell.
+	 * 
 	 * @param cell
 	 */
 	public Area(Cell cell) {
@@ -56,12 +58,16 @@ public class Area {
 
 	/**
 	 * This constructor is used to set a referenced range of a cell.
-	 * @param cellReferences -> references of the selected cell
-	 * @param worksheet -> selected worksheet
-	 * @param cellContext -> selected cell
+	 * 
+	 * @param cellReferences
+	 *            -> references of the selected cell
+	 * @param worksheet
+	 *            -> selected worksheet
+	 * @param cellContext
+	 *            -> selected cell
 	 */
 	public Area(String cellReferences, Worksheet worksheet, Cell cellContext) {
-		parentWorksheet = worksheet;	
+		parentWorksheet = worksheet;
 		String[] splittedCellReferences = cellReferences.split(":");
 		Cell cellTopLeft = worksheet.getCell(splittedCellReferences[0], cellContext);
 		Cell cellBottomRight = worksheet.getCell(splittedCellReferences[1], cellContext);
@@ -73,10 +79,12 @@ public class Area {
 
 	/**
 	 * A cell contains multiple referenced cells
+	 * 
 	 * @return -> referenced range area
 	 */
 	public String getCellReferences() {
-		return "'" + parentWorksheet.getWorksheetName() + "'!R" + firstRow + "C" + firstColumn + ":" + "R" + lastRow + "C" + lastColumn;
+		return "'" + parentWorksheet.getWorksheetName() + "'!R" + firstRow + "C" + firstColumn + ":" + "R" + lastRow
+				+ "C" + lastColumn;
 	}
 
 	/**
