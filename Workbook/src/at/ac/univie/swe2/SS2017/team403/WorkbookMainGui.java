@@ -23,6 +23,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.text.AttributeSet;
 import javax.swing.JMenuItem;
+import javax.swing.JMenu;
 
 public class WorkbookMainGui extends javax.swing.JFrame implements WorkbookListener {
 
@@ -227,7 +228,27 @@ public class WorkbookMainGui extends javax.swing.JFrame implements WorkbookListe
 		menuBar.add(helpMenu);
 
 		setJMenuBar(menuBar);
-
+		
+		mnCharts = new JMenu("Charts");
+		menuBar.add(mnCharts);
+		
+		createLinechartMenu = new JMenuItem("Create Linechart");
+		mnCharts.add(createLinechartMenu);
+		createLinechartMenu.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				createLineChartActionPerformed(evt);
+			}
+		});
+		
+		createBarchartMenu = new JMenuItem("Create Barchart");
+		mnCharts.add(createBarchartMenu);
+		createBarchartMenu.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				createBarchartMenuActionPerformed(evt);
+			}
+		});
+		
+		
 		javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
 		getContentPane().setLayout(layout);
 		layout.setHorizontalGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -239,6 +260,14 @@ public class WorkbookMainGui extends javax.swing.JFrame implements WorkbookListe
 		setLocationRelativeTo(null);
 	}
 
+	private void createLineChartActionPerformed(java.awt.event.ActionEvent evt){
+		//TODO open new tab and place linechart on tab
+	}
+	
+	private void createBarchartMenuActionPerformed(java.awt.event.ActionEvent evt){
+		//TODO open new tab and place linechart on tab
+	}
+	
 	private void exitMenuItemActionPerformed(java.awt.event.ActionEvent evt) {
 		System.exit(0);
 	}
@@ -629,6 +658,9 @@ public class WorkbookMainGui extends javax.swing.JFrame implements WorkbookListe
 	private Integer sizeColumns = 30;
 	private JMenuItem closeCurrentTab;
 	private JMenuItem renameTabMenuItem;
+	private JMenu mnCharts;
+	private JMenuItem createLinechartMenu;
+	private JMenuItem createBarchartMenu;
 
 	@Override
 	public void afterWorksheetAdded(String worksheetName) {

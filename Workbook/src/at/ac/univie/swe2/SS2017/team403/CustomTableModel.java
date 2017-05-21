@@ -38,4 +38,8 @@ public class CustomTableModel extends AbstractTableModel {
 	public String getWorksheetName(){
 		return sheet.getName();
 	}
+	
+	public boolean isCellEditable(int row, int col) { 
+	    return true; 
+	}
 }
