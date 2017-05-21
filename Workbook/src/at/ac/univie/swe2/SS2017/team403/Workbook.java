@@ -199,6 +199,10 @@ public class Workbook implements Serializable  {
 		//System.out.println(cell.getAddress() + " -> " + precedent.getAddress());
 	}
 
+	public Integer getNumberOfSheets(){
+		return sheets.size();
+	}
+	
 	void addDependency(Cell cell, Cell precedent) {
 		addDependency(cell, new Area(precedent));
 	}
