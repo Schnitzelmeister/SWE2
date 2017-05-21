@@ -3,122 +3,120 @@ package at.ac.univie.swe2.SS2017.team403;
 import java.util.Comparator;
 
 public class Cell {
-	private Worksheet parent;
-	//row, column
-	private int r, c;
+	private Worksheet parentWorksheet;
+	private int cellRow, cellColumn;
 
-	private DataType dataType = DataType.General;
-	
-	//current value
+	private CellInputDataType cellInputDataType = CellInputDataType.General;
+
+	// current value
 	private Object value = null;
 	private String formula = null;
 
-	//expression tree for a formula
+	// expression tree for a formula
 	private Expression expr = null;
 
-	public void setNumericValue(double value)
-	{ 
-    	//remove dependency, if exists
-    	Application.getActiveWorkbook().removeDependancy(this);
+	public void setNumericValue(double value) {
+		// remove dependency, if exists
+		Application.getActiveWorkbook().removeDependancy(this);
 
-		this.expr = null;
-		this.formula = null;
-		this.value = value; 
-		this.dataType = DataType.Number; 
-		parent.getParent().calculateDependencies(this);
-	}
-
-	public void setTextValue(String value)
-	{
-    	//remove dependency, if exists
-    	Application.getActiveWorkbook().removeDependancy(this);
-    	
 		this.expr = null;
 		this.formula = null;
 		this.value = value;
-		this.dataType = DataType.String;
-		parent.getParent().calculateDependencies(this);
+		this.cellInputDataType = CellInputDataType.Number;
+		parentWorksheet.getParentWorkbook().calculateDependencies(this);
 	}
-	
-	public void setFormula(String formula) throws IllegalArgumentException
-	{
+
+	public void setTextValue(String value) {
+		// remove dependency, if exists
+		Application.getActiveWorkbook().removeDependancy(this);
+
+		this.expr = null;
+		this.formula = null;
+		this.value = value;
+		this.cellInputDataType = CellInputDataType.String;
+		parentWorksheet.getParentWorkbook().calculateDependencies(this);
+	}
+
+	public void setFormula(String formula) throws IllegalArgumentException {
 		if (!formula.startsWith("="))
-        	throw new IllegalArgumentException(formula + " Formula must begin with = symbol");
-		
-		this.formula = formula; 
+			throw new IllegalArgumentException(formula + " Formula must begin with = symbol");
+
+		this.formula = formula;
 		expr = Expression.parse(this, formula);
-		dataType = expr.getDataType();
-		
+		cellInputDataType = expr.getDataType();
+
 		this.value = expr.getValue();
 
-		parent.getParent().calculateDependencies(this);
+		parentWorksheet.getParentWorkbook().calculateDependencies(this);
 	}
 
-	public void calculate()
-	{
+	public void calculate() {
 		if (expr != null)
-			this.value = expr.getValue(); 
+			this.value = expr.getValue();
 	}
 
-	public DataType getDataType()
-	{ return dataType; }
+	public CellInputDataType getDataType() {
+		return cellInputDataType;
+	}
 
-	public void setDataType(DataType dataType)
-	{ this.dataType = dataType; }
-	
-	public String getFormula()
-	{ return formula; }
+	public void setDataType(CellInputDataType dataType) {
+		this.cellInputDataType = dataType;
+	}
 
-	public String getAddress()
-	{ return "'"+ parent.getWorksheetName() +"'!R" + r + "C" + c; }
+	public String getFormula() {
+		return formula;
+	}
 
-	public Object getValue()
-	{ return value; }
+	public String getAddress() {
+		return "'" + parentWorksheet.getWorksheetName() + "'!R" + cellRow + "C" + cellColumn;
+	}
 
-	public double getNumericValue()	{
+	public Object getValue() {
+		return value;
+	}
+
+	public double getNumericValue() {
 		if (value == null)
 			return 0d;
-		return (double)value; 
+		return (double) value;
 	}
 
 	public String getTextValue() {
 		if (value == null)
 			return "";
-		return (String)value;
+		return (String) value;
 	}
 
-	
 	public Cell(Worksheet parent, int row, int column) {
-		this.parent = parent;
-		this.r = row;
-		this.c = column;
+		this.parentWorksheet = parent;
+		this.cellRow = row;
+		this.cellColumn = column;
 	}
 
-	public Worksheet getParentWorksheet()
-	{ return parent; }
+	public Worksheet getParentWorksheet() {
+		return parentWorksheet;
+	}
 
-	public int getRow()
-	{ return r; }
+	public int getRow() {
+		return cellRow;
+	}
 
-	public int getColumn()
-	{ return c; }
-	
-	//Comparator to Cell class, we can order Cells
-	static class CellComparator implements Comparator<Cell>
-	{
-		public int compare(Cell c1, Cell c2)
-	    {
-			int res = c1.parent.getId() - c2.parent.getId();
+	public int getColumn() {
+		return cellColumn;
+	}
+
+	// Comparator to Cell class, we can order Cells
+	static class CellComparator implements Comparator<Cell> {
+		public int compare(Cell c1, Cell c2) {
+			int res = c1.parentWorksheet.getId() - c2.parentWorksheet.getId();
 			if (res == 0) {
-				res = c1.r - c2.r;
+				res = c1.cellRow - c2.cellRow;
 				if (res == 0) {
-					return c1.c - c2.c;
-				}
-				else {
+					return c1.cellColumn - c2.cellColumn;
+				} else {
 					return res;
 				}
-			}
-			else {
+			} else {
 				return res;
 			}
 		}

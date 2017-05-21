@@ -15,6 +15,12 @@ public class Range {
 		return cells;
 	}
 
+	/**
+	 * This is a method for creating cell references to rows and columns.
+	 * @param address
+	 * @param contextCell
+	 * @return
+	 */
 	static Range getRangeByAddress(String address, Cell contextCell) {
 		Worksheet worksheet = contextCell.getParentWorksheet();
 		Range ret = new Range();

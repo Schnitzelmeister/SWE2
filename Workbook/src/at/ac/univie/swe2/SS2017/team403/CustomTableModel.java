@@ -1,11 +1,18 @@
 package at.ac.univie.swe2.SS2017.team403;
 
 import java.util.List;
-
 import javax.swing.table.AbstractTableModel;
 
 public class CustomTableModel extends AbstractTableModel {
+<<<<<<< HEAD
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	List<String[]> list = null;
+=======
 	Worksheet sheet = null;
+>>>>>>> 74d1ba7ec3738bcada746293a10eb3296363d500
 
 	public CustomTableModel(Worksheet sheet) {
 		this.sheet = sheet;
@@ -31,8 +38,12 @@ public class CustomTableModel extends AbstractTableModel {
 
 	@Override
 	public Object getValueAt(int row, int column) {
+<<<<<<< HEAD
+		return list.get(row)[column]; // TODO
+=======
 		Cell cell = sheet.getCell(row + 1, column + 1);
 		return cell.getValue();
+>>>>>>> 74d1ba7ec3738bcada746293a10eb3296363d500
 	}
 	
 	public String getWorksheetName(){

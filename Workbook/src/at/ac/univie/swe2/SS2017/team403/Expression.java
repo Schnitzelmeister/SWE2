@@ -595,7 +595,7 @@ public class Expression {
 
     public Expression()
     {
-        dataType = DataType.General;
+        dataType = CellInputDataType.General;
     }
     
     public Expression(TOKEN token, Object value)
@@ -609,11 +609,11 @@ public class Expression {
         			Cell c = (Cell)value;
         			data = c; this.dataType = c.getDataType();
         			break;
-            	case RANGE: data = (Range)value; this.dataType = DataType.RANGE; break;
-                case NUMBER: data = Double.valueOf(value.toString()); this.dataType = DataType.Number; break;
-                case STRING: data = value.toString(); this.dataType = DataType.String; break;
+            	case RANGE: data = (Range)value; this.dataType = CellInputDataType.RANGE; break;
+                case NUMBER: data = Double.valueOf(value.toString()); this.dataType = CellInputDataType.Number; break;
+                case STRING: data = value.toString(); this.dataType = CellInputDataType.String; break;
                 default:
-                	this.dataType = DataType.General;
+                	this.dataType = CellInputDataType.General;
             }
         }
     }
@@ -636,7 +636,7 @@ public class Expression {
     public Expression(TOKEN token, Expression e)
     {
         this.token = token;
-        dataType = DataType.General;
+        dataType = CellInputDataType.General;
         expressions = new ArrayList<Expression>();
         expressions.add(e);
     }
@@ -648,14 +648,14 @@ public class Expression {
         expressions = new ArrayList<Expression>();
         expressions.add(e1);
         expressions.add(e2);
-        dataType = DataType.General;
+        dataType = CellInputDataType.General;
     }
 
     //string constant constructor
     public Expression(String v)
     {
         token = TOKEN.STRING;
-        dataType = DataType.String;
+        dataType = CellInputDataType.String;
         data = v;
     }
 
@@ -663,14 +663,14 @@ public class Expression {
     public Expression(boolean v)
     {
         token = (v) ? TOKEN.TRUE : TOKEN.FALSE;
-        dataType = DataType.Boolean;
+        dataType = CellInputDataType.Boolean;
     }
 
     //double constant constructor
     public Expression(double v)
     {
         token = TOKEN.NUMBER;
-        dataType = DataType.Number;
+        dataType = CellInputDataType.Number;
         data = v;
     }
 
@@ -764,15 +764,15 @@ public class Expression {
 	}
 	
 	private TOKEN token = TOKEN.UNDEF;
-    private DataType dataType;
+    private CellInputDataType dataType;
     private ArrayList<Expression> expressions = new ArrayList<Expression>();
     private Object data = null;
     
-    public DataType getDataType() {
+    public CellInputDataType getDataType() {
     	return dataType;
     }
 
-    public void setDataType(DataType value) {
+    public void setDataType(CellInputDataType value) {
     	dataType = value;
     }
     
