@@ -12,6 +12,13 @@ public class Worksheet {
 	private int furthestRowUsed = 1;
 	private int furthestColumnUsed = 1;
 
+	/**
+	 * This constructor is used to set a worksheet.
+	 * A worksheet contains one or more Cells and is part of a workbook.
+	 * @param name -> worksheetName
+	 * @param workbook -> this workbook contains the worksheet
+	 * @param worksheetRenameCallback -> is part of the observer pattern
+	 */
 	Worksheet(String name, Workbook workbook, WorksheetRenameCallback worksheetRenameCallback) {
 		this.worksheetId = WorkbookMainGui.getActiveWorkbook().getNewId();
 		this.worksheetName = name;
@@ -27,7 +34,10 @@ public class Worksheet {
 		return worksheetName;
 	}
 
-	public void setWorksheetName(String name) throws IllegalArgumentException {
+	/**
+	 * @param name -> worksheetname
+	 */
+	public void setWorksheetName(String name) {
 		if (parentWorkbook.getSheets().containsKey(name)) {
 			throw new IllegalArgumentException("Sheet with name " + name + " already exists");			
 		}
@@ -55,7 +65,7 @@ public class Worksheet {
 	/**
 	 * This method checks the availability of a cell by a cell-key check.
 	 * If there is a similar key it returns the existing cell, otherwise
-	 * it returns the new cell.
+	 * it returns a new cell.
 	 * @param row
 	 * @param column
 	 * @param isCellExisting
@@ -71,13 +81,11 @@ public class Worksheet {
 			if (row > furthestColumnUsed){
 				furthestColumnUsed = column;				
 			}
-		}
-
-		if (!worksheetCells.containsKey(key)) {
-			if (!isCellExisting) {
-				return null;				
+			if(!worksheetCells.containsKey(key)){
+				return null;
+			} else {
+				worksheetCells.put(key, new Cell(this, row, column));
 			}
-			worksheetCells.put(key, new Cell(this, row, column));
 		}
 		
 		return worksheetCells.get(key);	
@@ -96,26 +104,24 @@ public class Worksheet {
 
 		// relative row address without offset
 		if (cellRefUpperCase[0].length() == 1) {
-			row = cellContext.getRow();
+			row = cellContext.getCellRow();
 		}
 		// relative row address
 		else if (cellRefUpperCase[0].charAt(1) == '[') {
-			row = cellContext.getRow() + Integer.valueOf(cellRefUpperCase[0].substring(2, cellRefUpperCase[0].length() - 1));
-		}
-		else {
+			row = cellContext.getCellRow() + Integer.valueOf(cellRefUpperCase[0].substring(2, cellRefUpperCase[0].length() - 1));
+		} else {
 			row = Integer.valueOf(cellRefUpperCase[0].substring(1));			
 		}
 
 
 		// relative column address without offset
 		if (cellRefUpperCase.length == 1 || cellRefUpperCase[1].length() == 0) {
-			column = cellContext.getColumn();
+			column = cellContext.getCellColumn();
 		}
 		// relative column address
 		else if (cellRefUpperCase[1].charAt(0) == '[') {
-			column = cellContext.getColumn() + Integer.valueOf(cellRefUpperCase[1].substring(1, cellRefUpperCase[1].length() - 1));
-		}
-		else {
+			column = cellContext.getCellColumn() + Integer.valueOf(cellRefUpperCase[1].substring(1, cellRefUpperCase[1].length() - 1));
+		} else {
 			column = Integer.valueOf(cellRefUpperCase[1]);			
 		}
 

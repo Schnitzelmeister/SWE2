@@ -24,7 +24,7 @@ class FunctionSUM implements FunctionRangeStrategy {
             for (int r = a.getFirstRow(); r <= a.getLastRow(); ++r) {
                 for (int c = a.getFirstColumn(); c <= a.getLastColumn(); ++c) {
                 	Cell cell = sheet.getCell(r, c, false);
-                	if (cell != null && cell.getValue() != null)
+                	if (cell != null && cell.getCellValue() != null)
                 		tmp += cell.getNumericValue();
                 }
             }
@@ -36,7 +36,7 @@ class FunctionSUM implements FunctionRangeStrategy {
 	    {
 	    	Map.Entry<Cell, Integer > e = iter.next();
 	    	Cell c = e.getKey();
-	    	if (c != null && c.getValue() != null)
+	    	if (c != null && c.getCellValue() != null)
 	    		ret += (c.getNumericValue() * e.getValue());
 	    }
 	    
@@ -64,7 +64,7 @@ class FunctionMEAN implements FunctionRangeStrategy {
             for (int r = a.getFirstRow(); r <= a.getLastRow(); ++r) {
                 for (int c = a.getFirstColumn(); c <= a.getLastColumn(); ++c) {
                 	Cell cell = sheet.getCell(r, c, false);
-                	if (cell != null && cell.getValue() != null)
+                	if (cell != null && cell.getCellValue() != null)
                 	{
                 		++tmp2;
                 		ret += cell.getNumericValue();
@@ -80,7 +80,7 @@ class FunctionMEAN implements FunctionRangeStrategy {
 	    {
 	    	Map.Entry<Cell, Integer > e = iter.next();
 	    	Cell c = e.getKey();
-	    	if (c != null && c.getValue() != null) {
+	    	if (c != null && c.getCellValue() != null) {
 	    		count += e.getValue();
 	    		ret += (c.getNumericValue() * e.getValue());
 	    	}
@@ -108,7 +108,7 @@ class FunctionCOUNT implements FunctionRangeStrategy {
             for (int r = a.getFirstRow(); r <= a.getLastRow(); ++r) {
                 for (int c = a.getFirstColumn(); c <= a.getLastColumn(); ++c) {
                 	Cell cell = sheet.getCell(r, c, false);
-                	if (cell != null && cell.getValue() != null)
+                	if (cell != null && cell.getCellValue() != null)
                 		++tmp;
                 }
             }
@@ -120,7 +120,7 @@ class FunctionCOUNT implements FunctionRangeStrategy {
 	    {
 	    	Map.Entry<Cell, Integer > e = iter.next();
 	    	Cell c = e.getKey();
-	    	if (c != null && c.getValue() != null)
+	    	if (c != null && c.getCellValue() != null)
 	    		ret += e.getValue();
 	    }
 	   	

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Expression {
+public class ExpressionTree {
 	
 	private enum TOKEN {
         CELL,
@@ -330,13 +330,13 @@ public class Expression {
             return FUNCTION.UNDEF;
         }
 
-        private List<Expression> _readFunction()
+        private List<ExpressionTree> _readFunction()
         {
         	FUNCTION _func = (FUNCTION)data;
             _readToken();
             _readThis(TOKEN.LEFT_BRACKET, "must be ( after function name");
 
-            List<Expression> ret = new ArrayList<Expression>();
+            List<ExpressionTree> ret = new ArrayList<ExpressionTree>();
 
             _readToken();
 
@@ -364,58 +364,58 @@ public class Expression {
             return ret;
         }
 
-	    private Expression _readOr()
+	    private ExpressionTree _readOr()
 	    {
-	        Expression r = _readAnd();
+	        ExpressionTree r = _readAnd();
 	
 	        while (token == TOKEN.OR)
 	        {
 	            TOKEN _t = token;
-	            Expression a = r;
+	            ExpressionTree a = r;
 	
 	            _readToken();
 	
-	            r = new Expression(_t, a, _readAnd());
+	            r = new ExpressionTree(_t, a, _readAnd());
 	        }
 	
 	        return r;
 	    }
 	
-	    private Expression _readAnd()
+	    private ExpressionTree _readAnd()
 	    {
-	        Expression r = _readCondition();
+	        ExpressionTree r = _readCondition();
 	
 	        while (token == TOKEN.AND)
 	        {
 	            TOKEN _t = token;
-	            Expression a = r;
+	            ExpressionTree a = r;
 	
 	            _readToken();
 	
-	            r = new Expression(_t, a, _readCondition());
+	            r = new ExpressionTree(_t, a, _readCondition());
 	        }
 	
 	        return r;
 	    }
 	
-	    private Expression _readCondition() throws IllegalArgumentException
+	    private ExpressionTree _readCondition() throws IllegalArgumentException
 	    {
 	        if (token == TOKEN.NOT)
 	        {
 	            _readToken();
 	
-	            Expression ret = _readCondition();
+	            ExpressionTree ret = _readCondition();
 	
 	            if (ret.token == TOKEN.IN)
 	                ret.token = TOKEN.NOT_IN;
 	            else
-	                ret = new Expression(TOKEN.NOT, ret, null);
+	                ret = new ExpressionTree(TOKEN.NOT, ret, null);
 	
 	            return ret;
 	        }
 	        else
 	        {
-	            Expression a = _readExpConcat();
+	            ExpressionTree a = _readExpConcat();
 	            boolean not = false;
 	
 	            if (token == TOKEN.NOT)
@@ -427,21 +427,21 @@ public class Expression {
 	
 	            if (token == TOKEN.LIKE)
 	            {
-	                Expression b = _readExpConcat();
+	                ExpressionTree b = _readExpConcat();
 	
-	                a = new Expression(TOKEN.LIKE, a, b);
+	                a = new ExpressionTree(TOKEN.LIKE, a, b);
 	            }
 	            else if (token == TOKEN.BETWEEN)
 	            {
-	                Expression l = new Expression(TOKEN.BIGGER_EQUAL, a,
+	                ExpressionTree l = new ExpressionTree(TOKEN.BIGGER_EQUAL, a,
 	                    _readExpConcat());
 	
 	                _readThis(TOKEN.AND, "must be AND in BETWEEN");
 	
-	                Expression h = new Expression(TOKEN.SMALLER_EQUAL, a,
+	                ExpressionTree h = new ExpressionTree(TOKEN.SMALLER_EQUAL, a,
 	                    _readExpConcat());
 	
-	                a = new Expression(TOKEN.AND, l, h);
+	                a = new ExpressionTree(TOKEN.AND, l, h);
 	            }
 	            else if (token == TOKEN.IN || token == TOKEN.NOT_IN)
 	            {
@@ -449,7 +449,7 @@ public class Expression {
 	                _readToken();
 	                _readThis(TOKEN.LEFT_BRACKET, "after IN must be (");
 	
-	                Expression b = new Expression();
+	                ExpressionTree b = new ExpressionTree();
 	
 	                while (true)
 	                {
@@ -462,7 +462,7 @@ public class Expression {
 	
 	                _readThis(TOKEN.RIGHT_BRACKET, "after IN and ( must be )");
 	
-	                a = new Expression(baseToken, a, b);
+	                a = new ExpressionTree(baseToken, a, b);
 	            }
 	            else if (token == TOKEN.EQUAL || token == TOKEN.BIGGER_EQUAL || token == TOKEN.BIGGER || token == TOKEN.SMALLER || token == TOKEN.SMALLER_EQUAL || token == TOKEN.NOT_EQUAL)
 	            {
@@ -473,47 +473,47 @@ public class Expression {
 	
 	                _readToken();
 	
-	                return new Expression(_t, a, _readExpConcat());
+	                return new ExpressionTree(_t, a, _readExpConcat());
 	            }
 	
 	            if (not)
-	                a = new Expression(TOKEN.NOT, a, null);
+	                a = new ExpressionTree(TOKEN.NOT, a, null);
 	
 	            return a;
 	        }
 	    }
 	
-	    private Expression _readExpConcat()
+	    private ExpressionTree _readExpConcat()
 	    {
-	        Expression r = _readSum();
+	        ExpressionTree r = _readSum();
 	
 	        if (token == TOKEN.REMAINDER)
 	        {
-	            Expression a = r;
+	            ExpressionTree a = r;
 	
 	            _readToken();
 	
-	            r = new Expression(TOKEN.REMAINDER, a, _readOr());
+	            r = new ExpressionTree(TOKEN.REMAINDER, a, _readOr());
 	        }
 	        else
 	        {
 	            while (token == TOKEN.CONCATENATE || token == TOKEN.POWER)
 	            {
 	                TOKEN _tok = token;
-	                Expression a = r;
+	                ExpressionTree a = r;
 	
 	                _readToken();
 	
-	                r = new Expression(_tok, a, _readOr());
+	                r = new ExpressionTree(_tok, a, _readOr());
 	            }
 	        }
 	
 	        return r;
 	    }
 	
-	    private Expression _readSum()
+	    private ExpressionTree _readSum()
 	    {
-	        Expression r = _readFactor();
+	        ExpressionTree r = _readFactor();
 	
 	        while (true)
 	        {
@@ -521,42 +521,42 @@ public class Expression {
 	                break;
 	
 	            TOKEN _t = token;
-	            Expression a = r;
+	            ExpressionTree a = r;
 	
 	            _readToken();
 	
-	            r = new Expression(_t, a, _readFactor());
+	            r = new ExpressionTree(_t, a, _readFactor());
 	        }
 	
 	        return r;
 	    }
 	
-	    private Expression _readFactor()
+	    private ExpressionTree _readFactor()
 	    {
-	        Expression r = _readTerm();
+	        ExpressionTree r = _readTerm();
 	
 	        while (token == TOKEN.MULTIPLY || token == TOKEN.DIVIDE)
 	        {
 	            TOKEN _t = token;
-	            Expression a = r;
+	            ExpressionTree a = r;
 	
 	            _readToken();
 	
-	            r = new Expression(_t, a, _readTerm());
+	            r = new ExpressionTree(_t, a, _readTerm());
 	        }
 	
 	        return r;
 	    }
 	
-	    private Expression _readTerm() throws IllegalArgumentException
+	    private ExpressionTree _readTerm() throws IllegalArgumentException
 	    {
-	        Expression r = null;
+	        ExpressionTree r = null;
 	
 	        switch (token)
 	        {
 	            case MINUS:
 	                _readToken();
-	                r = new Expression(TOKEN.MINUS, _readTerm());
+	                r = new ExpressionTree(TOKEN.MINUS, _readTerm());
 	                break;
 	            case PLUS:
 	                _readToken();
@@ -572,19 +572,19 @@ public class Expression {
 	
 	                break;
 	            case NUMBER:
-	                r = new Expression((double)data); _readToken(); break;
+	                r = new ExpressionTree((double)data); _readToken(); break;
 	            case STRING:
-	                r = new Expression((String)data); _readToken(); break;
+	                r = new ExpressionTree((String)data); _readToken(); break;
 	            case TRUE:
-	                r = new Expression(true); _readToken(); break;
+	                r = new ExpressionTree(true); _readToken(); break;
 	            case FALSE:
-	                r = new Expression(false); _readToken(); break;
+	                r = new ExpressionTree(false); _readToken(); break;
 	            case FUNCTION:
-	                r = new Expression((FUNCTION)data); r.expressions.addAll(_readFunction()); _readToken(); break;
+	                r = new ExpressionTree((FUNCTION)data); r.expressions.addAll(_readFunction()); _readToken(); break;
 	            case CELL:
-	                r = new Expression(token, (Cell)data); _readToken(); break;
+	                r = new ExpressionTree(token, (Cell)data); _readToken(); break;
 	            case RANGE:
-	                r = new Expression(token, (Range)data); _readToken(); break;
+	                r = new ExpressionTree(token, (Range)data); _readToken(); break;
 	            default:
 	                throw new IllegalArgumentException("unexpected element " + token.toString() + ": " + this.token.toString() + "," + this.pos + "," + this.formula);
 	        }
@@ -593,12 +593,12 @@ public class Expression {
 	    }
 	};
 
-    public Expression()
+    public ExpressionTree()
     {
         dataType = CellInputDataType.General;
     }
     
-    public Expression(TOKEN token, Object value)
+    public ExpressionTree(TOKEN token, Object value)
     {
         this.token = token;
         if (token != TOKEN.ERROR && token != TOKEN.EXPRESSION && token != TOKEN.UNDEF)
@@ -607,7 +607,7 @@ public class Expression {
             {
         		case CELL: 
         			Cell c = (Cell)value;
-        			data = c; this.dataType = c.getDataType();
+        			data = c; this.dataType = c.getCellDataType();
         			break;
             	case RANGE: data = (Range)value; this.dataType = CellInputDataType.RANGE; break;
                 case NUMBER: data = Double.valueOf(value.toString()); this.dataType = CellInputDataType.Number; break;
@@ -619,40 +619,40 @@ public class Expression {
     }
 
     //copy constructor
-    public Expression(Expression e1)
+    public ExpressionTree(ExpressionTree e1)
     {
         this.token = e1.token;
         this.dataType = e1.dataType;
         this.data = e1.data;
         if (e1.expressions != null)
         {
-            expressions = new ArrayList<Expression>();
-            for (Expression ex : e1.expressions)
-                expressions.add(new Expression(ex));
+            expressions = new ArrayList<ExpressionTree>();
+            for (ExpressionTree ex : e1.expressions)
+                expressions.add(new ExpressionTree(ex));
         }
     }
     
     //unary operation constructor
-    public Expression(TOKEN token, Expression e)
+    public ExpressionTree(TOKEN token, ExpressionTree e)
     {
         this.token = token;
         dataType = CellInputDataType.General;
-        expressions = new ArrayList<Expression>();
+        expressions = new ArrayList<ExpressionTree>();
         expressions.add(e);
     }
 
     //binary operation constructor
-    public Expression(TOKEN token, Expression e1, Expression e2)
+    public ExpressionTree(TOKEN token, ExpressionTree e1, ExpressionTree e2)
     {
         this.token = token;
-        expressions = new ArrayList<Expression>();
+        expressions = new ArrayList<ExpressionTree>();
         expressions.add(e1);
         expressions.add(e2);
         dataType = CellInputDataType.General;
     }
 
     //string constant constructor
-    public Expression(String v)
+    public ExpressionTree(String v)
     {
         token = TOKEN.STRING;
         dataType = CellInputDataType.String;
@@ -660,14 +660,14 @@ public class Expression {
     }
 
     //boolean constant constructor
-    public Expression(boolean v)
+    public ExpressionTree(boolean v)
     {
         token = (v) ? TOKEN.TRUE : TOKEN.FALSE;
         dataType = CellInputDataType.Boolean;
     }
 
     //double constant constructor
-    public Expression(double v)
+    public ExpressionTree(double v)
     {
         token = TOKEN.NUMBER;
         dataType = CellInputDataType.Number;
@@ -675,7 +675,7 @@ public class Expression {
     }
 
     //function constructor
-    public Expression(FUNCTION v)
+    public ExpressionTree(FUNCTION v)
     {
         token = TOKEN.FUNCTION;
         data = v;
@@ -719,7 +719,7 @@ public class Expression {
                 return this.expressions.get(0).getNumericValue() % this.expressions.get(1).getNumericValue();
 
             case CELL:
-                return ((Cell)this.data).getValue();
+                return ((Cell)this.data).getCellValue();
 
             case FUNCTION:
             	
@@ -765,10 +765,10 @@ public class Expression {
 	
 	private TOKEN token = TOKEN.UNDEF;
     private CellInputDataType dataType;
-    private ArrayList<Expression> expressions = new ArrayList<Expression>();
+    private ArrayList<ExpressionTree> expressions = new ArrayList<ExpressionTree>();
     private Object data = null;
     
-    public CellInputDataType getDataType() {
+    public CellInputDataType getExpressionDataType() {
     	return dataType;
     }
 
@@ -776,17 +776,17 @@ public class Expression {
     	dataType = value;
     }
     
-    public static Expression parse(Cell cell, String formula) throws IllegalArgumentException
+    public static ExpressionTree parse(Cell cell, String formula) throws IllegalArgumentException
     {
-    	Expression.ExpressionParser parser = new Expression.ExpressionParser(formula, cell);
+    	ExpressionTree.ExpressionParser parser = new ExpressionTree.ExpressionParser(formula, cell);
     	parser._readToken();
-    	Expression ret = parser._readOr();
+    	ExpressionTree ret = parser._readOr();
     	if (parser.pos != formula.length() || parser.token != TOKEN.UNDEF)
         	throw new IllegalArgumentException(formula + " Formula has false structure");
 
     	
     	//remove dependency, if exists
-    	Application.getActiveWorkbook().removeDependancy(cell);
+    	Application.getActiveWorkbook().removeReferenceDependencies(cell);
     	
     	//add new dependency
     	addDependency(cell, ret);
@@ -794,7 +794,7 @@ public class Expression {
     	return ret;
     }
     
-    private static void addDependency(Cell cell, Expression ex)
+    private static void addDependency(Cell cell, ExpressionTree ex)
     {
     	if (ex.token == TOKEN.RANGE) {
     		Range r = (Range)ex.data;
@@ -809,7 +809,7 @@ public class Expression {
     	}
     	
     	if (ex.expressions != null) {
-    		for(Expression e : ex.expressions)
+    		for(ExpressionTree e : ex.expressions)
     			addDependency(cell, e);
     	}
     }

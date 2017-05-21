@@ -36,10 +36,10 @@ public class Area {
 	 */
 	public Area(Cell cellTopLeft, Cell cellBottomRight) {
 		parentWorksheet = cellTopLeft.getParentWorksheet();
-		firstRow = cellTopLeft.getRow();
-		firstColumn = cellTopLeft.getColumn();
-		lastRow = cellBottomRight.getRow();
-		lastColumn = cellBottomRight.getColumn();
+		firstRow = cellTopLeft.getCellRow();
+		firstColumn = cellTopLeft.getCellColumn();
+		lastRow = cellBottomRight.getCellRow();
+		lastColumn = cellBottomRight.getCellColumn();
 	}
 
 	/**
@@ -48,8 +48,8 @@ public class Area {
 	 */
 	public Area(Cell cell) {
 		parentWorksheet = cell.getParentWorksheet();
-		firstRow = cell.getRow();
-		firstColumn = cell.getColumn();
+		firstRow = cell.getCellRow();
+		firstColumn = cell.getCellColumn();
 		lastRow = firstRow;
 		lastColumn = firstColumn;
 	}
@@ -65,12 +65,16 @@ public class Area {
 		String[] splittedCellReferences = cellReferences.split(":");
 		Cell cellTopLeft = worksheet.getCell(splittedCellReferences[0], cellContext);
 		Cell cellBottomRight = worksheet.getCell(splittedCellReferences[1], cellContext);
-		firstRow = cellTopLeft.getRow();
-		firstColumn = cellTopLeft.getColumn();
-		lastRow = cellBottomRight.getRow();
-		lastColumn = cellBottomRight.getColumn();
+		firstRow = cellTopLeft.getCellRow();
+		firstColumn = cellTopLeft.getCellColumn();
+		lastRow = cellBottomRight.getCellRow();
+		lastColumn = cellBottomRight.getCellColumn();
 	}
 
+	/**
+	 * A cell contains multiple referenced cells
+	 * @return -> referenced range area
+	 */
 	public String getCellReferences() {
 		return "'" + parentWorksheet.getWorksheetName() + "'!R" + firstRow + "C" + firstColumn + ":" + "R" + lastRow + "C" + lastColumn;
 	}

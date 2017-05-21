@@ -172,7 +172,7 @@ public class Workbook implements Serializable  {
 	private transient TreeMap<Area, TreeSet<Cell> > dependencies = new TreeMap<Area, TreeSet<Cell> >(new Area.AreaComparator());
 	private transient TreeMap<Cell, TreeSet<Area> > precedents = new TreeMap<Cell, TreeSet<Area> >(new Cell.CellComparator());
 		
-	void removeDependancy(Cell cell) {
+	void removeReferenceDependencies(Cell cell) {
 		if (precedents.containsKey(cell)) {
 			for ( Area dep : precedents.get(cell) ) {
 				//System.out.println(cell.getAddress() + " remove " + dep.getAddress());
@@ -210,7 +210,7 @@ public class Workbook implements Serializable  {
 	//recalculated cells - dynamic TreeSet
 	private TreeSet<Cell> calcCells = new TreeSet<Cell>(new Cell.CellComparator());
 	
-	void calculateDependencies(Cell cell) throws IllegalArgumentException
+	void calculateReferenceDependencies(Cell cell) throws IllegalArgumentException
 	{
 		//empty dependency cells
 		calcCells.clear();
@@ -223,14 +223,14 @@ public class Workbook implements Serializable  {
 		}
 		catch(IllegalArgumentException e) {
 			e.printStackTrace();
-			throw new IllegalArgumentException(e.getMessage() + ", source cell R"+cell.getRow()+"C"+cell.getColumn());
+			throw new IllegalArgumentException(e.getMessage() + ", source cell R"+cell.getCellRow()+"C"+cell.getCellColumn());
 		}
 		
 		
 		// inform observers
 		for(Cell c : calcCells)
 			for(WorkbookListener l : listeners)
-				l.afterCellChanged(c.getParentWorksheet().getWorksheetName(), c.getRow(), c.getColumn(), c.getValue());
+				l.afterCellChanged(c.getParentWorksheet().getWorksheetName(), c.getCellRow(), c.getCellColumn(), c.getCellValue());
 		
 		//empty dependencies
 		calcCells.clear();
@@ -245,21 +245,21 @@ public class Workbook implements Serializable  {
 			if ( e.getKey().getParent() != cell.getParentWorksheet() )
 				continue;
 
-			if ( e.getKey().getFirstRow() > cell.getRow() )
+			if ( e.getKey().getFirstRow() > cell.getCellRow() )
 				return;
 
-			if (e.getKey().getFirstColumn() > cell.getColumn()
-					|| e.getKey().getLastRow() < cell.getRow()
-					|| e.getKey().getLastColumn() < cell.getColumn()  )
+			if (e.getKey().getFirstColumn() > cell.getCellColumn()
+					|| e.getKey().getLastRow() < cell.getCellRow()
+					|| e.getKey().getLastColumn() < cell.getCellColumn()  )
 				continue;
 
 			for(Cell c : e.getValue() ) {
 				
 				//calculate dependencies
-				c.calculate();
+				c.calculateCellExpression();
 				//cellular cell check
 				if (calcCells.contains(c))
-					throw new IllegalArgumentException("Circular reference " + c.getAddress());
+					throw new IllegalArgumentException("Circular reference " + c.getCellReferences());
 				calcCells.add(c);
 
 				_calculateDependencies(c);

@@ -42,7 +42,7 @@ public class CustomTableModel extends AbstractTableModel {
 		
 		//return list.get(row)[column]; // TODO
 		Cell cell = sheet.getCell(row + 1, column + 1);
-		return cell.getValue();
+		return cell.getCellValue();
 	}
 	
 	public String getWorksheetName(){
