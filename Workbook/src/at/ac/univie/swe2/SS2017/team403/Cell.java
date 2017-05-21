@@ -50,14 +50,12 @@ public class Cell {
 		this.cellFormula = formula;
 		cellExpression = ExpressionTree.parse(this, formula);
 		cellInputDataType = cellExpression.getExpressionDataType();
-
 		this.cellValue = cellExpression.getValue();
-
 		parentWorksheet.getParentWorkbook().calculateReferenceDependencies(this);
 	}
 
 	public void calculateCellExpression() {
-		if (cellExpression != null){
+		if (cellExpression != null) {
 			this.cellValue = cellExpression.getValue();			
 		}
 	}

@@ -95,723 +95,728 @@ public class ExpressionTree {
         private static final Pattern regExBool = Pattern.compile(regExBooleanPattern, Pattern.CASE_INSENSITIVE);
 
 	
-	    public ExpressionParser(String formula, Cell cell)
-	    {
-	    	this.cell = cell;
-	        this.formula = formula;
-	        this.charFormula = this.formula.toCharArray();
-	        this.len = this.formula.length();
-	        this.pos = 1;
-	    }
-	    
-	    private void _readToken()
-	    {
-	        if (pos >= len)
-	        {
-	            token = TOKEN.UNDEF;
-	            return;
-	        }
-	
-	        while (pos < len && charFormula[pos] == ' ')
-	            pos++;
-	
-	        data = null;
-	        token = TOKEN.UNDEF;
-	
-	        {
-		        Matcher matcher = regExRange.matcher(formula.substring(pos));
-		        if (matcher.find() && (matcher.start() == 0))
-	            {
-	                token = TOKEN.RANGE;	
-	                pos += matcher.end();
-	                data = Range.getRangeByAddress(matcher.group(0), cell);
-	            }
-	        }
+		public ExpressionParser(String formula, Cell cell) {
+			this.cell = cell;
+			this.formula = formula;
+			this.charFormula = this.formula.toCharArray();
+			this.len = this.formula.length();
+			this.pos = 1;
+		}
 
+		private void _readToken() {
+			if (pos >= len) {
+				token = TOKEN.UNDEF;
+				return;
+			}
 
-            if (token == TOKEN.UNDEF)
-            {
-            	Matcher matcher = regExCell.matcher(formula.substring(pos));
-            	if (matcher.find() && (matcher.start() == 0))
-                {
-                    token = TOKEN.CELL;
+			while (pos < len && charFormula[pos] == ' ')
+				pos++;
 
-                    pos += matcher.end();
-	                data = Range.getRangeByAddress(matcher.group(0), cell).getCells().firstKey();
-                }
-            }
+			data = null;
+			token = TOKEN.UNDEF;
 
-            
-	        if (token == TOKEN.UNDEF && Character.isDigit(charFormula[pos]))
-	        {
-	            token = TOKEN.NUMBER;
-	        }
-	        else if (token == TOKEN.UNDEF)
-	        {
-	            switch (charFormula[pos])
-	            {
-	                case '"': pos++; token = TOKEN.STRING; break;
-	                case '.': pos++; token = TOKEN.NUMBER; break;
-	                //case '#': pos++; token = TOKEN.DATE; break;
-	                case ',': pos++; token = TOKEN.DELIMITER; break;
-	                case '+': pos++; token = TOKEN.PLUS; break;
-	                case '-': pos++; token = TOKEN.MINUS; break;
-	                case '&':
-	                    if (charFormula[pos + 1] != '&')
-	                    { pos++; token = TOKEN.CONCATENATE; }
-	                    break;
-	                case '*': pos++; token = TOKEN.MULTIPLY; break;
-	                case '/': pos++; token = TOKEN.DIVIDE; break;
-	                case '=': pos++; token = TOKEN.EQUAL; break;
-	                case '(': pos++; token = TOKEN.LEFT_BRACKET; break;
-	                case ')': pos++; token = TOKEN.RIGHT_BRACKET; break;
-	                case '^': pos++; token = TOKEN.POWER; break;
-	                case '%': pos++; token = TOKEN.REMAINDER; break;
-	                case '~': pos++; token = TOKEN.NOT; break;
-	                case '>':
-	                    if (pos + 1 < len && charFormula[pos + 1] == '=')
-	                    {
-	                        pos += 2; token = TOKEN.BIGGER_EQUAL;
-	                    }
-	                    else
-	                    {
-	                        pos++; token = TOKEN.BIGGER;
-	                    }
-	                    break;
-	                case '<':
-	                    if (pos + 1 < len && (charFormula[pos + 1] == '=') || (charFormula[pos + 1] == '>'))
-	                    {
-	                        if (charFormula[pos + 1] != '>')
-	                        { pos += 2; token = TOKEN.SMALLER_EQUAL; }
-	                    }
-	                    else
-	                    {
-	                        pos++; token = TOKEN.SMALLER;
-	                    }
-	                    break;
-	            }
-	
-	            if (pos + 1 < len && token == TOKEN.UNDEF)
-	            {
-	                switch (formula.substring(pos, pos + 2))
-	                {
-	                    case "||": pos += 2; token = TOKEN.OR; break;
-	                    case "&&": pos += 2; token = TOKEN.AND; break;
-	                    case "<>":
-	                    case "!=": pos += 2; token = TOKEN.NOT_EQUAL; break;
-	                }
-	
-	                if (token == TOKEN.UNDEF && pos + 8 < len && (formula.substring(pos, pos + 8).toUpperCase() == "BETWEEN " || formula.substring(pos, pos + 8).toUpperCase() == "BETWEEN("))
-	                {
-	                    pos += 7; token = TOKEN.BETWEEN;
-	                }
-	
-	
-	                if (token == TOKEN.UNDEF && pos + 3 < len && (formula.substring(pos, pos + 3).toUpperCase() == "IN(" || formula.substring(pos, pos + 3).toUpperCase() == "IN "))
-	                {
-	                    pos += 2; token = TOKEN.IN;
-	                }
-	
-	                if (token == TOKEN.UNDEF && pos + 5 < len && (formula.substring(pos, pos + 5).toUpperCase() == "LIKE " || formula.substring(pos, pos + 5).toUpperCase() == "LIKE\""))
-	                {
-	                    pos += 4; token = TOKEN.LIKE;
-	                }
-	
-	                if (token == TOKEN.UNDEF && pos + 4 < len && (formula.substring(pos, pos + 5).toUpperCase() == "NOT " || formula.substring(pos, pos + 5).toUpperCase() == "NOT("))
-	                {
-	                    pos += 3; token = TOKEN.NOT;
-	                }
-	            }
-	        }
-	
-	        if (token == TOKEN.UNDEF)
-	        {
-	        	Matcher matcher = regExBool.matcher(formula.substring(pos));
-	            if (matcher.find() && (matcher.start() == 0) )
-                {
-                    pos += matcher.end();
-                    int tmpPos = pos;
-                    _readToken();
-                    if (token == TOKEN.LEFT_BRACKET)
-                    {
-                        _readToken();
-                        _readThis(TOKEN.RIGHT_BRACKET, "TRUE/FALSE-function, expected )");
-                    }
-                    else
-                        pos = tmpPos;
-                    token = (matcher.group(0).toUpperCase() == "TRUE") ? TOKEN.TRUE : TOKEN.FALSE;
-                }
-	        }
-	
-	        if (token == TOKEN.NUMBER || token == TOKEN.STRING)
-	        {
-	            switch (token)
-	            {
-	                case NUMBER:
-	                {
-	                    double d = _readNumber();
-                        token = TOKEN.NUMBER;
-                        data = d;
-	                    break;
-	            	}
-	                case STRING:
-	                {
-	                    data = _readString();
-	                    break;
-	                }
-	            }
-	        }
-	
-	        if (token == TOKEN.UNDEF)
-	        {
-	
-	        	FUNCTION _func = _readFunctionToken();
-	            if (_func != FUNCTION.UNDEF)
-	            {
-	                data = _func;
-	                token = TOKEN.FUNCTION;
-	            }
-	        }
-	    }
-	    
-	    private void _readThis(TOKEN nextToken, String err) throws IllegalArgumentException
-	    {
-	        if (token != nextToken)
-	        	throw new IllegalArgumentException(err + ": " + this.token.toString() + "," + this.pos + "," + this.formula);
-	    }
-	
-	    private double _readNumber()
-	    {
-	        int _start = pos;
-	        while (pos < len && (Character.isDigit(this.charFormula[pos]) || this.charFormula[pos] == '.'))
-	            pos++;
-	
-	        String _s = new String(this.charFormula, _start, pos - _start);
-	
-	        return Double.valueOf(_s);
-	    }
-	    
-        private String _readString()
-        {
-            int _p = pos;
-            int _p2 = formula.indexOf('"', _p);
-            while (_p2 == formula.indexOf("\"\"", _p))
-            {
-                _p = _p2 + 2;
-                _p2 = formula.indexOf('"', _p);
-            }
+			{
+				Matcher matcher = regExRange.matcher(formula.substring(pos));
+				if (matcher.find() && (matcher.start() == 0)) {
+					token = TOKEN.RANGE;
+					pos += matcher.end();
+					data = Range.getRangeByAddress(matcher.group(0), cell);
+				}
+			}
 
-            _p = pos;
-            pos = _p2 + 1;
+			if (token == TOKEN.UNDEF) {
+				Matcher matcher = regExCell.matcher(formula.substring(pos));
+				if (matcher.find() && (matcher.start() == 0)) {
+					token = TOKEN.CELL;
 
-            return formula.substring(_p, _p2).replace("\"\"", "\"");
-        }
-	
-        private FUNCTION _readFunctionToken()
-        {
-            if (pos + 5 < len)
-                switch (formula.substring(pos, pos + 5).toUpperCase())
-                {
-                    case "COUNT": pos += 5; return FUNCTION.COUNT;
-                }
+					pos += matcher.end();
+					data = Range.getRangeByAddress(matcher.group(0), cell).getWorksheetCells().firstKey();
+				}
+			}
 
-            if (pos + 4 < len)
-                switch (formula.substring(pos, pos + 4).toUpperCase())
-                {
-                    case "MEAN": pos += 4; return FUNCTION.MEAN;
-                }
+			if (token == TOKEN.UNDEF && Character.isDigit(charFormula[pos])) {
+				token = TOKEN.NUMBER;
+			} else if (token == TOKEN.UNDEF) {
+				switch (charFormula[pos]) {
+				case '"':
+					pos++;
+					token = TOKEN.STRING;
+					break;
+				case '.':
+					pos++;
+					token = TOKEN.NUMBER;
+					break;
+				// case '#': pos++; token = TOKEN.DATE; break;
+				case ',':
+					pos++;
+					token = TOKEN.DELIMITER;
+					break;
+				case '+':
+					pos++;
+					token = TOKEN.PLUS;
+					break;
+				case '-':
+					pos++;
+					token = TOKEN.MINUS;
+					break;
+				case '&':
+					if (charFormula[pos + 1] != '&') {
+						pos++;
+						token = TOKEN.CONCATENATE;
+					}
+					break;
+				case '*':
+					pos++;
+					token = TOKEN.MULTIPLY;
+					break;
+				case '/':
+					pos++;
+					token = TOKEN.DIVIDE;
+					break;
+				case '=':
+					pos++;
+					token = TOKEN.EQUAL;
+					break;
+				case '(':
+					pos++;
+					token = TOKEN.LEFT_BRACKET;
+					break;
+				case ')':
+					pos++;
+					token = TOKEN.RIGHT_BRACKET;
+					break;
+				case '^':
+					pos++;
+					token = TOKEN.POWER;
+					break;
+				case '%':
+					pos++;
+					token = TOKEN.REMAINDER;
+					break;
+				case '~':
+					pos++;
+					token = TOKEN.NOT;
+					break;
+				case '>':
+					if (pos + 1 < len && charFormula[pos + 1] == '=') {
+						pos += 2;
+						token = TOKEN.BIGGER_EQUAL;
+					} else {
+						pos++;
+						token = TOKEN.BIGGER;
+					}
+					break;
+				case '<':
+					if (pos + 1 < len && (charFormula[pos + 1] == '=') || (charFormula[pos + 1] == '>')) {
+						if (charFormula[pos + 1] != '>') {
+							pos += 2;
+							token = TOKEN.SMALLER_EQUAL;
+						}
+					} else {
+						pos++;
+						token = TOKEN.SMALLER;
+					}
+					break;
+				}
 
-            if (pos + 3 < len)
-                switch (formula.substring(pos, pos + 3).toUpperCase())
-                {
-                    case "SUM": pos += 3; return FUNCTION.SUM;
-                }
+				if (pos + 1 < len && token == TOKEN.UNDEF) {
+					switch (formula.substring(pos, pos + 2)) {
+					case "||":
+						pos += 2;
+						token = TOKEN.OR;
+						break;
+					case "&&":
+						pos += 2;
+						token = TOKEN.AND;
+						break;
+					case "<>":
+					case "!=":
+						pos += 2;
+						token = TOKEN.NOT_EQUAL;
+						break;
+					}
 
-            return FUNCTION.UNDEF;
-        }
+					if (token == TOKEN.UNDEF && pos + 8 < len
+							&& (formula.substring(pos, pos + 8).toUpperCase() == "BETWEEN "
+									|| formula.substring(pos, pos + 8).toUpperCase() == "BETWEEN(")) {
+						pos += 7;
+						token = TOKEN.BETWEEN;
+					}
 
-        private List<ExpressionTree> _readFunction()
-        {
-        	FUNCTION _func = (FUNCTION)data;
-            _readToken();
-            _readThis(TOKEN.LEFT_BRACKET, "must be ( after function name");
+					if (token == TOKEN.UNDEF && pos + 3 < len && (formula.substring(pos, pos + 3).toUpperCase() == "IN("
+							|| formula.substring(pos, pos + 3).toUpperCase() == "IN ")) {
+						pos += 2;
+						token = TOKEN.IN;
+					}
 
-            List<ExpressionTree> ret = new ArrayList<ExpressionTree>();
+					if (token == TOKEN.UNDEF && pos + 5 < len
+							&& (formula.substring(pos, pos + 5).toUpperCase() == "LIKE "
+									|| formula.substring(pos, pos + 5).toUpperCase() == "LIKE\"")) {
+						pos += 4;
+						token = TOKEN.LIKE;
+					}
 
-            _readToken();
+					if (token == TOKEN.UNDEF && pos + 4 < len
+							&& (formula.substring(pos, pos + 5).toUpperCase() == "NOT "
+									|| formula.substring(pos, pos + 5).toUpperCase() == "NOT(")) {
+						pos += 3;
+						token = TOKEN.NOT;
+					}
+				}
+			}
 
-            switch (_func)
-            {
-                case COUNT: 
-                case SUM:
-                case MEAN:
+			if (token == TOKEN.UNDEF) {
+				Matcher matcher = regExBool.matcher(formula.substring(pos));
+				if (matcher.find() && (matcher.start() == 0)) {
+					pos += matcher.end();
+					int tmpPos = pos;
+					_readToken();
+					if (token == TOKEN.LEFT_BRACKET) {
+						_readToken();
+						_readThis(TOKEN.RIGHT_BRACKET, "TRUE/FALSE-function, expected )");
+					} else
+						pos = tmpPos;
+					token = (matcher.group(0).toUpperCase() == "TRUE") ? TOKEN.TRUE : TOKEN.FALSE;
+				}
+			}
 
-                	_readThis(TOKEN.RANGE, "param for functions must be range");
-                    ret.add(_readOr());
-                    while (token != TOKEN.RIGHT_BRACKET)
-                    {
-                        _readThis(TOKEN.DELIMITER, "must be , after function param");
-                        _readToken();
+			if (token == TOKEN.NUMBER || token == TOKEN.STRING) {
+				switch (token) {
+				case NUMBER: {
+					double d = _readNumber();
+					token = TOKEN.NUMBER;
+					data = d;
+					break;
+				}
+				case STRING: {
+					data = _readString();
+					break;
+				}
+				}
+			}
 
-                        _readThis(TOKEN.RANGE, "param must be range");
-                        ret.add(_readOr());                                        
-                    }
+			if (token == TOKEN.UNDEF) {
 
-                    break;
-            }
+				FUNCTION _func = _readFunctionToken();
+				if (_func != FUNCTION.UNDEF) {
+					data = _func;
+					token = TOKEN.FUNCTION;
+				}
+			}
+		}
 
-            _readThis(TOKEN.RIGHT_BRACKET, "must be ) after function params");
-            return ret;
-        }
+		private void _readThis(TOKEN nextToken, String err) throws IllegalArgumentException {
+			if (token != nextToken)
+				throw new IllegalArgumentException(
+						err + ": " + this.token.toString() + "," + this.pos + "," + this.formula);
+		}
 
-	    private ExpressionTree _readOr()
-	    {
-	        ExpressionTree r = _readAnd();
-	
-	        while (token == TOKEN.OR)
-	        {
-	            TOKEN _t = token;
-	            ExpressionTree a = r;
-	
-	            _readToken();
-	
-	            r = new ExpressionTree(_t, a, _readAnd());
-	        }
-	
-	        return r;
-	    }
-	
-	    private ExpressionTree _readAnd()
-	    {
-	        ExpressionTree r = _readCondition();
-	
-	        while (token == TOKEN.AND)
-	        {
-	            TOKEN _t = token;
-	            ExpressionTree a = r;
-	
-	            _readToken();
-	
-	            r = new ExpressionTree(_t, a, _readCondition());
-	        }
-	
-	        return r;
-	    }
-	
-	    private ExpressionTree _readCondition() throws IllegalArgumentException
-	    {
-	        if (token == TOKEN.NOT)
-	        {
-	            _readToken();
-	
-	            ExpressionTree ret = _readCondition();
-	
-	            if (ret.token == TOKEN.IN)
-	                ret.token = TOKEN.NOT_IN;
-	            else
-	                ret = new ExpressionTree(TOKEN.NOT, ret, null);
-	
-	            return ret;
-	        }
-	        else
-	        {
-	            ExpressionTree a = _readExpConcat();
-	            boolean not = false;
-	
-	            if (token == TOKEN.NOT)
-	            {
-	                not = true;
-	
-	                _readToken();
-	            }
-	
-	            if (token == TOKEN.LIKE)
-	            {
-	                ExpressionTree b = _readExpConcat();
-	
-	                a = new ExpressionTree(TOKEN.LIKE, a, b);
-	            }
-	            else if (token == TOKEN.BETWEEN)
-	            {
-	                ExpressionTree l = new ExpressionTree(TOKEN.BIGGER_EQUAL, a,
-	                    _readExpConcat());
-	
-	                _readThis(TOKEN.AND, "must be AND in BETWEEN");
-	
-	                ExpressionTree h = new ExpressionTree(TOKEN.SMALLER_EQUAL, a,
-	                    _readExpConcat());
-	
-	                a = new ExpressionTree(TOKEN.AND, l, h);
-	            }
-	            else if (token == TOKEN.IN || token == TOKEN.NOT_IN)
-	            {
-	                TOKEN baseToken = token;
-	                _readToken();
-	                _readThis(TOKEN.LEFT_BRACKET, "after IN must be (");
-	
-	                ExpressionTree b = new ExpressionTree();
-	
-	                while (true)
-	                {
-	                    _readToken();
-	                    b.expressions.add(_readExpConcat());
-	
-	                    if (token != TOKEN.DELIMITER)
-	                        break;
-	                }
-	
-	                _readThis(TOKEN.RIGHT_BRACKET, "after IN and ( must be )");
-	
-	                a = new ExpressionTree(baseToken, a, b);
-	            }
-	            else if (token == TOKEN.EQUAL || token == TOKEN.BIGGER_EQUAL || token == TOKEN.BIGGER || token == TOKEN.SMALLER || token == TOKEN.SMALLER_EQUAL || token == TOKEN.NOT_EQUAL)
-	            {
-	                if (not)
-	                    throw new IllegalArgumentException ("not can not be used with =,<>,!=,>,<,<=,>=" + this.token.toString() + "," + this.pos + "," + this.formula);
-	
-	                TOKEN _t = token;
-	
-	                _readToken();
-	
-	                return new ExpressionTree(_t, a, _readExpConcat());
-	            }
-	
-	            if (not)
-	                a = new ExpressionTree(TOKEN.NOT, a, null);
-	
-	            return a;
-	        }
-	    }
-	
-	    private ExpressionTree _readExpConcat()
-	    {
-	        ExpressionTree r = _readSum();
-	
-	        if (token == TOKEN.REMAINDER)
-	        {
-	            ExpressionTree a = r;
-	
-	            _readToken();
-	
-	            r = new ExpressionTree(TOKEN.REMAINDER, a, _readOr());
-	        }
-	        else
-	        {
-	            while (token == TOKEN.CONCATENATE || token == TOKEN.POWER)
-	            {
-	                TOKEN _tok = token;
-	                ExpressionTree a = r;
-	
-	                _readToken();
-	
-	                r = new ExpressionTree(_tok, a, _readOr());
-	            }
-	        }
-	
-	        return r;
-	    }
-	
-	    private ExpressionTree _readSum()
-	    {
-	        ExpressionTree r = _readFactor();
-	
-	        while (true)
-	        {
-	            if (token != TOKEN.PLUS && token != TOKEN.MINUS)
-	                break;
-	
-	            TOKEN _t = token;
-	            ExpressionTree a = r;
-	
-	            _readToken();
-	
-	            r = new ExpressionTree(_t, a, _readFactor());
-	        }
-	
-	        return r;
-	    }
-	
-	    private ExpressionTree _readFactor()
-	    {
-	        ExpressionTree r = _readTerm();
-	
-	        while (token == TOKEN.MULTIPLY || token == TOKEN.DIVIDE)
-	        {
-	            TOKEN _t = token;
-	            ExpressionTree a = r;
-	
-	            _readToken();
-	
-	            r = new ExpressionTree(_t, a, _readTerm());
-	        }
-	
-	        return r;
-	    }
-	
-	    private ExpressionTree _readTerm() throws IllegalArgumentException
-	    {
-	        ExpressionTree r = null;
-	
-	        switch (token)
-	        {
-	            case MINUS:
-	                _readToken();
-	                r = new ExpressionTree(TOKEN.MINUS, _readTerm());
-	                break;
-	            case PLUS:
-	                _readToken();
-	                r = _readTerm();
-	                break;
-	            case LEFT_BRACKET:
-	                _readToken();
-	
-	                r = _readOr();
-	
-	                if (token != TOKEN.RIGHT_BRACKET)
-	                    throw new IllegalArgumentException("unexpected element, must be )" + this.token.toString() + "," + this.pos + "," + this.formula);
-	
-	                break;
-	            case NUMBER:
-	                r = new ExpressionTree((double)data); _readToken(); break;
-	            case STRING:
-	                r = new ExpressionTree((String)data); _readToken(); break;
-	            case TRUE:
-	                r = new ExpressionTree(true); _readToken(); break;
-	            case FALSE:
-	                r = new ExpressionTree(false); _readToken(); break;
-	            case FUNCTION:
-	                r = new ExpressionTree((FUNCTION)data); r.expressions.addAll(_readFunction()); _readToken(); break;
-	            case CELL:
-	                r = new ExpressionTree(token, (Cell)data); _readToken(); break;
-	            case RANGE:
-	                r = new ExpressionTree(token, (Range)data); _readToken(); break;
-	            default:
-	                throw new IllegalArgumentException("unexpected element " + token.toString() + ": " + this.token.toString() + "," + this.pos + "," + this.formula);
-	        }
-	
-	        return r;
-	    }
+		private double _readNumber() {
+			int _start = pos;
+			while (pos < len && (Character.isDigit(this.charFormula[pos]) || this.charFormula[pos] == '.'))
+				pos++;
+
+			String _s = new String(this.charFormula, _start, pos - _start);
+
+			return Double.valueOf(_s);
+		}
+
+		private String _readString() {
+			int _p = pos;
+			int _p2 = formula.indexOf('"', _p);
+			while (_p2 == formula.indexOf("\"\"", _p)) {
+				_p = _p2 + 2;
+				_p2 = formula.indexOf('"', _p);
+			}
+
+			_p = pos;
+			pos = _p2 + 1;
+
+			return formula.substring(_p, _p2).replace("\"\"", "\"");
+		}
+
+		private FUNCTION _readFunctionToken() {
+			if (pos + 5 < len)
+				switch (formula.substring(pos, pos + 5).toUpperCase()) {
+				case "COUNT":
+					pos += 5;
+					return FUNCTION.COUNT;
+				}
+
+			if (pos + 4 < len)
+				switch (formula.substring(pos, pos + 4).toUpperCase()) {
+				case "MEAN":
+					pos += 4;
+					return FUNCTION.MEAN;
+				}
+
+			if (pos + 3 < len)
+				switch (formula.substring(pos, pos + 3).toUpperCase()) {
+				case "SUM":
+					pos += 3;
+					return FUNCTION.SUM;
+				}
+
+			return FUNCTION.UNDEF;
+		}
+
+		private List<ExpressionTree> _readFunction() {
+			FUNCTION _func = (FUNCTION) data;
+			_readToken();
+			_readThis(TOKEN.LEFT_BRACKET, "must be ( after function name");
+
+			List<ExpressionTree> ret = new ArrayList<ExpressionTree>();
+
+			_readToken();
+
+			switch (_func) {
+			case COUNT:
+			case SUM:
+			case MEAN:
+
+				_readThis(TOKEN.RANGE, "param for functions must be range");
+				ret.add(_readOr());
+				while (token != TOKEN.RIGHT_BRACKET) {
+					_readThis(TOKEN.DELIMITER, "must be , after function param");
+					_readToken();
+
+					_readThis(TOKEN.RANGE, "param must be range");
+					ret.add(_readOr());
+				}
+
+				break;
+			}
+
+			_readThis(TOKEN.RIGHT_BRACKET, "must be ) after function params");
+			return ret;
+		}
+
+		private ExpressionTree _readOr() {
+			ExpressionTree r = _readAnd();
+
+			while (token == TOKEN.OR) {
+				TOKEN _t = token;
+				ExpressionTree a = r;
+
+				_readToken();
+
+				r = new ExpressionTree(_t, a, _readAnd());
+			}
+
+			return r;
+		}
+
+		private ExpressionTree _readAnd() {
+			ExpressionTree r = _readCondition();
+
+			while (token == TOKEN.AND) {
+				TOKEN _t = token;
+				ExpressionTree a = r;
+
+				_readToken();
+
+				r = new ExpressionTree(_t, a, _readCondition());
+			}
+
+			return r;
+		}
+
+		private ExpressionTree _readCondition() throws IllegalArgumentException {
+			if (token == TOKEN.NOT) {
+				_readToken();
+
+				ExpressionTree ret = _readCondition();
+
+				if (ret.token == TOKEN.IN)
+					ret.token = TOKEN.NOT_IN;
+				else
+					ret = new ExpressionTree(TOKEN.NOT, ret, null);
+
+				return ret;
+			} else {
+				ExpressionTree a = _readExpConcat();
+				boolean not = false;
+
+				if (token == TOKEN.NOT) {
+					not = true;
+
+					_readToken();
+				}
+
+				if (token == TOKEN.LIKE) {
+					ExpressionTree b = _readExpConcat();
+
+					a = new ExpressionTree(TOKEN.LIKE, a, b);
+				} else if (token == TOKEN.BETWEEN) {
+					ExpressionTree l = new ExpressionTree(TOKEN.BIGGER_EQUAL, a, _readExpConcat());
+
+					_readThis(TOKEN.AND, "must be AND in BETWEEN");
+
+					ExpressionTree h = new ExpressionTree(TOKEN.SMALLER_EQUAL, a, _readExpConcat());
+
+					a = new ExpressionTree(TOKEN.AND, l, h);
+				} else if (token == TOKEN.IN || token == TOKEN.NOT_IN) {
+					TOKEN baseToken = token;
+					_readToken();
+					_readThis(TOKEN.LEFT_BRACKET, "after IN must be (");
+
+					ExpressionTree b = new ExpressionTree();
+
+					while (true) {
+						_readToken();
+						b.expressions.add(_readExpConcat());
+
+						if (token != TOKEN.DELIMITER)
+							break;
+					}
+
+					_readThis(TOKEN.RIGHT_BRACKET, "after IN and ( must be )");
+
+					a = new ExpressionTree(baseToken, a, b);
+				} else if (token == TOKEN.EQUAL || token == TOKEN.BIGGER_EQUAL || token == TOKEN.BIGGER
+						|| token == TOKEN.SMALLER || token == TOKEN.SMALLER_EQUAL || token == TOKEN.NOT_EQUAL) {
+					if (not)
+						throw new IllegalArgumentException("not can not be used with =,<>,!=,>,<,<=,>="
+								+ this.token.toString() + "," + this.pos + "," + this.formula);
+
+					TOKEN _t = token;
+
+					_readToken();
+
+					return new ExpressionTree(_t, a, _readExpConcat());
+				}
+
+				if (not)
+					a = new ExpressionTree(TOKEN.NOT, a, null);
+
+				return a;
+			}
+		}
+
+		private ExpressionTree _readExpConcat() {
+			ExpressionTree r = _readSum();
+
+			if (token == TOKEN.REMAINDER) {
+				ExpressionTree a = r;
+
+				_readToken();
+
+				r = new ExpressionTree(TOKEN.REMAINDER, a, _readOr());
+			} else {
+				while (token == TOKEN.CONCATENATE || token == TOKEN.POWER) {
+					TOKEN _tok = token;
+					ExpressionTree a = r;
+
+					_readToken();
+
+					r = new ExpressionTree(_tok, a, _readOr());
+				}
+			}
+
+			return r;
+		}
+
+		private ExpressionTree _readSum() {
+			ExpressionTree r = _readFactor();
+
+			while (true) {
+				if (token != TOKEN.PLUS && token != TOKEN.MINUS)
+					break;
+
+				TOKEN _t = token;
+				ExpressionTree a = r;
+
+				_readToken();
+
+				r = new ExpressionTree(_t, a, _readFactor());
+			}
+
+			return r;
+		}
+
+		private ExpressionTree _readFactor() {
+			ExpressionTree r = _readTerm();
+
+			while (token == TOKEN.MULTIPLY || token == TOKEN.DIVIDE) {
+				TOKEN _t = token;
+				ExpressionTree a = r;
+
+				_readToken();
+
+				r = new ExpressionTree(_t, a, _readTerm());
+			}
+
+			return r;
+		}
+
+		private ExpressionTree _readTerm() throws IllegalArgumentException {
+			ExpressionTree r = null;
+
+			switch (token) {
+			case MINUS:
+				_readToken();
+				r = new ExpressionTree(TOKEN.MINUS, _readTerm());
+				break;
+			case PLUS:
+				_readToken();
+				r = _readTerm();
+				break;
+			case LEFT_BRACKET:
+				_readToken();
+
+				r = _readOr();
+
+				if (token != TOKEN.RIGHT_BRACKET)
+					throw new IllegalArgumentException("unexpected element, must be )" + this.token.toString() + ","
+							+ this.pos + "," + this.formula);
+
+				break;
+			case NUMBER:
+				r = new ExpressionTree((double) data);
+				_readToken();
+				break;
+			case STRING:
+				r = new ExpressionTree((String) data);
+				_readToken();
+				break;
+			case TRUE:
+				r = new ExpressionTree(true);
+				_readToken();
+				break;
+			case FALSE:
+				r = new ExpressionTree(false);
+				_readToken();
+				break;
+			case FUNCTION:
+				r = new ExpressionTree((FUNCTION) data);
+				r.expressions.addAll(_readFunction());
+				_readToken();
+				break;
+			case CELL:
+				r = new ExpressionTree(token, (Cell) data);
+				_readToken();
+				break;
+			case RANGE:
+				r = new ExpressionTree(token, (Range) data);
+				_readToken();
+				break;
+			default:
+				throw new IllegalArgumentException("unexpected element " + token.toString() + ": "
+						+ this.token.toString() + "," + this.pos + "," + this.formula);
+			}
+
+			return r;
+		}
 	};
 
-    public ExpressionTree()
-    {
-        dataType = CellInputDataType.General;
-    }
-    
-    public ExpressionTree(TOKEN token, Object value)
-    {
-        this.token = token;
-        if (token != TOKEN.ERROR && token != TOKEN.EXPRESSION && token != TOKEN.UNDEF)
-        {
-            switch (token)
-            {
-        		case CELL: 
-        			Cell c = (Cell)value;
-        			data = c; this.dataType = c.getCellDataType();
-        			break;
-            	case RANGE: data = (Range)value; this.dataType = CellInputDataType.RANGE; break;
-                case NUMBER: data = Double.valueOf(value.toString()); this.dataType = CellInputDataType.Number; break;
-                case STRING: data = value.toString(); this.dataType = CellInputDataType.String; break;
-                default:
-                	this.dataType = CellInputDataType.General;
-            }
-        }
-    }
-
-    //copy constructor
-    public ExpressionTree(ExpressionTree e1)
-    {
-        this.token = e1.token;
-        this.dataType = e1.dataType;
-        this.data = e1.data;
-        if (e1.expressions != null)
-        {
-            expressions = new ArrayList<ExpressionTree>();
-            for (ExpressionTree ex : e1.expressions)
-                expressions.add(new ExpressionTree(ex));
-        }
-    }
-    
-    //unary operation constructor
-    public ExpressionTree(TOKEN token, ExpressionTree e)
-    {
-        this.token = token;
-        dataType = CellInputDataType.General;
-        expressions = new ArrayList<ExpressionTree>();
-        expressions.add(e);
-    }
-
-    //binary operation constructor
-    public ExpressionTree(TOKEN token, ExpressionTree e1, ExpressionTree e2)
-    {
-        this.token = token;
-        expressions = new ArrayList<ExpressionTree>();
-        expressions.add(e1);
-        expressions.add(e2);
-        dataType = CellInputDataType.General;
-    }
-
-    //string constant constructor
-    public ExpressionTree(String v)
-    {
-        token = TOKEN.STRING;
-        dataType = CellInputDataType.String;
-        data = v;
-    }
-
-    //boolean constant constructor
-    public ExpressionTree(boolean v)
-    {
-        token = (v) ? TOKEN.TRUE : TOKEN.FALSE;
-        dataType = CellInputDataType.Boolean;
-    }
-
-    //double constant constructor
-    public ExpressionTree(double v)
-    {
-        token = TOKEN.NUMBER;
-        dataType = CellInputDataType.Number;
-        data = v;
-    }
-
-    //function constructor
-    public ExpressionTree(FUNCTION v)
-    {
-        token = TOKEN.FUNCTION;
-        data = v;
-        //dataType = ExpressionParser._defineFunctionTypes(this, false); ;
-    }
-    
-    
-    
-	public Object getValue()
-	{
-        switch (this.token)
-        {
-            case NUMBER:
-                return (double)this.data;
-
-            case PLUS:
-            	if (this.expressions.size() == 1)
-            		return this.expressions.get(0).getNumericValue();
-            	else
-            		return this.expressions.get(0).getNumericValue() + this.expressions.get(1).getNumericValue();
-
-            case MINUS:
-            	if (this.expressions.size() == 1)
-            		return -this.expressions.get(0).getNumericValue();
-            	else
-            		return this.expressions.get(0).getNumericValue() - this.expressions.get(1).getNumericValue();
-
-            case MULTIPLY:
-                return this.expressions.get(0).getNumericValue() * this.expressions.get(1).getNumericValue();
-
-            case DIVIDE:
-                double ex2 = this.expressions.get(1).getNumericValue();
-                if (ex2 == 0)
-        			throw new IllegalArgumentException("divide by 0");
-                return this.expressions.get(0).getNumericValue() / ex2;
-
-            case POWER:
-                return Math.pow(this.expressions.get(0).getNumericValue(), this.expressions.get(1).getNumericValue());
-
-            case REMAINDER:
-                return this.expressions.get(0).getNumericValue() % this.expressions.get(1).getNumericValue();
-
-            case CELL:
-                return ((Cell)this.data).getCellValue();
-
-            case FUNCTION:
-            	
-            	FunctionRangeStrategy strategy;
-                switch ((FUNCTION)this.data)
-                {
-	                case SUM:
-	                	strategy = new FunctionSUM();
-	                	break;
-	
-	                case COUNT:
-	                	strategy = new FunctionCOUNT();
-	                	break;
-	
-	                case MEAN:
-	                	strategy = new FunctionMEAN();
-	                	break;
-                	
-                	default:
-                		strategy = null;
-                		break;
-                }
-                
-                return strategy.calculate((Range)this.expressions.get(0).data);
-        }
-        
-        throw new RuntimeException("Expression token " + this.token.toString() + " is not defined");
+	public ExpressionTree() {
+		dataType = CellInputDataType.General;
 	}
 
-	public double getNumericValue()	{
+	public ExpressionTree(TOKEN token, Object value) {
+		this.token = token;
+		if (token != TOKEN.ERROR && token != TOKEN.EXPRESSION && token != TOKEN.UNDEF) {
+			switch (token) {
+			case CELL:
+				Cell c = (Cell) value;
+				data = c;
+				this.dataType = c.getCellDataType();
+				break;
+			case RANGE:
+				data = (Range) value;
+				this.dataType = CellInputDataType.RANGE;
+				break;
+			case NUMBER:
+				data = Double.valueOf(value.toString());
+				this.dataType = CellInputDataType.Number;
+				break;
+			case STRING:
+				data = value.toString();
+				this.dataType = CellInputDataType.String;
+				break;
+			default:
+				this.dataType = CellInputDataType.General;
+			}
+		}
+	}
+
+	// copy constructor
+	public ExpressionTree(ExpressionTree e1) {
+		this.token = e1.token;
+		this.dataType = e1.dataType;
+		this.data = e1.data;
+		if (e1.expressions != null) {
+			expressions = new ArrayList<ExpressionTree>();
+			for (ExpressionTree ex : e1.expressions)
+				expressions.add(new ExpressionTree(ex));
+		}
+	}
+
+	// unary operation constructor
+	public ExpressionTree(TOKEN token, ExpressionTree e) {
+		this.token = token;
+		dataType = CellInputDataType.General;
+		expressions = new ArrayList<ExpressionTree>();
+		expressions.add(e);
+	}
+
+	// binary operation constructor
+	public ExpressionTree(TOKEN token, ExpressionTree e1, ExpressionTree e2) {
+		this.token = token;
+		expressions = new ArrayList<ExpressionTree>();
+		expressions.add(e1);
+		expressions.add(e2);
+		dataType = CellInputDataType.General;
+	}
+
+	// string constant constructor
+	public ExpressionTree(String v) {
+		token = TOKEN.STRING;
+		dataType = CellInputDataType.String;
+		data = v;
+	}
+
+	// boolean constant constructor
+	public ExpressionTree(boolean v) {
+		token = (v) ? TOKEN.TRUE : TOKEN.FALSE;
+		dataType = CellInputDataType.Boolean;
+	}
+
+	// double constant constructor
+	public ExpressionTree(double v) {
+		token = TOKEN.NUMBER;
+		dataType = CellInputDataType.Number;
+		data = v;
+	}
+
+	// function constructor
+	public ExpressionTree(FUNCTION v) {
+		token = TOKEN.FUNCTION;
+		data = v;
+		// dataType = ExpressionParser._defineFunctionTypes(this, false); ;
+	}
+
+	public Object getValue() {
+		switch (this.token) {
+		case NUMBER:
+			return (double) this.data;
+
+		case PLUS:
+			if (this.expressions.size() == 1)
+				return this.expressions.get(0).getNumericValue();
+			else
+				return this.expressions.get(0).getNumericValue() + this.expressions.get(1).getNumericValue();
+
+		case MINUS:
+			if (this.expressions.size() == 1)
+				return -this.expressions.get(0).getNumericValue();
+			else
+				return this.expressions.get(0).getNumericValue() - this.expressions.get(1).getNumericValue();
+
+		case MULTIPLY:
+			return this.expressions.get(0).getNumericValue() * this.expressions.get(1).getNumericValue();
+
+		case DIVIDE:
+			double ex2 = this.expressions.get(1).getNumericValue();
+			if (ex2 == 0)
+				throw new IllegalArgumentException("divide by 0");
+			return this.expressions.get(0).getNumericValue() / ex2;
+
+		case POWER:
+			return Math.pow(this.expressions.get(0).getNumericValue(), this.expressions.get(1).getNumericValue());
+
+		case REMAINDER:
+			return this.expressions.get(0).getNumericValue() % this.expressions.get(1).getNumericValue();
+
+		case CELL:
+			return ((Cell) this.data).getCellValue();
+
+		case FUNCTION:
+
+			FunctionRangeStrategy strategy;
+			switch ((FUNCTION) this.data) {
+			case SUM:
+				strategy = new FunctionSUM();
+				break;
+
+			case COUNT:
+				strategy = new FunctionCOUNT();
+				break;
+
+			case MEAN:
+				strategy = new FunctionMEAN();
+				break;
+
+			default:
+				strategy = null;
+				break;
+			}
+
+			return strategy.calculate((Range) this.expressions.get(0).data);
+		}
+
+		throw new RuntimeException("Expression token " + this.token.toString() + " is not defined");
+	}
+
+	public double getNumericValue() {
 		Object o = getValue();
 		if (o == null)
 			return 0d;
-		return (double)o; 
+		return (double) o;
 	}
 
-	public String getTextValue()	{
+	public String getTextValue() {
 		Object o = getValue();
 		if (o == null)
 			return "";
-		return (String)o; 
+		return (String) o;
 	}
-	
+
 	private TOKEN token = TOKEN.UNDEF;
-    private CellInputDataType dataType;
-    private ArrayList<ExpressionTree> expressions = new ArrayList<ExpressionTree>();
-    private Object data = null;
-    
-    public CellInputDataType getExpressionDataType() {
-    	return dataType;
-    }
+	private CellInputDataType dataType;
+	private ArrayList<ExpressionTree> expressions = new ArrayList<ExpressionTree>();
+	private Object data = null;
 
-    public void setDataType(CellInputDataType value) {
-    	dataType = value;
-    }
-    
-    public static ExpressionTree parse(Cell cell, String formula) throws IllegalArgumentException
-    {
-    	ExpressionTree.ExpressionParser parser = new ExpressionTree.ExpressionParser(formula, cell);
-    	parser._readToken();
-    	ExpressionTree ret = parser._readOr();
-    	if (parser.pos != formula.length() || parser.token != TOKEN.UNDEF)
-        	throw new IllegalArgumentException(formula + " Formula has false structure");
+	public CellInputDataType getExpressionDataType() {
+		return dataType;
+	}
 
-    	
-    	//remove dependency, if exists
-    	Application.getActiveWorkbook().removeReferenceDependencies(cell);
-    	
-    	//add new dependency
-    	addDependency(cell, ret);
-    	
-    	return ret;
-    }
-    
-    private static void addDependency(Cell cell, ExpressionTree ex)
-    {
-    	if (ex.token == TOKEN.RANGE) {
-    		Range r = (Range)ex.data;
-    		for (Area a : r.getAreas().keySet())
-    			Application.getActiveWorkbook().addDependency(cell, a);
+	public void setDataType(CellInputDataType value) {
+		dataType = value;
+	}
 
-    		for (Cell c : r.getCells().keySet())
-    			Application.getActiveWorkbook().addDependency(cell, c);
-    	}
-    	else if (ex.token == TOKEN.CELL) { 
-    		Application.getActiveWorkbook().addDependency(cell, (Cell)ex.data);
-    	}
-    	
-    	if (ex.expressions != null) {
-    		for(ExpressionTree e : ex.expressions)
-    			addDependency(cell, e);
-    	}
-    }
-    
+	public static ExpressionTree parse(Cell cell, String formula) throws IllegalArgumentException {
+		ExpressionTree.ExpressionParser parser = new ExpressionTree.ExpressionParser(formula, cell);
+		parser._readToken();
+		ExpressionTree ret = parser._readOr();
+		if (parser.pos != formula.length() || parser.token != TOKEN.UNDEF)
+			throw new IllegalArgumentException(formula + " Formula has false structure");
+
+		// remove dependency, if exists
+		Application.getActiveWorkbook().removeReferenceDependencies(cell);
+
+		// add new dependency
+		addDependency(cell, ret);
+
+		return ret;
+	}
+
+	private static void addDependency(Cell cell, ExpressionTree ex) {
+		if (ex.token == TOKEN.RANGE) {
+			Range r = (Range) ex.data;
+			for (Area a : r.getAreas().keySet())
+				Application.getActiveWorkbook().addDependency(cell, a);
+
+			for (Cell c : r.getWorksheetCells().keySet())
+				Application.getActiveWorkbook().addDependency(cell, c);
+		} else if (ex.token == TOKEN.CELL) {
+			Application.getActiveWorkbook().addDependency(cell, (Cell) ex.data);
+		}
+
+		if (ex.expressions != null) {
+			for (ExpressionTree e : ex.expressions)
+				addDependency(cell, e);
+		}
+	}
+
 }

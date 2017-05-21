@@ -32,7 +32,7 @@ class FunctionSUM implements FunctionRangeStrategy {
             ret += (tmp * e.getValue());
 	    }
 	    
-	    for (Iterator< Map.Entry<Cell, Integer > > iter = range.getCells().entrySet().iterator(); iter.hasNext();)
+	    for (Iterator< Map.Entry<Cell, Integer > > iter = range.getWorksheetCells().entrySet().iterator(); iter.hasNext();)
 	    {
 	    	Map.Entry<Cell, Integer > e = iter.next();
 	    	Cell c = e.getKey();
@@ -76,7 +76,7 @@ class FunctionMEAN implements FunctionRangeStrategy {
             ret += (tmp * e.getValue());
 	    }
 	    
-	    for (Iterator< Map.Entry<Cell, Integer > > iter = range.getCells().entrySet().iterator(); iter.hasNext();)
+	    for (Iterator< Map.Entry<Cell, Integer > > iter = range.getWorksheetCells().entrySet().iterator(); iter.hasNext();)
 	    {
 	    	Map.Entry<Cell, Integer > e = iter.next();
 	    	Cell c = e.getKey();
@@ -116,7 +116,7 @@ class FunctionCOUNT implements FunctionRangeStrategy {
             ret += (tmp * e.getValue());
 	    }
 	    
-	    for (Iterator< Map.Entry<Cell, Integer > > iter = range.getCells().entrySet().iterator(); iter.hasNext();)
+	    for (Iterator< Map.Entry<Cell, Integer > > iter = range.getWorksheetCells().entrySet().iterator(); iter.hasNext();)
 	    {
 	    	Map.Entry<Cell, Integer > e = iter.next();
 	    	Cell c = e.getKey();
