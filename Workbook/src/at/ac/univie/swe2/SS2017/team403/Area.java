@@ -72,7 +72,7 @@ public class Area {
 	}
 
 	public String getCellReferences() {
-		return "'" + parentWorksheet.getName() + "'!R" + firstRow + "C" + firstColumn + ":" + "R" + lastRow + "C" + lastColumn;
+		return "'" + parentWorksheet.getWorksheetName() + "'!R" + firstRow + "C" + firstColumn + ":" + "R" + lastRow + "C" + lastColumn;
 	}
 
 	/**
