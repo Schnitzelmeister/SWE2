@@ -804,7 +804,7 @@ public class ExpressionTree {
 	private static void addDependency(Cell cell, ExpressionTree ex) {
 		if (ex.token == TOKEN.RANGE) {
 			Range r = (Range) ex.data;
-			for (Area a : r.getAreas().keySet())
+			for (Area a : r.getWorksheetAreas().keySet())
 				Application.getActiveWorkbook().addDependency(cell, a);
 
 			for (Cell c : r.getWorksheetCells().keySet())
