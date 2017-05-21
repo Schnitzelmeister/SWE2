@@ -3,78 +3,103 @@ package at.ac.univie.swe2.SS2017.team403;
 import java.util.Comparator;
 
 public class Area {
-	private Worksheet parent;
-	public Worksheet getParent() { return parent; }
+	private Worksheet parentWorksheet;
 
-	private int r1, r2, c1, c2;
-	
-	public int getR1() { return r1; }
-	public int getR2() { return r2; }
-	public int getC1() { return c1; }
-	public int getC2() { return c2; }
-	
+	public Worksheet getParent() {
+		return parentWorksheet;
+	}
+
+	private int firstRow, lastRow, firstColumn, lastColumn;
+
+	public int getFirstRow() {
+		return firstRow;
+	}
+
+	public int getLastRow() {
+		return lastRow;
+	}
+
+	public int getFirstColumn() {
+		return firstColumn;
+	}
+
+	public int getLastColumn() {
+		return lastColumn;
+	}
+
+	/**
+	 * This constructor is used to set a range which contains different cells.
+	 * We need only two cells to build a rectangle to define the range.
+	 * @param cellTopLeft
+	 * @param cellBottomRight
+	 */
 	public Area(Cell cellTopLeft, Cell cellBottomRight) {
-		parent = cellTopLeft.getParent();
-		r1 = cellTopLeft.getRow();
-		c1 = cellTopLeft.getColumn();
-		r2 = cellBottomRight.getRow();
-		c2 = cellBottomRight.getColumn();
+		parentWorksheet = cellTopLeft.getParentWorksheet();
+		firstRow = cellTopLeft.getRow();
+		firstColumn = cellTopLeft.getColumn();
+		lastRow = cellBottomRight.getRow();
+		lastColumn = cellBottomRight.getColumn();
 	}
 
+	/**
+	 * This constructor is used to set a specific cell.
+	 * @param cell
+	 */
 	public Area(Cell cell) {
-		parent = cell.getParent();
-		r1 = cell.getRow();
-		c1 = cell.getColumn();
-		r2 = r1;
-		c2 = c1;
+		parentWorksheet = cell.getParentWorksheet();
+		firstRow = cell.getRow();
+		firstColumn = cell.getColumn();
+		lastRow = firstRow;
+		lastColumn = firstColumn;
 	}
-	
-    public Area(String address, Worksheet worksheet, Cell contextCell)
-    {
-    	parent = worksheet;
-        String[] tmp = address.split(":");
-        Cell cellTopLeft = worksheet.getCell(tmp[0], contextCell);
-        Cell cellBottomRight = worksheet.getCell(tmp[1], contextCell);
-		r1 = cellTopLeft.getRow();
-		c1 = cellTopLeft.getColumn();
-		r2 = cellBottomRight.getRow();
-		c2 = cellBottomRight.getColumn();
-    }
 
-	
-	public String getAddress()
-	{ return "'"+ parent.getName() +"'!R" + r1 + "C" + c1 + ":" + "R" + r2 + "C" + c2; }
-	
-	//Comparator to Area class, we can order Areas
-	static class AreaComparator implements Comparator<Area>
-	{
-		public int compare(Area r1, Area r2)
-	    {
-			int res = r1.parent.getId() - r2.parent.getId();
-			if (res == 0) {
-				res = r1.r1 - r2.r1;
-				if (res == 0) {
-					res = r1.c1 - r2.c1;
-					if (res == 0) {
-						res = r2.r2 - r1.r2;
-						if (res == 0) {
-							return r2.c2 - r1.c2;
-						}
-						else {
-							return res;
+	/**
+	 * This constructor is used to set a referenced range of a cell.
+	 * @param cellReferences -> references of the selected cell
+	 * @param worksheet -> selected worksheet
+	 * @param cellContext -> selected cell
+	 */
+	public Area(String cellReferences, Worksheet worksheet, Cell cellContext) {
+		parentWorksheet = worksheet;	
+		String[] splittedCellReferences = cellReferences.split(":");
+		Cell cellTopLeft = worksheet.getCell(splittedCellReferences[0], cellContext);
+		Cell cellBottomRight = worksheet.getCell(splittedCellReferences[1], cellContext);
+		firstRow = cellTopLeft.getRow();
+		firstColumn = cellTopLeft.getColumn();
+		lastRow = cellBottomRight.getRow();
+		lastColumn = cellBottomRight.getColumn();
+	}
+
+	public String getCellReferences() {
+		return "'" + parentWorksheet.getWorksheetName() + "'!R" + firstRow + "C" + firstColumn + ":" + "R" + lastRow + "C" + lastColumn;
+	}
+
+	/**
+	 * We use Comperator to order Area-objects and accelerate the search.
+	 */
+	static class AreaComparator implements Comparator<Area> {
+		public int compare(Area firstArea, Area secondArea) {
+			int var = firstArea.parentWorksheet.getId() - secondArea.parentWorksheet.getId();
+			if (var == 0) {
+				var = firstArea.firstRow - secondArea.firstRow;
+				if (var == 0) {
+					var = firstArea.firstColumn - secondArea.firstColumn;
+					if (var == 0) {
+						var = secondArea.lastRow - firstArea.lastRow;
+						if (var == 0) {
+							return secondArea.lastColumn - firstArea.lastColumn;
+						} else {
+							return var;
 						}
 
+					} else {
+						return var;
 					}
-					else {
-						return res;
-					}					
+				} else {
+					return var;
 				}
-				else {
-					return res;
-				}
-			}
-			else {
-				return res;
+			} else {
+				return var;
 			}
 		}
 	}

@@ -6,8 +6,8 @@ import java.io.IOException;
 public class CsvWriteUtility {
 	
 	public static void convertWorkSheetToCsv(Worksheet worksheet, FileWriter writer) throws IOException{
-		Integer numberOfColumns = worksheet.getUsedArea().getC2();
-		Integer numberOfRows = worksheet.getUsedArea().getR2();
+		Integer numberOfColumns = worksheet.getUsedArea().getLastColumn();
+		Integer numberOfRows = worksheet.getUsedArea().getLastRow();
 		StringBuilder cellContents = new StringBuilder();
 		
 		for(int i=0;i<numberOfRows;++i){	
