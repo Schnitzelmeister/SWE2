@@ -2,25 +2,25 @@ package at.ac.univie.swe2.SS2017.team403;
 
 // Workbook Listener
 public interface WorkbookListener {
-	void AfterWorksheetAdded(String worksheetName);
-	void AfterWorksheetRemoved(String worksheetName);
-	void AfterWorksheetRenamed(String worksheetOldName, String worksheetNewName);
-	void AfterCellChanged(String worksheetName, int row, int column, Object newValue);
+	void afterWorksheetAdded(String worksheetName);
+	void afterWorksheetRemoved(String worksheetName);
+	void afterWorksheetRenamed(String worksheetOldName, String worksheetNewName);
+	void afterCellChanged(String worksheetName, int row, int column, Object newValue);
 
-	void AfterDiagramAdded(String diagramName);
-	void AfterDiagramRemoved(String diagramName);
-	void AfterDiagramRenamed(String diagramOldName, String diagramNewName);
-	void AfterDiagramChanged(String diagramName);
+	void afterDiagramAdded(String diagramName);
+	void afterDiagramRemoved(String diagramName);
+	void afterDiagramRenamed(String diagramOldName, String diagramNewName);
+	void afterDiagramChanged(String diagramName);
 
 }
 
 // Inernal Interface for Workbook-Worksheet Relation
 interface WorksheetRenameCallback {
-	void AfterWorksheetRenamed(String worksheetOldName, Worksheet sheet);
+	void afterWorksheetRenamed(String worksheetOldName, Worksheet sheet);
 }
 
 //Inernal Interface for Workbook-Diagram Relation
 interface DiagramChangedCallback {
-	void AfterDiagramRenamed(String diagramOldName, Diagram diagram);
-	void AfterDiagramChanged(String diagramName);
+	void afterDiagramRenamed(String diagramOldName, Diagram diagram);
+	void afterDiagramChanged(String diagramName);
 }

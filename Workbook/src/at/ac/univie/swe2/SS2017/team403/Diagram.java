@@ -33,7 +33,7 @@ public abstract class Diagram {
 		
 		//inform workbook
 		if (diagramChangedCallback != null)
-			diagramChangedCallback.AfterDiagramRenamed(oldName, this);
+			diagramChangedCallback.afterDiagramRenamed(oldName, this);
 		
 	}
 }

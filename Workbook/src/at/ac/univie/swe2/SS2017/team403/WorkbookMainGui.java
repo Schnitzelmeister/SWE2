@@ -16,13 +16,16 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.JViewport;
 import javax.swing.event.ChangeEvent;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.text.AttributeSet;
+import javax.swing.JMenuItem;
+import javax.swing.JMenu;
 
-public class WorkbookMainGui extends javax.swing.JFrame {
+public class WorkbookMainGui extends javax.swing.JFrame implements WorkbookListener {
 
 	/**
 	 * 
@@ -68,12 +71,33 @@ public class WorkbookMainGui extends javax.swing.JFrame {
 	 * Open CSV format File
 	 */
 	public void openCSV(String fileLocation, char delimiter, char quotation) throws IOException {
-		CSVReader reader = new CSVReader(new FileReader(fileLocation), ','); //TODO, quotation parameter missing
+		CSVReader reader = new CSVReader(new FileReader(fileLocation), delimiter, quotation);
 		List<String[]> csvValues = reader.readAll();
+		String worksheetName = "Worksheet " + Application.getActiveWorkbook().getNewId();
+		Worksheet sheet = Application.getActiveWorkbook().addSheet(worksheetName);
+		int r = 0;
+		for (String[] ar : csvValues) {
+			++r;
+			for (int c = 0; c < ar.length; ++c) {
+				if (isNumber(ar[c]))
+					sheet.getCell(r, c + 1).setNumericValue(Double.valueOf(ar[c]));
+				else
+					sheet.getCell(r, c + 1).setTextValue(ar[c]);
+			}
+		}
 		reader.close();
 
-		TableModel model = new CustomTableModel(csvValues);
-		jTable1.setModel(model);
+		System.out.println("gelesen rows=" + r + ", cols=" + sheet.getUsedArea().getC2());
+
+		TableModel model = new CustomTableModel(sheet);
+		returnTableForCurrentTab().setModel(model);
+	}
+
+	public JTable returnTableForCurrentTab() {
+		Component selected = jTabbedPane1.getSelectedComponent();
+		JViewport viewport = ((JScrollPane) selected).getViewport();
+		JTable table = (JTable) viewport.getView();
+		return table;
 	}
 
 	/**
@@ -102,7 +126,7 @@ public class WorkbookMainGui extends javax.swing.JFrame {
 
 		setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-		Worksheet worksheet = activeWorkbook.addSheet("tab1");
+		Worksheet worksheet = activeWorkbook.addSheet("Worksheet 1");
 
 		jScrollPane1.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
 			public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
@@ -110,14 +134,15 @@ public class WorkbookMainGui extends javax.swing.JFrame {
 			}
 		});
 
-		jTable1.setModel(new javax.swing.table.DefaultTableModel(new Object[80][80], new String[30]));
+		jTable1.setModel(new CustomTableModel(worksheet));
 
-		jTable1.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
-		jTable1.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-		jTable1.setGridColor(new java.awt.Color(0, 0, 0));
+		// jTable1.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
+		// jTable1.setCursor(new
+		// java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+		// jTable1.setGridColor(new java.awt.Color(0, 0, 0));
 		jScrollPane1.setViewportView(jTable1);
 
-		jTabbedPane1.addTab("tab1", jScrollPane1);
+		jTabbedPane1.addTab(worksheet.getName(), jScrollPane1);
 
 		fileMenu.setText("File");
 
@@ -165,6 +190,22 @@ public class WorkbookMainGui extends javax.swing.JFrame {
 		});
 		editMenu.add(openNewTab);
 
+		closeCurrentTab = new JMenuItem("Close Tab");
+		closeCurrentTab.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				closeTab();
+			}
+		});
+		editMenu.add(closeCurrentTab);
+
+		renameTabMenuItem = new JMenuItem("Rename Tab");
+		editMenu.add(renameTabMenuItem);
+		renameTabMenuItem.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				renameTabActionPerformed(evt);
+			}
+		});
+
 		cutMenuItem.setText("Cut");
 		editMenu.add(cutMenuItem);
 
@@ -187,7 +228,27 @@ public class WorkbookMainGui extends javax.swing.JFrame {
 		menuBar.add(helpMenu);
 
 		setJMenuBar(menuBar);
-
+		
+		mnCharts = new JMenu("Charts");
+		menuBar.add(mnCharts);
+		
+		createLinechartMenu = new JMenuItem("Create Linechart");
+		mnCharts.add(createLinechartMenu);
+		createLinechartMenu.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				createLineChartActionPerformed(evt);
+			}
+		});
+		
+		createBarchartMenu = new JMenuItem("Create Barchart");
+		mnCharts.add(createBarchartMenu);
+		createBarchartMenu.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				createBarchartMenuActionPerformed(evt);
+			}
+		});
+		
+		
 		javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
 		getContentPane().setLayout(layout);
 		layout.setHorizontalGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -199,21 +260,50 @@ public class WorkbookMainGui extends javax.swing.JFrame {
 		setLocationRelativeTo(null);
 	}
 
+	private void createLineChartActionPerformed(java.awt.event.ActionEvent evt){
+		//TODO open new tab and place linechart on tab
+	}
+	
+	private void createBarchartMenuActionPerformed(java.awt.event.ActionEvent evt){
+		//TODO open new tab and place linechart on tab
+	}
+	
 	private void exitMenuItemActionPerformed(java.awt.event.ActionEvent evt) {
 		System.exit(0);
 	}
 
+	private void renameTabActionPerformed(java.awt.event.ActionEvent evt) {
+		try {
+			JTable currentTable = returnTableForCurrentTab();
+			CustomTableModel model = (CustomTableModel) currentTable.getModel();
+			String oldName = model.getWorksheetName();
+
+			JTextField inputFieldnewName = new JTextField();
+
+			Object[] inputFields = { "New name: ", inputFieldnewName };
+			int option = JOptionPane.showConfirmDialog(this, inputFields, "Please choose a tab name",
+					JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+
+			if (option == JOptionPane.CANCEL_OPTION)
+				return;
+
+			if (option == JOptionPane.OK_OPTION) {
+				String nameToString = inputFieldnewName.getText();
+				if (nameToString.length() < 1 || nameToString.length() > 20)
+					throw new IllegalArgumentException("Invalid value for tab name");
+				afterWorksheetRenamed(oldName, nameToString);
+				return;
+			}
+		} catch (IllegalArgumentException i) {
+			JOptionPane.showMessageDialog(this, i.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+		}
+
+	}
+
 	private void openNewTabActionPerformed(java.awt.event.ActionEvent evt) {
-		JScrollPane jPane = new javax.swing.JScrollPane();
-		JTable albumTable = new javax.swing.JTable();
-		albumTable.setModel(new javax.swing.table.DefaultTableModel(new Object[80][80], new String[30]));
-
-		jPane.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
-		jPane.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-
-		jPane.setViewportView(albumTable);
-		int tabCount = jTabbedPane1.getTabCount() + 1;
-		jTabbedPane1.addTab("tab " + tabCount, jPane);
+		String worksheetName = "Worksheet " + (Application.getActiveWorkbook().getNewId() - 1);
+		Application.getActiveWorkbook().addSheet(worksheetName);
+		afterWorksheetAdded(worksheetName);
 	}
 
 	private void openMenuItemActionPerformed(java.awt.event.ActionEvent evt) {
@@ -237,8 +327,7 @@ public class WorkbookMainGui extends javax.swing.JFrame {
 					JOptionPane.ERROR_MESSAGE);
 		} catch (IllegalArgumentException i) {
 			System.out.println("showMultipleInputMessageDialog threw IllegalArgumentException ");
-			JOptionPane.showMessageDialog(this, i.getMessage(), "Fehler",
-					JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(this, i.getMessage(), "Fehler", JOptionPane.ERROR_MESSAGE);
 		}
 	}
 
@@ -256,10 +345,11 @@ public class WorkbookMainGui extends javax.swing.JFrame {
 
 		alternativeDelimiter.setEnabled(false);
 		alternativeQotation.setEnabled(false);
-		
+
 		Object[] inputFields = { "Semicolon as delimiter: ;", checkBoxForSemiColon, "Comma as delimiter: ,",
-				checkBoxForComma,"Optional delimiter: ", checkBoxForAlternativeDelimiter, alternativeDelimiter, "Default quotation: \" ", checkBoxForDefaultQuote
-				, "Alternative quotation: ", checkBoxForAlternativeQuote, alternativeQotation};
+				checkBoxForComma, "Optional delimiter: ", checkBoxForAlternativeDelimiter, alternativeDelimiter,
+				"Default quotation: \" ", checkBoxForDefaultQuote, "Alternative quotation: ",
+				checkBoxForAlternativeQuote, alternativeQotation };
 
 		checkBoxForAlternativeDelimiter.addActionListener(new ActionListener() {
 			@Override
@@ -295,7 +385,7 @@ public class WorkbookMainGui extends javax.swing.JFrame {
 				}
 			}
 		});
-		
+
 		checkBoxForComma.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -316,7 +406,7 @@ public class WorkbookMainGui extends javax.swing.JFrame {
 				}
 			}
 		});
-		
+
 		checkBoxForAlternativeQuote.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -326,56 +416,66 @@ public class WorkbookMainGui extends javax.swing.JFrame {
 				}
 			}
 		});
-		
+
 		int option = JOptionPane.showConfirmDialog(this, inputFields, "Please Choose a delimiter",
 				JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
 
-		if(option == JOptionPane.CANCEL_OPTION)
+		if (option == JOptionPane.CANCEL_OPTION)
 			return;
-		
-		if (option == JOptionPane.OK_OPTION && checkBoxForSemiColon.isSelected() && checkBoxForDefaultQuote.isSelected()){
+
+		if (option == JOptionPane.OK_OPTION && checkBoxForSemiColon.isSelected()
+				&& checkBoxForDefaultQuote.isSelected()) {
 			openCSV(absolutePath, ';', '"');
 			return;
 		}
-			
-		if (option == JOptionPane.OK_OPTION && checkBoxForComma.isSelected() && checkBoxForDefaultQuote.isSelected()){
+
+		if (option == JOptionPane.OK_OPTION && checkBoxForComma.isSelected() && checkBoxForDefaultQuote.isSelected()) {
 			openCSV(absolutePath, ',', '"');
 			return;
 		}
-			
-		if (option == JOptionPane.OK_OPTION && checkBoxForSemiColon.isSelected() && checkBoxForAlternativeQuote.isSelected()){
+
+		if (option == JOptionPane.OK_OPTION && checkBoxForSemiColon.isSelected()
+				&& checkBoxForAlternativeQuote.isSelected()) {
 			String alternativeQuoteString = alternativeQotation.getText();
-			if(alternativeQuoteString.length() > 1 || alternativeQuoteString.length() == 0) throw new IllegalArgumentException("The value entered cannot be used as a quote");
+			if (alternativeQuoteString.length() > 1 || alternativeQuoteString.length() == 0)
+				throw new IllegalArgumentException("The value entered cannot be used as a quote");
 			char alternativeQuoteChar = alternativeQuoteString.charAt(0);
 			openCSV(absolutePath, ';', alternativeQuoteChar);
 			return;
 		}
-		
-		if (option == JOptionPane.OK_OPTION && checkBoxForComma.isSelected() && checkBoxForAlternativeQuote.isSelected()){
+
+		if (option == JOptionPane.OK_OPTION && checkBoxForComma.isSelected()
+				&& checkBoxForAlternativeQuote.isSelected()) {
 			String alternativeQuoteString = alternativeQotation.getText();
-			if(alternativeQuoteString.length() > 1 || alternativeQuoteString.length() == 0) throw new IllegalArgumentException("The value entered cannot be used as a quote");
+			if (alternativeQuoteString.length() > 1 || alternativeQuoteString.length() == 0)
+				throw new IllegalArgumentException("The value entered cannot be used as a quote");
 			char alternativeQuoteChar = alternativeQuoteString.charAt(0);
 			openCSV(absolutePath, ',', alternativeQuoteChar);
 			return;
 		}
-		
-		if (option == JOptionPane.OK_OPTION && checkBoxForAlternativeDelimiter.isSelected() && checkBoxForAlternativeQuote.isSelected()){
+
+		if (option == JOptionPane.OK_OPTION && checkBoxForAlternativeDelimiter.isSelected()
+				&& checkBoxForAlternativeQuote.isSelected()) {
 			String alternativeDelimiterString = alternativeDelimiter.getText();
-			if(alternativeDelimiterString.length() > 1 || alternativeDelimiterString.length() == 0) throw new IllegalArgumentException("The value entered cannot be used as a delimiter");
-			char alternativeDelimiterChar = alternativeDelimiterString.charAt(0);  
-			
+			if (alternativeDelimiterString.length() > 1 || alternativeDelimiterString.length() == 0)
+				throw new IllegalArgumentException("The value entered cannot be used as a delimiter");
+			char alternativeDelimiterChar = alternativeDelimiterString.charAt(0);
+
 			String alternativeQuoteString = alternativeQotation.getText();
-			if(alternativeQuoteString.length() > 1 || alternativeQuoteString.length() == 0) throw new IllegalArgumentException("The value entered cannot be used as a quote");
+			if (alternativeQuoteString.length() > 1 || alternativeQuoteString.length() == 0)
+				throw new IllegalArgumentException("The value entered cannot be used as a quote");
 			char alternativeQuoteChar = alternativeQuoteString.charAt(0);
-			
+
 			openCSV(absolutePath, alternativeDelimiterChar, alternativeQuoteChar);
 			return;
 		}
-		
-		if (option == JOptionPane.OK_OPTION && checkBoxForAlternativeDelimiter.isSelected() && checkBoxForDefaultQuote.isSelected()){
+
+		if (option == JOptionPane.OK_OPTION && checkBoxForAlternativeDelimiter.isSelected()
+				&& checkBoxForDefaultQuote.isSelected()) {
 			String alternativeDelimiterString = alternativeDelimiter.getText();
-			if(alternativeDelimiterString.length() > 1 || alternativeDelimiterString.length() == 0) throw new IllegalArgumentException("The value entered cannot be used as a delimiter");
-			char alternativeDelimiterChar = alternativeDelimiterString.charAt(0);  
+			if (alternativeDelimiterString.length() > 1 || alternativeDelimiterString.length() == 0)
+				throw new IllegalArgumentException("The value entered cannot be used as a delimiter");
+			char alternativeDelimiterChar = alternativeDelimiterString.charAt(0);
 			openCSV(absolutePath, alternativeDelimiterChar, '"');
 			return;
 		}
@@ -448,7 +548,6 @@ public class WorkbookMainGui extends javax.swing.JFrame {
 					System.out.println("Fehler beim internen Auslesen!");
 					e1.printStackTrace();
 				} catch (DocumentException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 
@@ -467,15 +566,29 @@ public class WorkbookMainGui extends javax.swing.JFrame {
 		if ((jScrollPane1.getVerticalScrollBar().getValue() + verticalExtent) == jScrollPane1.getVerticalScrollBar()
 				.getMaximum()) {
 			sizeRows++;
-			DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+			TableModel model = (CustomTableModel) jTable1.getModel();
 			model.setRowCount(++sizeRows);
 		}
 		if ((jScrollPane1.getHorizontalScrollBar().getValue() + horizontalExtent) == jScrollPane1
 				.getHorizontalScrollBar().getMaximum()) {
 			sizeColumns++;
-			DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+			TableModel model = (CustomTableModel) jTable1.getModel();
 			model.setColumnCount(++sizeColumns);
 		}
+	}
+
+	public void closeTab() {
+		Component selected = jTabbedPane1.getSelectedComponent();
+		JViewport viewport = ((JScrollPane) selected).getViewport();
+		JTable mytable = (JTable) viewport.getView();
+		TableModel model = mytable.getModel();
+		CustomTableModel custommodel = (CustomTableModel) model;
+		String sheetName = custommodel.getWorksheetName();
+
+		if (selected != null)
+			jTabbedPane1.remove(selected);
+
+		afterWorksheetRemoved(sheetName);
 	}
 
 	/**
@@ -511,6 +624,15 @@ public class WorkbookMainGui extends javax.swing.JFrame {
 		});
 	}
 
+	public boolean isNumber(String str) {
+		try {
+			double d = Double.parseDouble(str);
+		} catch (NumberFormatException nfe) {
+			return false;
+		}
+		return true;
+	}
+
 	// Variables declaration
 	private javax.swing.JMenuItem aboutMenuItem;
 	private javax.swing.JMenuItem contentsMenuItem;
@@ -530,9 +652,90 @@ public class WorkbookMainGui extends javax.swing.JFrame {
 	private javax.swing.JMenuItem saveAsMenuItem;
 	private javax.swing.JMenuItem saveMenuItem;
 
-	private static Workbook activeWorkbook;
+	private static Workbook activeWorkbook = new Workbook();
 	private String choosedAbsolutFile = null;
 	private Integer sizeRows = 80;
 	private Integer sizeColumns = 30;
+	private JMenuItem closeCurrentTab;
+	private JMenuItem renameTabMenuItem;
+	private JMenu mnCharts;
+	private JMenuItem createLinechartMenu;
+	private JMenuItem createBarchartMenu;
+
+	@Override
+	public void afterWorksheetAdded(String worksheetName) {
+		JScrollPane jPane = new javax.swing.JScrollPane();
+		JTable albumTable = new javax.swing.JTable();
+		Worksheet sheet = Application.getActiveWorkbook().getSheet(worksheetName);
+		TableModel model = new CustomTableModel(sheet);
+		albumTable.setModel(model);
+
+		jPane.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+		jPane.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+
+		jPane.setViewportView(albumTable);
+		int tabCount = jTabbedPane1.getTabCount();
+		albumTable.setName("TableNr.: " + tabCount);
+		jTabbedPane1.addTab(worksheetName, jPane);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * at.ac.univie.swe2.SS2017.team403.WorkbookListener#afterWorksheetRemoved(
+	 * java.lang.String) This method is being invoced after the user decides to
+	 * close the tab by the methode closeTab()
+	 */
+	@Override
+	public void afterWorksheetRemoved(String worksheetName) {
+		Application.getActiveWorkbook().removeSheet(worksheetName);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see at.ac.univie.swe2.SS2017.team403.WorkbookListener#afterWorksheetRenamed(java.lang.String, java.lang.String)
+	 * The method is being invoced when the user decides to rename the current worksheet which implicitely changes the name of the tab
+	 */
+	@Override
+	public void afterWorksheetRenamed(String worksheetOldName, String worksheetNewName) {
+		JTable currentTable = returnTableForCurrentTab();
+		CustomTableModel model = (CustomTableModel) currentTable.getModel();
+		Worksheet sheet = Application.getActiveWorkbook().getSheet(model.getWorksheetName());
+		System.out.println("The worksheet with the name: "+worksheetOldName+" has been changed to the name: "+worksheetNewName);
+		sheet.setName(worksheetNewName);
+		int indexOfTab = jTabbedPane1.getSelectedIndex();
+		jTabbedPane1.setTitleAt(indexOfTab, worksheetNewName);
+	}
+
+	@Override
+	public void afterCellChanged(String worksheetName, int row, int column, Object newValue) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void afterDiagramAdded(String diagramName) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void afterDiagramRemoved(String diagramName) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void afterDiagramRenamed(String diagramOldName, String diagramNewName) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void afterDiagramChanged(String diagramName) {
+		// TODO Auto-generated method stub
+
+	}
 
 }

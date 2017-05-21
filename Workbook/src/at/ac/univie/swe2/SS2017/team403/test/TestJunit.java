@@ -12,7 +12,7 @@ import static org.junit.Assert.assertTrue;
 public class TestJunit {
 
 	@Test(expected=IllegalArgumentException.class)
-	public void testFormulas() 
+	public static void testFormulas() 
 	{
 		boolean thrown;
 		
