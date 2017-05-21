@@ -21,8 +21,8 @@ class FunctionSUM implements FunctionRangeStrategy {
 	    	
         	Worksheet sheet = a.getParent();
 
-            for (int r = a.getR1(); r <= a.getR2(); ++r) {
-                for (int c = a.getC1(); c <= a.getC2(); ++c) {
+            for (int r = a.getFirstRow(); r <= a.getLastRow(); ++r) {
+                for (int c = a.getFirstColumn(); c <= a.getLastColumn(); ++c) {
                 	Cell cell = sheet.getCell(r, c, false);
                 	if (cell != null && cell.getValue() != null)
                 		tmp += cell.getNumericValue();
@@ -61,8 +61,8 @@ class FunctionMEAN implements FunctionRangeStrategy {
 	    	
         	Worksheet sheet = a.getParent();
 
-            for (int r = a.getR1(); r <= a.getR2(); ++r) {
-                for (int c = a.getC1(); c <= a.getC2(); ++c) {
+            for (int r = a.getFirstRow(); r <= a.getLastRow(); ++r) {
+                for (int c = a.getFirstColumn(); c <= a.getLastColumn(); ++c) {
                 	Cell cell = sheet.getCell(r, c, false);
                 	if (cell != null && cell.getValue() != null)
                 	{
@@ -105,8 +105,8 @@ class FunctionCOUNT implements FunctionRangeStrategy {
 	    	
         	Worksheet sheet = a.getParent();
 
-            for (int r = a.getR1(); r <= a.getR2(); ++r) {
-                for (int c = a.getC1(); c <= a.getC2(); ++c) {
+            for (int r = a.getFirstRow(); r <= a.getLastRow(); ++r) {
+                for (int c = a.getFirstColumn(); c <= a.getLastColumn(); ++c) {
                 	Cell cell = sheet.getCell(r, c, false);
                 	if (cell != null && cell.getValue() != null)
                 		++tmp;

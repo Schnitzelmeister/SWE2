@@ -70,7 +70,7 @@ public class Cell {
 	{ return formula; }
 
 	public String getAddress()
-	{ return "'"+ parent.getName() +"'!R" + r + "C" + c; }
+	{ return "'"+ parent.getWorksheetName() +"'!R" + r + "C" + c; }
 
 	public Object getValue()
 	{ return value; }
@@ -94,7 +94,7 @@ public class Cell {
 		this.c = column;
 	}
 
-	public Worksheet getParent()
+	public Worksheet getParentWorksheet()
 	{ return parent; }
 
 	public int getRow()
