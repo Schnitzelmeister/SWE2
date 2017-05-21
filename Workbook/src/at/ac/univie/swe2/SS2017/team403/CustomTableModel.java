@@ -24,14 +24,22 @@ public class CustomTableModel extends AbstractTableModel {
 	@Override
 	public int getColumnCount() {
 		System.out.println("getcolumncount wurde aufgerufen");
+<<<<<<< HEAD
 		return sheet.getMaxUsedRangeArea().getLastColumn();
+=======
+		return sheet.getUsedArea().getLastColumn();
+>>>>>>> f144f3cfe5c3dabdc9a82c3b534c281f560c231a
 	}
 	
 
 	@Override
 	public int getRowCount() {
 		System.out.println("getrowcount wurde aufgerufen");
+<<<<<<< HEAD
 		return sheet.getMaxUsedRangeArea().getLastRow();
+=======
+		return sheet.getUsedArea().getLastRow();
+>>>>>>> f144f3cfe5c3dabdc9a82c3b534c281f560c231a
 	}
 
 	@Override

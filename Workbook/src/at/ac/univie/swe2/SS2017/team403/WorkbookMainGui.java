@@ -87,7 +87,7 @@ public class WorkbookMainGui extends javax.swing.JFrame implements WorkbookListe
 		}
 		reader.close();
 
-		System.out.println("gelesen rows=" + r + ", cols=" + sheet.getUsedArea().getC2());
+		//System.out.println("gelesen rows=" + r + ", cols=" + sheet.getUsedArea().getC2());
 
 		TableModel model = new CustomTableModel(sheet);
 		returnTableForCurrentTab().setModel(model);
@@ -126,7 +126,8 @@ public class WorkbookMainGui extends javax.swing.JFrame implements WorkbookListe
 
 		setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-		Worksheet worksheet = activeWorkbook.addSheet("Worksheet 1");
+		Integer numberOfWorksheets = activeWorkbook.getNumberOfSheets() + 1;
+		Worksheet worksheet = activeWorkbook.addSheet("Worksheet "+ numberOfWorksheets );
 
 		jScrollPane1.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
 			public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
@@ -136,10 +137,10 @@ public class WorkbookMainGui extends javax.swing.JFrame implements WorkbookListe
 
 		jTable1.setModel(new CustomTableModel(worksheet));
 
-		// jTable1.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
-		// jTable1.setCursor(new
-		// java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-		// jTable1.setGridColor(new java.awt.Color(0, 0, 0));
+		jTable1.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
+		jTable1.setCursor(new
+		java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+		jTable1.setGridColor(new java.awt.Color(0, 0, 0));
 		jScrollPane1.setViewportView(jTable1);
 
 		jTabbedPane1.addTab(worksheet.getName(), jScrollPane1);
@@ -664,9 +665,10 @@ public class WorkbookMainGui extends javax.swing.JFrame implements WorkbookListe
 
 	@Override
 	public void afterWorksheetAdded(String worksheetName) {
-		JScrollPane jPane = new javax.swing.JScrollPane();
-		JTable albumTable = new javax.swing.JTable();
+		JScrollPane jPane = new JScrollPane();
+		JTable albumTable = new JTable();
 		Worksheet sheet = Application.getActiveWorkbook().getSheet(worksheetName);
+		
 		TableModel model = new CustomTableModel(sheet);
 		albumTable.setModel(model);
 
