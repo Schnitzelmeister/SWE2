@@ -48,14 +48,14 @@ public class Workbook implements Serializable  {
 		
 		sheets.put(name, new Worksheet(name, this, new WorksheetRenameCallback() {
             @Override
-            public void AfterWorksheetRenamed(String worksheetOldName, Worksheet sheet) {
+            public void afterWorksheetRenamed(String worksheetOldName, Worksheet sheet) {
             	renameSheet(worksheetOldName, sheet);
             }
         }));
 		
 		// inform observers
 		for(WorkbookListener l : listeners)
-			l.AfterWorksheetAdded(name);
+			l.afterWorksheetAdded(name);
 
 		return sheets.get(name);
 	}
@@ -69,7 +69,7 @@ public class Workbook implements Serializable  {
 			
 			// inform observers
 			for(WorkbookListener l : listeners)
-				l.AfterWorksheetRenamed(worksheetOldName, sheet.getName());
+				l.afterWorksheetRenamed(worksheetOldName, sheet.getName());
 		}
 	}
 
@@ -82,7 +82,7 @@ public class Workbook implements Serializable  {
 		
 		// inform observers
 		for(WorkbookListener l : listeners)
-			l.AfterWorksheetRemoved(name);
+			l.afterWorksheetRemoved(name);
 	}
 	
 	//contained Diagrams
@@ -106,12 +106,12 @@ public class Workbook implements Serializable  {
 		ctorArgument[1] = this;
 		ctorArgument[2] = new DiagramChangedCallback() {
             @Override
-            public void AfterDiagramRenamed(String diagramOldName, Diagram diagram) {
+            public void afterDiagramRenamed(String diagramOldName, Diagram diagram) {
             	renameDiagram(diagramOldName, diagram);
             }
 
             @Override
-            public void AfterDiagramChanged(String diagramName) {
+            public void afterDiagramChanged(String diagramName) {
             	changeDiagram(diagramName);
             }};
         
@@ -128,7 +128,7 @@ public class Workbook implements Serializable  {
 		
 		// inform observers
 		for(WorkbookListener l : listeners)
-			l.AfterDiagramAdded(name);
+			l.afterDiagramAdded(name);
 
 		return diagrams.get(name);
 	}
@@ -142,7 +142,7 @@ public class Workbook implements Serializable  {
 			
 			// inform observers
 			for(WorkbookListener l : listeners)
-				l.AfterDiagramRenamed(diagramOldName, diagram.getName());
+				l.afterDiagramRenamed(diagramOldName, diagram.getName());
 		}
 	}
 
@@ -152,7 +152,7 @@ public class Workbook implements Serializable  {
 		{
 			// inform observers
 			for(WorkbookListener l : listeners)
-				l.AfterDiagramChanged(diagramName);
+				l.afterDiagramChanged(diagramName);
 		}
 	}
 
@@ -165,7 +165,7 @@ public class Workbook implements Serializable  {
 		
 		// inform observers
 		for(WorkbookListener l : listeners)
-			l.AfterDiagramRemoved(name);
+			l.afterDiagramRemoved(name);
 	}
 	
 	//dependencies/precedents for Formula-Calculation
@@ -226,7 +226,7 @@ public class Workbook implements Serializable  {
 		// inform observers
 		for(Cell c : calcCells)
 			for(WorkbookListener l : listeners)
-				l.AfterCellChanged(c.getParent().getName(), c.getRow(), c.getColumn(), c.getValue());
+				l.afterCellChanged(c.getParent().getName(), c.getRow(), c.getColumn(), c.getValue());
 		
 		//empty dependencies
 		calcCells.clear();

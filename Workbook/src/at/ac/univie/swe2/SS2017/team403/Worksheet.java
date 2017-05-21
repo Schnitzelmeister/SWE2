@@ -13,7 +13,7 @@ public class Worksheet {
 	private int usedAreaC = 1;
 		
 	Worksheet(String name, Workbook wbk, WorksheetRenameCallback worksheetRenameCallback) {
-		this.id = WorkbookMainGui.getActiveWorkbook().getNewId();
+		this.id = wbk.getNewId();
 		this.name = name;
 		this.parent = wbk;
 		this.worksheetRenameCallback = worksheetRenameCallback;
@@ -31,7 +31,7 @@ public class Worksheet {
 		this.name = name;
 		
 		if (worksheetRenameCallback != null)
-			worksheetRenameCallback.AfterWorksheetRenamed(oldName, this);
+			worksheetRenameCallback.afterWorksheetRenamed(oldName, this);
 		
 	}
 	
@@ -40,14 +40,17 @@ public class Worksheet {
 	//maximal Used range on this Worksheet
 	public Area getUsedArea() { return new Area( getCell(1,1), getCell(usedAreaR, usedAreaC) ); }
 	
-	public Cell getCell(int row, int column) 
+	public Cell getCell(int row, int column) throws IllegalArgumentException
 	{
 		return getCell(row, column, true);
 	}
 	
-	public Cell getCell(int row, int column, boolean createIfNotExist)
+	public Cell getCell(int row, int column, boolean createIfNotExist) throws IllegalArgumentException
 	{
-		if (!createIfNotExist)
+		if (row <= 0 || column <=0)
+			throw new IllegalArgumentException("Row/Column must be >= 1");
+		
+		if (createIfNotExist)
 		{
 			if (row > usedAreaR)
 				usedAreaR = row;
