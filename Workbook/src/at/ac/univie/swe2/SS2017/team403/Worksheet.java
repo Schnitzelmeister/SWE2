@@ -28,7 +28,6 @@ public class Worksheet {
 	}
 
 	public void setWorksheetName(String name) throws IllegalArgumentException {
-		
 		if (parentWorkbook.getSheets().containsKey(name)) {
 			throw new IllegalArgumentException("Sheet with name " + name + " already exists");			
 		}
@@ -37,9 +36,8 @@ public class Worksheet {
 		this.worksheetName = name;
 
 		if (worksheetRenameCallback != null) {
-			worksheetRenameCallback.AfterWorksheetRenamed(oldName, this);			
+			worksheetRenameCallback.afterWorksheetRenamed(oldName, this);			
 		}
-
 	}
 
 	public Workbook getParentWorkbook() {
@@ -63,8 +61,7 @@ public class Worksheet {
 	 * @param isCellExisting
 	 * @return existing/new cell
 	 */
-	public Cell getCell(int row, int column, boolean isCellExisting) {
-		
+	public Cell getCell(int row, int column, boolean isCellExisting) {	
 		long key = getUniqueCellKey(row,column);
 		
 		if (!isCellExisting) {
@@ -83,16 +80,14 @@ public class Worksheet {
 			worksheetCells.put(key, new Cell(this, row, column));
 		}
 		
-		return worksheetCells.get(key);
-		
+		return worksheetCells.get(key);	
 	}
 	
 	public long getUniqueCellKey(int row, int column){
 		return (long) row << 32 | column & 0xFFFFFFFFL;
 	}
 
-	public Cell getCell(String cellReferences, Cell cellContext) {
-		
+	public Cell getCell(String cellReferences, Cell cellContext) {	
 		int row, column;
 		
 		String[] cellRefUpperCase = cellReferences.toUpperCase().split("C");

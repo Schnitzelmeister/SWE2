@@ -65,11 +65,11 @@ public class Workbook implements Serializable  {
 		if (sheets.containsKey(worksheetOldName) && sheets.get(worksheetOldName) == sheet)
 		{
 			sheets.remove(worksheetOldName);
-			sheets.put(sheet.getName(), sheet);
+			sheets.put(sheet.getWorksheetName(), sheet);
 			
 			// inform observers
 			for(WorkbookListener l : listeners)
-				l.afterWorksheetRenamed(worksheetOldName, sheet.getName());
+				l.afterWorksheetRenamed(worksheetOldName, sheet.getWorksheetName());
 		}
 	}
 
@@ -230,7 +230,7 @@ public class Workbook implements Serializable  {
 		// inform observers
 		for(Cell c : calcCells)
 			for(WorkbookListener l : listeners)
-				l.afterCellChanged(c.getParent().getName(), c.getRow(), c.getColumn(), c.getValue());
+				l.afterCellChanged(c.getParentWorksheet().getWorksheetName(), c.getRow(), c.getColumn(), c.getValue());
 		
 		//empty dependencies
 		calcCells.clear();
@@ -242,15 +242,15 @@ public class Workbook implements Serializable  {
 			Map.Entry<Area, TreeSet<Cell> > e = idep.next();
 			
 			//get only overlapped with cells ranges
-			if ( e.getKey().getParent() != cell.getParent() )
+			if ( e.getKey().getParent() != cell.getParentWorksheet() )
 				continue;
 
-			if ( e.getKey().getR1() > cell.getRow() )
+			if ( e.getKey().getFirstRow() > cell.getRow() )
 				return;
 
-			if (e.getKey().getC1() > cell.getColumn()
-					|| e.getKey().getR2() < cell.getRow()
-					|| e.getKey().getC2() < cell.getColumn()  )
+			if (e.getKey().getFirstColumn() > cell.getColumn()
+					|| e.getKey().getLastRow() < cell.getRow()
+					|| e.getKey().getLastColumn() < cell.getColumn()  )
 				continue;
 
 			for(Cell c : e.getValue() ) {

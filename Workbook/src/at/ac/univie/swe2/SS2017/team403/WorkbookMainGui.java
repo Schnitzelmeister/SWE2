@@ -143,7 +143,7 @@ public class WorkbookMainGui extends javax.swing.JFrame implements WorkbookListe
 		jTable1.setGridColor(new java.awt.Color(0, 0, 0));
 		jScrollPane1.setViewportView(jTable1);
 
-		jTabbedPane1.addTab(worksheet.getName(), jScrollPane1);
+		jTabbedPane1.addTab(worksheet.getWorksheetName(), jScrollPane1);
 
 		fileMenu.setText("File");
 
@@ -568,13 +568,13 @@ public class WorkbookMainGui extends javax.swing.JFrame implements WorkbookListe
 				.getMaximum()) {
 			sizeRows++;
 			TableModel model = (CustomTableModel) jTable1.getModel();
-			model.setRowCount(++sizeRows);
+			//model.setRowCount(++sizeRows); //TODO
 		}
 		if ((jScrollPane1.getHorizontalScrollBar().getValue() + horizontalExtent) == jScrollPane1
 				.getHorizontalScrollBar().getMaximum()) {
 			sizeColumns++;
 			TableModel model = (CustomTableModel) jTable1.getModel();
-			model.setColumnCount(++sizeColumns);
+			//model.setColumnCount(++sizeColumns); //TODO
 		}
 	}
 
@@ -705,7 +705,7 @@ public class WorkbookMainGui extends javax.swing.JFrame implements WorkbookListe
 		CustomTableModel model = (CustomTableModel) currentTable.getModel();
 		Worksheet sheet = Application.getActiveWorkbook().getSheet(model.getWorksheetName());
 		System.out.println("The worksheet with the name: "+worksheetOldName+" has been changed to the name: "+worksheetNewName);
-		sheet.setName(worksheetNewName);
+		sheet.setWorksheetName(worksheetNewName);
 		int indexOfTab = jTabbedPane1.getSelectedIndex();
 		jTabbedPane1.setTitleAt(indexOfTab, worksheetNewName);
 	}

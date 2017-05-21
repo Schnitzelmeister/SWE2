@@ -108,6 +108,11 @@ public class Application implements ActionListener, WorkbookListener {
 		table_1.setModel(model);
 	}
 
+	private boolean isNumber(String string) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 	/**
 	 * Calculate Data in worksheet
 	 */
@@ -156,7 +161,7 @@ public class Application implements ActionListener, WorkbookListener {
 
 							
 							at.ac.univie.swe2.SS2017.team403.test.TestJunit.testFormulas();
-							Application.activeWorkbook.getSheet("sheet1").setName("SHEEET1");
+							Application.activeWorkbook.getSheet("sheet1").setWorksheetName("SHEEET1");
 							Application.activeWorkbook.getSheet("SHEEET1").getCell(1, 1).setFormula("=657-33");
 							Application.activeWorkbook.removeSheet("SHEEET1");
 							
@@ -225,12 +230,12 @@ public class Application implements ActionListener, WorkbookListener {
 					}
 				} catch (IOException o) {
 					System.out.println("Exception occured: File could not be found. ");
-					JOptionPane.showMessageDialog(this, "Die Datei konnte nicht gefunden werden ", "Fehler",
-							JOptionPane.ERROR_MESSAGE);
+					// JOptionPane.showMessageDialog(this, "Die Datei konnte nicht gefunden werden ", "Fehler",
+							//JOptionPane.ERROR_MESSAGE); //TODO
 				} catch (IllegalArgumentException i) {
 					System.out.println("showMultipleInputMessageDialog threw IllegalArgumentException ");
-					JOptionPane.showMessageDialog(this, i.getMessage(), "Fehler",
-							JOptionPane.ERROR_MESSAGE);
+					//JOptionPane.showMessageDialog(this, i.getMessage(), "Fehler",
+						//	JOptionPane.ERROR_MESSAGE); //TODO
 				}  
 			}
 		}
