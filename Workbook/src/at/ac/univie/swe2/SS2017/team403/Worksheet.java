@@ -16,12 +16,10 @@ public class Worksheet {
 	 * This constructor is used to set a worksheet. A worksheet contains one or
 	 * more Cells and is part of a workbook.
 	 * 
-	 * @param name
-	 *            -> worksheetName
-	 * @param workbook
-	 *            -> this workbook contains the worksheet
-	 * @param worksheetRenameCallback
-	 *            -> is part of the observer pattern
+	 * @param name -> worksheetName
+	 * @param workbook -> this workbook contains the worksheet
+	 * @param worksheetRenameCallback -> is part of the observer pattern
+	 * 
 	 */
 	Worksheet(String name, Workbook workbook, WorksheetRenameCallback worksheetRenameCallback) {
 		this.worksheetId = Application.getActiveWorkbook().getNewId();
@@ -39,8 +37,8 @@ public class Worksheet {
 	}
 
 	/**
-	 * @param name
-	 *            -> worksheetname
+	 * @param name -> worksheetname
+	 * 
 	 */
 	public void setWorksheetName(String name) {
 		if (parentWorkbook.getSheets().containsKey(name)) {
@@ -87,12 +85,13 @@ public class Worksheet {
 			if (row > furthestColumnUsed) {
 				furthestColumnUsed = column;
 			}
+		}
 			if (!worksheetCells.containsKey(key)) {
-				return null;
-			} else {
+				if (!isCellExisting) {
+					return null;
+				}
 				worksheetCells.put(key, new Cell(this, row, column));
 			}
-		}
 
 		return worksheetCells.get(key);
 	}

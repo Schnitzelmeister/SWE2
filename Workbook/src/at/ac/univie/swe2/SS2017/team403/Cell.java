@@ -2,6 +2,12 @@ package at.ac.univie.swe2.SS2017.team403;
 
 import java.util.Comparator;
 
+/**
+ * This class is used to handle all operations connected to a Cell.
+ * A Cell-Object contains either a cellValue which is also an object
+ * or a formula.
+ * 
+ */
 public class Cell {
 
 	private Worksheet parentWorksheet;
@@ -13,8 +19,9 @@ public class Cell {
 	private ExpressionTree cellExpression = null;
 
 	/**
-	 * @param value
-	 *            -> cell-input-double-value
+	 * You use setNumericValue to store a double-value in a Cell.
+	 * 
+	 * @param value -> cell-input-double-value
 	 */
 	public void setNumericValue(double value) {
 		Application.getActiveWorkbook().removeReferenceDependencies(this);
@@ -27,8 +34,9 @@ public class Cell {
 	}
 
 	/**
-	 * @param value
-	 *            -> cell-input-value
+	 * You use setTextValue to store a String-value in a Cell.
+	 * 
+	 * @param value  -> cell-input-value
 	 */
 	public void setTextValue(String value) {
 		Application.getActiveWorkbook().removeReferenceDependencies(this);
@@ -41,9 +49,10 @@ public class Cell {
 	}
 
 	/**
-	 * @param formula
-	 *            -> cell-input-formula-value
-	 * @throws IllegalArgumentException
+	 * You use setFormula to store a formula in a Cell.
+	 * 
+	 * @param formula -> cell-input-formula-value
+	 * @throws IllegalArgumentException -> Exception will be thrown if the formula doesn't begin with "="
 	 */
 	public void setFormula(String formula) throws IllegalArgumentException {
 		if (!formula.startsWith("=")) {
@@ -53,7 +62,7 @@ public class Cell {
 		this.cellFormula = formula;
 		cellExpression = ExpressionTree.parse(this, formula);
 		cellInputDataType = cellExpression.getExpressionDataType();
-		this.cellValue = cellExpression.getValue();
+		calculateCellExpression();
 		parentWorksheet.getParentWorkbook().calculateReferenceDependencies(this);
 	}
 
@@ -76,7 +85,7 @@ public class Cell {
 	}
 
 	/**
-	 * A cell contains a referenced cell.
+	 * A cell contains a formula which is a reference of other cells.
 	 * 
 	 * @return -> referenced cell
 	 */
@@ -123,9 +132,7 @@ public class Cell {
 		return cellColumn;
 	}
 
-	/**
-	 * We use Comperator to order Cell-objects and accelerate the search.
-	 */
+	/** We use Comperator to order Cell-objects and accelerate the search. */
 	static class CellComparator implements Comparator<Cell> {
 		public int compare(Cell firstCell, Cell secondCell) {
 			int var = firstCell.parentWorksheet.getId() - secondCell.parentWorksheet.getId();

@@ -3,6 +3,10 @@ package at.ac.univie.swe2.SS2017.team403;
 import java.io.FileWriter;
 import java.io.IOException;
 
+/**
+ * This class is used to write a worksheet into a csv-file. 
+ * Each cell content (of a worksheet) is stored into a csv-file-cell.
+ */
 public class CsvWriteUtility {
 
 	public static void convertWorkSheetToCsv(Worksheet worksheet, FileWriter writer) throws IOException {
@@ -22,6 +26,7 @@ public class CsvWriteUtility {
 			writer.append(System.lineSeparator());
 			cellContents = new StringBuilder();
 		}
+		
 		writer.flush();
 		writer.close();
 	}
