@@ -4,104 +4,127 @@ import java.util.TreeMap;
 
 public class Worksheet {
 
-	private transient int id;
-	private TreeMap<Long, Cell> cells = new TreeMap<Long, Cell>();
-	private String name;
-	private Workbook parent;
+	private transient int worksheetId;
+	private TreeMap<Long, Cell> worksheetCells = new TreeMap<Long, Cell>();
+	private String worksheetName;
+	private Workbook parentWorkbook;
 	private WorksheetRenameCallback worksheetRenameCallback = null;
-	private int usedAreaR = 1;
-	private int usedAreaC = 1;
+	private int furthestRowUsed = 1;
+	private int furthestColumnUsed = 1;
 
-	Worksheet(String name, Workbook wbk, WorksheetRenameCallback worksheetRenameCallback) {
-		this.id = WorkbookMainGui.getActiveWorkbook().getNewId();
-		this.name = name;
-		this.parent = wbk;
+	Worksheet(String name, Workbook workbook, WorksheetRenameCallback worksheetRenameCallback) {
+		this.worksheetId = WorkbookMainGui.getActiveWorkbook().getNewId();
+		this.worksheetName = name;
+		this.parentWorkbook = workbook;
 		this.worksheetRenameCallback = worksheetRenameCallback;
 	}
 
-	int getId() {
-		return id;
+	public int getId() {
+		return worksheetId;
 	}
 
 	public String getWorksheetName() {
-		return name;
+		return worksheetName;
 	}
 
-	public void setName(String name) throws IllegalArgumentException {
-		// check if sheet with new name exists
-		if (parent.getSheets().containsKey(name))
-			throw new IllegalArgumentException("Sheet with name " + name + " already exists");
+	public void setWorksheetName(String name) throws IllegalArgumentException {
+		
+		if (parentWorkbook.getSheets().containsKey(name)) {
+			throw new IllegalArgumentException("Sheet with name " + name + " already exists");			
+		}
 
-		String oldName = this.name;
-		this.name = name;
+		String oldName = this.worksheetName;
+		this.worksheetName = name;
 
-		if (worksheetRenameCallback != null)
-			worksheetRenameCallback.AfterWorksheetRenamed(oldName, this);
+		if (worksheetRenameCallback != null) {
+			worksheetRenameCallback.AfterWorksheetRenamed(oldName, this);			
+		}
 
 	}
 
-	public Workbook getParent() {
-		return parent;
+	public Workbook getParentWorkbook() {
+		return parentWorkbook;
 	}
 
-	// maximal Used range on this Worksheet
-	public Area getUsedArea() {
-		return new Area(getCell(1, 1), getCell(usedAreaR, usedAreaC));
+	public Area getMaxUsedRangeArea() {
+		return new Area(getCell(1, 1), getCell(furthestRowUsed, furthestColumnUsed));
 	}
 
 	public Cell getCell(int row, int column) {
 		return getCell(row, column, true);
 	}
 
-	public Cell getCell(int row, int column, boolean createIfNotExist) {
-		if (!createIfNotExist) {
-			if (row > usedAreaR)
-				usedAreaR = row;
-			if (row > usedAreaC)
-				usedAreaC = column;
+	/**
+	 * This method checks the availability of a cell by a cell-key check.
+	 * If there is a similar key it returns the existing cell, otherwise
+	 * it returns the new cell.
+	 * @param row
+	 * @param column
+	 * @param isCellExisting
+	 * @return existing/new cell
+	 */
+	public Cell getCell(int row, int column, boolean isCellExisting) {
+		
+		long key = getUniqueCellKey(row,column);
+		
+		if (!isCellExisting) {
+			if (row > furthestRowUsed){
+				furthestRowUsed = row;			
+			}
+			if (row > furthestColumnUsed){
+				furthestColumnUsed = column;				
+			}
 		}
 
-		// convert two Integers to one Long
-		long key = (long) row << 32 | column & 0xFFFFFFFFL;
-		// int row = (int)(key >> 32);
-		// int column = (int)key;
-
-		if (!cells.containsKey(key)) {
-			if (!createIfNotExist)
-				return null;
-			cells.put(key, new Cell(this, row, column));
+		if (!worksheetCells.containsKey(key)) {
+			if (!isCellExisting) {
+				return null;				
+			}
+			worksheetCells.put(key, new Cell(this, row, column));
 		}
-
-		return cells.get(key);
+		
+		return worksheetCells.get(key);
+		
+	}
+	
+	public long getUniqueCellKey(int row, int column){
+		return (long) row << 32 | column & 0xFFFFFFFFL;
 	}
 
-	public Cell getCell(String address, Cell contextCell) {
-		int r, c;
-		String[] els = address.toUpperCase().split("C");
-		// System.out.println(address);
-		org.junit.Assert.assertEquals('R', els[0].charAt(0));
+	public Cell getCell(String cellReferences, Cell cellContext) {
+		
+		int row, column;
+		
+		String[] cellRefUpperCase = cellReferences.toUpperCase().split("C");
+		// System.out.println(cellReferences);
+		org.junit.Assert.assertEquals('R', cellRefUpperCase[0].charAt(0));
 
 		// relative row address without offset
-		if (els[0].length() == 1) {
-			r = contextCell.getRow();
+		if (cellRefUpperCase[0].length() == 1) {
+			row = cellContext.getRow();
 		}
 		// relative row address
-		else if (els[0].charAt(1) == '[')
-			r = contextCell.getRow() + Integer.valueOf(els[0].substring(2, els[0].length() - 1));
-		else
-			r = Integer.valueOf(els[0].substring(1));
+		else if (cellRefUpperCase[0].charAt(1) == '[') {
+			row = cellContext.getRow() + Integer.valueOf(cellRefUpperCase[0].substring(2, cellRefUpperCase[0].length() - 1));
+		}
+		else {
+			row = Integer.valueOf(cellRefUpperCase[0].substring(1));			
+		}
+
 
 		// relative column address without offset
-		if (els.length == 1 || els[1].length() == 0) {
-			c = contextCell.getColumn();
+		if (cellRefUpperCase.length == 1 || cellRefUpperCase[1].length() == 0) {
+			column = cellContext.getColumn();
 		}
 		// relative column address
-		else if (els[1].charAt(0) == '[')
-			c = contextCell.getColumn() + Integer.valueOf(els[1].substring(1, els[1].length() - 1));
-		else
-			c = Integer.valueOf(els[1]);
+		else if (cellRefUpperCase[1].charAt(0) == '[') {
+			column = cellContext.getColumn() + Integer.valueOf(cellRefUpperCase[1].substring(1, cellRefUpperCase[1].length() - 1));
+		}
+		else {
+			column = Integer.valueOf(cellRefUpperCase[1]);			
+		}
 
-		return getCell(r, c);
+		return getCell(row, column);
 	}
 
 }

@@ -1,10 +1,13 @@
 package at.ac.univie.swe2.SS2017.team403;
 
 import java.util.List;
-
 import javax.swing.table.AbstractTableModel;
 
 public class CustomTableModel extends AbstractTableModel {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	List<String[]> list = null;
 
 	public CustomTableModel(List<String[]> values) {
@@ -31,7 +34,7 @@ public class CustomTableModel extends AbstractTableModel {
 
 	@Override
 	public Object getValueAt(int row, int column) {
-		return list.get(row)[column]; // vorübergehend
+		return list.get(row)[column]; // TODO
 	}
 
 	public void emptyModel() {
