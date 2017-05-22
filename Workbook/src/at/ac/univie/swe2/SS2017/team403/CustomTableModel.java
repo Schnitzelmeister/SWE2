@@ -24,38 +24,40 @@ public class CustomTableModel extends AbstractTableModel {
 	@Override
 	public int getColumnCount() {
 		System.out.println("getcolumncount wurde aufgerufen");
-<<<<<<< HEAD
 		return sheet.getMaxUsedRangeArea().getLastColumn();
-=======
-		return sheet.getUsedArea().getLastColumn();
->>>>>>> f144f3cfe5c3dabdc9a82c3b534c281f560c231a
 	}
 	
 
 	@Override
 	public int getRowCount() {
 		System.out.println("getrowcount wurde aufgerufen");
-<<<<<<< HEAD
 		return sheet.getMaxUsedRangeArea().getLastRow();
-=======
-		return sheet.getUsedArea().getLastRow();
->>>>>>> f144f3cfe5c3dabdc9a82c3b534c281f560c231a
 	}
 
 	@Override
 	public Object getValueAt(int row, int column) {
-		
-		
-		//return list.get(row)[column]; // TODO
 		Cell cell = sheet.getCell(row + 1, column + 1);
 		return cell.getValue();
 	}
+	
+	 @Override
+     public void setValueAt(Object aValue, int row, int col) {
+		 Cell cell = sheet.getCell(row + 1, col + 1);
+		 cell.setTextValue((String) aValue);
+		 fireTableCellUpdated(row, col);
+     }
 	
 	public String getWorksheetName(){
 		return sheet.getWorksheetName();
 	}
 	
+	@Override
 	public boolean isCellEditable(int row, int col) { 
 	    return true; 
 	}
+	
+	public Class getColumnClass(int c) {
+        return getValueAt(0, c).getClass();
+    }
+
 }

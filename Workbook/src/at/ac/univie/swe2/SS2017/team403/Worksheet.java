@@ -37,7 +37,7 @@ public class Worksheet {
 		this.worksheetName = name;
 
 		if (worksheetRenameCallback != null) {
-			worksheetRenameCallback.AfterWorksheetRenamed(oldName, this);			
+			worksheetRenameCallback.afterWorksheetRenamed(oldName, this);			
 		}
 
 	}

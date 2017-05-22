@@ -152,14 +152,14 @@ public class Application implements ActionListener, WorkbookListener {
 							
 							//observe Application
 							Application.activeWorkbook.addListener(gui);
-							Application.activeWorkbook.removeListener(gui);
+							//Application.activeWorkbook.removeListener(gui);
 
-							
+							/*
 							at.ac.univie.swe2.SS2017.team403.test.TestJunit.testFormulas();
 							Application.activeWorkbook.getSheet("sheet1").setName("SHEEET1");
 							Application.activeWorkbook.getSheet("SHEEET1").getCell(1, 1).setFormula("=657-33");
 							Application.activeWorkbook.removeSheet("SHEEET1");
-							
+							*/
 						}
 				
 						gui.frmClientInterface.setVisible(true);
