@@ -5,6 +5,11 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * The class handles with the expression in a cell.
+ * 
+ *
+ */
 public class ExpressionTree {
 	
 	private enum TOKEN {
