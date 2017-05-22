@@ -16,33 +16,27 @@ public class Range {
 	}
 
 	/**
-	 * The Method returns a Range which contains Area(s) or/and cell(s) finding by cell references and cell
+	 * This is a method for creating cell references to rows and columns.
 	 * 
 	 * @param cellReferences
 	 * @param cellContext
 	 * @return
 	 */
 	static Range getRangeByAddress(String cellReferences, Cell cellContext) {
-
+		
 		Worksheet worksheet = cellContext.getParentWorksheet();
 		Range worksheetRange = new Range();
-
+		
 		for (String s : cellReferences.split(";")) {
 			String singleCellReference = s;
 
 			if (singleCellReference.indexOf('!') >= 0) {
-				// find worksheetname
 				String wshtName = singleCellReference.substring(0, singleCellReference.indexOf('!'));
 				if (wshtName.substring(0, 1) == "'") {
-					wshtName = wshtName.substring(1, wshtName.length() - 2);
+					wshtName = wshtName.substring(1, wshtName.length() - 2);					
 				}
-<<<<<<< HEAD
-				if (!Application.getActiveWorkbook().getSheets().containsKey(wshtName)) {
-					throw new IllegalArgumentException("Worksheet " + wshtName + " doesn't exists");
-=======
 				if (!Application.getActiveWorkbook().getWorksheets().containsKey(wshtName)) {
 					throw new IllegalArgumentException("Worksheet " + wshtName + " doesn't exists");					
->>>>>>> 1a690a1c534153995605be711f195c8f648f9d2c
 				}
 				worksheet = Application.getActiveWorkbook().getWorksheet(wshtName);
 				singleCellReference = singleCellReference.substring(singleCellReference.indexOf('!') + 1);
@@ -50,28 +44,28 @@ public class Range {
 
 			if (worksheet == null) {
 				throw new IllegalArgumentException("Undefined worksheet param " + cellReferences
-						+ " to get Range object in method getRangeByAddress(String address, Cell contextCell)");
+						+ " to get Range object in method getRangeByAddress(String address, Cell contextCell)");		
 			}
 
 			if (singleCellReference.indexOf(':') > 0) {
 				Area worksheetArea = new Area(singleCellReference, worksheet, cellContext);
 				if (!worksheetRange.worksheetAreas.containsKey(worksheetArea)) {
-					worksheetRange.worksheetAreas.put(worksheetArea, 1);
-				} else {
-					worksheetRange.worksheetAreas.put(worksheetArea,
-							worksheetRange.worksheetAreas.get(worksheetArea) + 1);
+					worksheetRange.worksheetAreas.put(worksheetArea, 1);					
+				}
+				else {
+					worksheetRange.worksheetAreas.put(worksheetArea, worksheetRange.worksheetAreas.get(worksheetArea) + 1);					
 				}
 			} else {
 				Cell worksheetCell = worksheet.getCell(singleCellReference, cellContext);
 				if (!worksheetRange.worksheetCells.containsKey(worksheetCell)) {
-					worksheetRange.worksheetCells.put(worksheetCell, 1);
-				} else {
-					worksheetRange.worksheetCells.put(worksheetCell,
-							worksheetRange.worksheetCells.get(worksheetCell) + 1);
+					worksheetRange.worksheetCells.put(worksheetCell, 1);					
+				}
+				else {
+					worksheetRange.worksheetCells.put(worksheetCell, worksheetRange.worksheetCells.get(worksheetCell) + 1);					
 				}
 			}
 		}
-
+		
 		return worksheetRange;
 	}
 

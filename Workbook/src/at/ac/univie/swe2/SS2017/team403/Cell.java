@@ -49,11 +49,7 @@ public class Cell {
 	}
 
 	/**
-<<<<<<< HEAD
-	 * used to storing a formula in a Cell.
-=======
 	 * Use setFormula to store a formula in a Cell.
->>>>>>> 1a690a1c534153995605be711f195c8f648f9d2c
 	 * 
 	 * @param formula -> cell-input-formula-value
 	 * @throws IllegalArgumentException -> Exception will be thrown if the formula doesn't begin with "="
@@ -70,9 +66,6 @@ public class Cell {
 		parentWorksheet.getParentWorkbook().calculateReferenceDependencies(this);
 	}
 
-	/**
-	 * 
-	 */
 	public void calculateCellExpression() {
 		if (cellExpression != null) {
 			this.cellValue = cellExpression.getValue();

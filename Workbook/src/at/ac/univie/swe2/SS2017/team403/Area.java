@@ -93,11 +93,7 @@ public class Area {
 				+ "C" + lastColumn;
 	}
 
-	/** We use Comperator to order Area-objects and accelerate the search. 
-	 * The class compares two areas.
-	 * a negative integer, zero, or a positive integer 
-	 * as the first argument is less than, equal to, or greater than the second.
-	 * */
+	/** We use Comperator to order Area-objects and accelerate the search. */
 	static class AreaComparator implements Comparator<Area> {
 		public int compare(Area firstArea, Area secondArea) {
 			int var = firstArea.parentWorksheet.getId() - secondArea.parentWorksheet.getId();
