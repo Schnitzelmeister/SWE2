@@ -36,10 +36,15 @@ public class Range {
 				if (wshtName.substring(0, 1) == "'") {
 					wshtName = wshtName.substring(1, wshtName.length() - 2);
 				}
+<<<<<<< HEAD
 				if (!Application.getActiveWorkbook().getSheets().containsKey(wshtName)) {
 					throw new IllegalArgumentException("Worksheet " + wshtName + " doesn't exists");
+=======
+				if (!Application.getActiveWorkbook().getWorksheets().containsKey(wshtName)) {
+					throw new IllegalArgumentException("Worksheet " + wshtName + " doesn't exists");					
+>>>>>>> 1a690a1c534153995605be711f195c8f648f9d2c
 				}
-				worksheet = Application.getActiveWorkbook().getSheet(wshtName);
+				worksheet = Application.getActiveWorkbook().getWorksheet(wshtName);
 				singleCellReference = singleCellReference.substring(singleCellReference.indexOf('!') + 1);
 			}
 

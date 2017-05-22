@@ -9,7 +9,7 @@ public class CustomTableModel extends AbstractTableModel {
 	 */
 	private static final long serialVersionUID = 1L;
 	List<String[]> list = null;
-
+	
 	Worksheet sheet = null;
 
 	public CustomTableModel(Worksheet sheet) {
@@ -18,36 +18,46 @@ public class CustomTableModel extends AbstractTableModel {
 
 	@Override
 	public String getColumnName(int index) {
-		return "C" + (index + 1);
+		return "C"+(index+1);
 	}
 
 	@Override
 	public int getColumnCount() {
 		System.out.println("getcolumncount wurde aufgerufen");
-
 		return sheet.getMaxUsedRangeArea().getLastColumn();
 	}
+	
 
 	@Override
 	public int getRowCount() {
 		System.out.println("getrowcount wurde aufgerufen");
-
 		return sheet.getMaxUsedRangeArea().getLastRow();
 	}
 
 	@Override
 	public Object getValueAt(int row, int column) {
-
-		// return list.get(row)[column]; // TODO
 		Cell cell = sheet.getCell(row + 1, column + 1);
-		return cell.getCellValue();
+		return cell.getValue();
 	}
-
-	public String getWorksheetName() {
+	
+	 @Override
+     public void setValueAt(Object aValue, int row, int col) {
+		 Cell cell = sheet.getCell(row + 1, col + 1);
+		 cell.setTextValue((String) aValue);
+		 fireTableCellUpdated(row, col);
+     }
+	
+	public String getWorksheetName(){
 		return sheet.getWorksheetName();
 	}
-
-	public boolean isCellEditable(int row, int col) {
-		return true;
+	
+	@Override
+	public boolean isCellEditable(int row, int col) { 
+	    return true; 
 	}
+	
+	public Class getColumnClass(int c) {
+        return getValueAt(0, c).getClass();
+    }
+
 }

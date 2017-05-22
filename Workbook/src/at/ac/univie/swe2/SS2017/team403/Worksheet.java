@@ -2,6 +2,12 @@ package at.ac.univie.swe2.SS2017.team403;
 
 import java.util.TreeMap;
 
+/**
+ * This class is used to handle all operations connected to a worksheet.
+ * A worksheet-object contains either one or more cells and is part of
+ * a workbook.
+ * 
+ */
 public class Worksheet {
 
 	private transient int worksheetId;
@@ -13,8 +19,7 @@ public class Worksheet {
 	private int furthestColumnUsed = 1;
 
 	/**
-	 * This constructor is used to set a worksheet. A worksheet contains one or
-	 * more Cells and is part of a workbook.
+	 * This constructor is used to set a worksheet. 
 	 * 
 	 * @param name -> worksheetName
 	 * @param workbook -> this workbook contains the worksheet
@@ -22,7 +27,7 @@ public class Worksheet {
 	 * 
 	 */
 	Worksheet(String name, Workbook workbook, WorksheetRenameCallback worksheetRenameCallback) {
-		this.worksheetId = Application.getActiveWorkbook().getNewId();
+		this.worksheetId = Application.getActiveWorkbook().generateNewId();
 		this.worksheetName = name;
 		this.parentWorkbook = workbook;
 		this.worksheetRenameCallback = worksheetRenameCallback;
@@ -37,11 +42,14 @@ public class Worksheet {
 	}
 
 	/**
-	 * @param name -> worksheetname
+	 * If the worksheetname exists, an exception is raised.
+	 * Where this is not the case, the worktsheet will be renamed and the
+	 * observer pattern will be used.
 	 * 
+	 * @param name -> worksheetname 
 	 */
 	public void setWorksheetName(String name) {
-		if (parentWorkbook.getSheets().containsKey(name)) {
+		if (parentWorkbook.getWorksheets().containsKey(name)) {
 			throw new IllegalArgumentException("Sheet with name " + name + " already exists");
 		}
 
@@ -57,7 +65,7 @@ public class Worksheet {
 		return parentWorkbook;
 	}
 
-	public Area getMaxUsedRangeArea() {
+	public Area getMaxUsedArea() {
 		return new Area(getCell(1, 1), getCell(furthestRowUsed, furthestColumnUsed));
 	}
 
@@ -70,10 +78,10 @@ public class Worksheet {
 	 * there is a similar key it returns the existing cell, otherwise it returns
 	 * a new cell.
 	 * 
-	 * @param row
-	 * @param column
-	 * @param isCellExisting
-	 * @return existing/new cell
+	 * @param row -> cell row
+	 * @param column -> cell column
+	 * @param isCellExisting -> is cell existing?
+	 * @return -> returns existing/new cell 
 	 */
 	public Cell getCell(int row, int column, boolean isCellExisting) {
 		long key = getUniqueCellKey(row, column);
@@ -100,18 +108,31 @@ public class Worksheet {
 		return (long) row << 32 | column & 0xFFFFFFFFL;
 	}
 
+	/**
+	 * This method is used to get a Cell which could contain references.
+	 * We use the R1C1-notation, that means we have to split up the
+	 * reference in two expressions.
+	 * If there isn't any row reference we will take only the row-position.
+	 * If there is a row reference which starts with a square bracket we will take
+	 * the row-position and the complete formula.
+	 * The same applies to columns.
+	 * If there isn't any column reference we will take only the column-position.
+	 * If there is a column reference which starts with a square bracket we will take
+	 * the column-position and the complete formula.
+	 * 
+	 * @param cellReferences -> cell-references
+	 * @param cellContext -> selected cell
+	 * @return -> returns a cell with/without references
+	 */
 	public Cell getCell(String cellReferences, Cell cellContext) {
 		int row, column;
-
 		String[] cellRefUpperCase = cellReferences.toUpperCase().split("C");
-		// System.out.println(cellReferences);
+		
 		org.junit.Assert.assertEquals('R', cellRefUpperCase[0].charAt(0));
 
-		// relative row address without offset
 		if (cellRefUpperCase[0].length() == 1) {
 			row = cellContext.getCellRow();
 		}
-		// relative row address
 		else if (cellRefUpperCase[0].charAt(1) == '[') {
 			row = cellContext.getCellRow()
 					+ Integer.valueOf(cellRefUpperCase[0].substring(2, cellRefUpperCase[0].length() - 1));
@@ -119,11 +140,9 @@ public class Worksheet {
 			row = Integer.valueOf(cellRefUpperCase[0].substring(1));
 		}
 
-		// relative column address without offset
 		if (cellRefUpperCase.length == 1 || cellRefUpperCase[1].length() == 0) {
 			column = cellContext.getCellColumn();
 		}
-		// relative column address
 		else if (cellRefUpperCase[1].charAt(0) == '[') {
 			column = cellContext.getCellColumn()
 					+ Integer.valueOf(cellRefUpperCase[1].substring(1, cellRefUpperCase[1].length() - 1));

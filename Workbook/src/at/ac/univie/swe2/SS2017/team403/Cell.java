@@ -4,8 +4,8 @@ import java.util.Comparator;
 
 /**
  * This class is used to handle all operations connected to a Cell.
- * A Cell-Object contains either a cellValue which is also an object
- * or a formula.
+ * A cell-object is part of a worksheet and contains either a cellValue 
+ * which is also an object or a formula.
  * 
  */
 public class Cell {
@@ -19,7 +19,7 @@ public class Cell {
 	private ExpressionTree cellExpression = null;
 
 	/**
-	 * You use setNumericValue to store a double-value in a Cell.
+	 * Use setNumericValue to store a double-value in a Cell.
 	 * 
 	 * @param value -> cell-input-double-value
 	 */
@@ -34,7 +34,7 @@ public class Cell {
 	}
 
 	/**
-	 * You use setTextValue to store a String-value in a Cell.
+	 * Use setTextValue to store a String-value in a Cell.
 	 * 
 	 * @param value  -> cell-input-value
 	 */
@@ -49,7 +49,11 @@ public class Cell {
 	}
 
 	/**
+<<<<<<< HEAD
 	 * used to storing a formula in a Cell.
+=======
+	 * Use setFormula to store a formula in a Cell.
+>>>>>>> 1a690a1c534153995605be711f195c8f648f9d2c
 	 * 
 	 * @param formula -> cell-input-formula-value
 	 * @throws IllegalArgumentException -> Exception will be thrown if the formula doesn't begin with "="

@@ -4,7 +4,7 @@ import java.util.Comparator;
 
 /**
  * This class is used to handle all operations connected to Area.
- * An Area can be either one cell or multiple cells. 
+ * An Area can be either one cell or more cells. 
  */
 public class Area {
 
@@ -38,7 +38,7 @@ public class Area {
 
 	/**
 	 * This constructor is used to set a range which contains different cells.
-	 * We need only two cells to build a rectangle to define the range.
+	 * We need only two cells to build a rectangle to define the area.
 	 * 
 	 * @param cellTopLeft
 	 * @param cellBottomRight
@@ -83,7 +83,8 @@ public class Area {
 	}
 
 	/**
-	 * A cell contains multiple referenced cells
+	 * A cell contains multiple referenced cells as a string.
+	 * Here you get the cell content as a String. 
 	 * 
 	 * @return -> referenced area as a String
 	 */

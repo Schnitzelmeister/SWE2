@@ -24,7 +24,7 @@ public abstract class Diagram {
 		boolean worksheetExists = true;
 		// check if sheet with new name exists
 		try {
-			parent.getSheet(name);
+			parent.getWorksheet(name);
 			worksheetExists = true;
 		} catch (IllegalArgumentException e) {
 			worksheetExists = false;
