@@ -62,9 +62,9 @@ public class ExpressionTree {
 	private static class ExpressionParser {
 	
 	    private char[] charFormula;
-	    private String formula;
-	    private int pos;
-	    private int len;
+	    private String cellFormula;
+	    private int charPosition;
+	    private int formulaLength;
 	    private Object data;
 	    private TOKEN token = TOKEN.UNDEF;
 	    private Cell cell;
@@ -97,201 +97,206 @@ public class ExpressionTree {
 	
 		public ExpressionParser(String formula, Cell cell) {
 			this.cell = cell;
-			this.formula = formula;
-			this.charFormula = this.formula.toCharArray();
-			this.len = this.formula.length();
-			this.pos = 1;
+			this.cellFormula = formula;
+			this.charFormula = this.cellFormula.toCharArray();
+			this.formulaLength = this.cellFormula.length();
+			this.charPosition = 1;
 		}
 
+		/**
+		 * At the beginning a Token is undefined if charPoition is same or greater than formulaLength.
+		 * If charPosition is smaller than formulaLength, charPosition is incremented by every loop cycle.
+		 * 
+		 */
 		private void _readToken() {
-			if (pos >= len) {
+			if (charPosition >= formulaLength) {
 				token = TOKEN.UNDEF;
 				return;
 			}
 
-			while (pos < len && charFormula[pos] == ' ')
-				pos++;
+			while (charPosition < formulaLength && charFormula[charPosition] == ' ')
+				charPosition++;
 
 			data = null;
 			token = TOKEN.UNDEF;
 
 			{
-				Matcher matcher = regExRange.matcher(formula.substring(pos));
+				Matcher matcher = regExRange.matcher(cellFormula.substring(charPosition));
 				if (matcher.find() && (matcher.start() == 0)) {
 					token = TOKEN.RANGE;
-					pos += matcher.end();
+					charPosition += matcher.end();
 					data = Range.getRangeByAddress(matcher.group(0), cell);
 				}
 			}
 
 			if (token == TOKEN.UNDEF) {
-				Matcher matcher = regExCell.matcher(formula.substring(pos));
+				Matcher matcher = regExCell.matcher(cellFormula.substring(charPosition));
 				if (matcher.find() && (matcher.start() == 0)) {
 					token = TOKEN.CELL;
 
-					pos += matcher.end();
+					charPosition += matcher.end();
 					data = Range.getRangeByAddress(matcher.group(0), cell).getWorksheetCells().firstKey();
 				}
 			}
 
-			if (token == TOKEN.UNDEF && Character.isDigit(charFormula[pos])) {
+			if (token == TOKEN.UNDEF && Character.isDigit(charFormula[charPosition])) {
 				token = TOKEN.NUMBER;
 			} else if (token == TOKEN.UNDEF) {
-				switch (charFormula[pos]) {
-				case '"':
-					pos++;
-					token = TOKEN.STRING;
-					break;
-				case '.':
-					pos++;
-					token = TOKEN.NUMBER;
-					break;
-				// case '#': pos++; token = TOKEN.DATE; break;
-				case ',':
-					pos++;
-					token = TOKEN.DELIMITER;
-					break;
-				case '+':
-					pos++;
-					token = TOKEN.PLUS;
-					break;
-				case '-':
-					pos++;
-					token = TOKEN.MINUS;
-					break;
-				case '&':
-					if (charFormula[pos + 1] != '&') {
-						pos++;
-						token = TOKEN.CONCATENATE;
-					}
-					break;
-				case '*':
-					pos++;
-					token = TOKEN.MULTIPLY;
-					break;
-				case '/':
-					pos++;
-					token = TOKEN.DIVIDE;
-					break;
-				case '=':
-					pos++;
-					token = TOKEN.EQUAL;
-					break;
-				case '(':
-					pos++;
-					token = TOKEN.LEFT_BRACKET;
-					break;
-				case ')':
-					pos++;
-					token = TOKEN.RIGHT_BRACKET;
-					break;
-				case '^':
-					pos++;
-					token = TOKEN.POWER;
-					break;
-				case '%':
-					pos++;
-					token = TOKEN.REMAINDER;
-					break;
-				case '~':
-					pos++;
-					token = TOKEN.NOT;
-					break;
-				case '>':
-					if (pos + 1 < len && charFormula[pos + 1] == '=') {
-						pos += 2;
-						token = TOKEN.BIGGER_EQUAL;
-					} else {
-						pos++;
-						token = TOKEN.BIGGER;
-					}
-					break;
-				case '<':
-					if (pos + 1 < len && (charFormula[pos + 1] == '=') || (charFormula[pos + 1] == '>')) {
-						if (charFormula[pos + 1] != '>') {
-							pos += 2;
-							token = TOKEN.SMALLER_EQUAL;
+				switch (charFormula[charPosition]) {
+					case '"':
+						charPosition++;
+						token = TOKEN.STRING;
+						break;
+					case '.':
+						charPosition++;
+						token = TOKEN.NUMBER;
+						break;
+					// case '#': pos++; token = TOKEN.DATE; break;
+					case ',':
+						charPosition++;
+						token = TOKEN.DELIMITER;
+						break;
+					case '+':
+						charPosition++;
+						token = TOKEN.PLUS;
+						break;
+					case '-':
+						charPosition++;
+						token = TOKEN.MINUS;
+						break;
+					case '&':
+						if (charFormula[charPosition + 1] != '&') {
+							charPosition++;
+							token = TOKEN.CONCATENATE;
 						}
-					} else {
-						pos++;
-						token = TOKEN.SMALLER;
+						break;
+					case '*':
+						charPosition++;
+						token = TOKEN.MULTIPLY;
+						break;
+					case '/':
+						charPosition++;
+						token = TOKEN.DIVIDE;
+						break;
+					case '=':
+						charPosition++;
+						token = TOKEN.EQUAL;
+						break;
+					case '(':
+						charPosition++;
+						token = TOKEN.LEFT_BRACKET;
+						break;
+					case ')':
+						charPosition++;
+						token = TOKEN.RIGHT_BRACKET;
+						break;
+					case '^':
+						charPosition++;
+						token = TOKEN.POWER;
+						break;
+					case '%':
+						charPosition++;
+						token = TOKEN.REMAINDER;
+						break;
+					case '~':
+						charPosition++;
+						token = TOKEN.NOT;
+						break;
+					case '>':
+						if (charPosition + 1 < formulaLength && charFormula[charPosition + 1] == '=') {
+							charPosition += 2;
+							token = TOKEN.BIGGER_EQUAL;
+						} else {
+							charPosition++;
+							token = TOKEN.BIGGER;
+						}
+						break;
+					case '<':
+						if (charPosition + 1 < formulaLength && (charFormula[charPosition + 1] == '=') || (charFormula[charPosition + 1] == '>')) {
+							if (charFormula[charPosition + 1] != '>') {
+								charPosition += 2;
+								token = TOKEN.SMALLER_EQUAL;
+							}
+						} else {
+							charPosition++;
+							token = TOKEN.SMALLER;
+						}
+						break;
 					}
-					break;
-				}
 
-				if (pos + 1 < len && token == TOKEN.UNDEF) {
-					switch (formula.substring(pos, pos + 2)) {
+				if (charPosition + 1 < formulaLength && token == TOKEN.UNDEF) {
+					switch (cellFormula.substring(charPosition, charPosition + 2)) {
 					case "||":
-						pos += 2;
+						charPosition += 2;
 						token = TOKEN.OR;
 						break;
 					case "&&":
-						pos += 2;
+						charPosition += 2;
 						token = TOKEN.AND;
 						break;
 					case "<>":
 					case "!=":
-						pos += 2;
+						charPosition += 2;
 						token = TOKEN.NOT_EQUAL;
 						break;
-					}
+				}
 
-					if (token == TOKEN.UNDEF && pos + 8 < len
-							&& (formula.substring(pos, pos + 8).toUpperCase() == "BETWEEN "
-									|| formula.substring(pos, pos + 8).toUpperCase() == "BETWEEN(")) {
-						pos += 7;
+					if (token == TOKEN.UNDEF && charPosition + 8 < formulaLength
+							&& (cellFormula.substring(charPosition, charPosition + 8).toUpperCase() == "BETWEEN "
+									|| cellFormula.substring(charPosition, charPosition + 8).toUpperCase() == "BETWEEN(")) {
+						charPosition += 7;
 						token = TOKEN.BETWEEN;
 					}
 
-					if (token == TOKEN.UNDEF && pos + 3 < len && (formula.substring(pos, pos + 3).toUpperCase() == "IN("
-							|| formula.substring(pos, pos + 3).toUpperCase() == "IN ")) {
-						pos += 2;
+					if (token == TOKEN.UNDEF && charPosition + 3 < formulaLength && (cellFormula.substring(charPosition, charPosition + 3).toUpperCase() == "IN("
+							|| cellFormula.substring(charPosition, charPosition + 3).toUpperCase() == "IN ")) {
+						charPosition += 2;
 						token = TOKEN.IN;
 					}
 
-					if (token == TOKEN.UNDEF && pos + 5 < len
-							&& (formula.substring(pos, pos + 5).toUpperCase() == "LIKE "
-									|| formula.substring(pos, pos + 5).toUpperCase() == "LIKE\"")) {
-						pos += 4;
+					if (token == TOKEN.UNDEF && charPosition + 5 < formulaLength
+							&& (cellFormula.substring(charPosition, charPosition + 5).toUpperCase() == "LIKE "
+									|| cellFormula.substring(charPosition, charPosition + 5).toUpperCase() == "LIKE\"")) {
+						charPosition += 4;
 						token = TOKEN.LIKE;
 					}
 
-					if (token == TOKEN.UNDEF && pos + 4 < len
-							&& (formula.substring(pos, pos + 5).toUpperCase() == "NOT "
-									|| formula.substring(pos, pos + 5).toUpperCase() == "NOT(")) {
-						pos += 3;
+					if (token == TOKEN.UNDEF && charPosition + 4 < formulaLength
+							&& (cellFormula.substring(charPosition, charPosition + 5).toUpperCase() == "NOT "
+									|| cellFormula.substring(charPosition, charPosition + 5).toUpperCase() == "NOT(")) {
+						charPosition += 3;
 						token = TOKEN.NOT;
 					}
 				}
 			}
 
 			if (token == TOKEN.UNDEF) {
-				Matcher matcher = regExBool.matcher(formula.substring(pos));
+				Matcher matcher = regExBool.matcher(cellFormula.substring(charPosition));
 				if (matcher.find() && (matcher.start() == 0)) {
-					pos += matcher.end();
-					int tmpPos = pos;
+					charPosition += matcher.end();
+					int tmpPos = charPosition;
 					_readToken();
 					if (token == TOKEN.LEFT_BRACKET) {
 						_readToken();
 						_readThis(TOKEN.RIGHT_BRACKET, "TRUE/FALSE-function, expected )");
 					} else
-						pos = tmpPos;
+						charPosition = tmpPos;
 					token = (matcher.group(0).toUpperCase() == "TRUE") ? TOKEN.TRUE : TOKEN.FALSE;
 				}
 			}
 
 			if (token == TOKEN.NUMBER || token == TOKEN.STRING) {
 				switch (token) {
-				case NUMBER: {
-					double d = _readNumber();
-					token = TOKEN.NUMBER;
-					data = d;
-					break;
-				}
-				case STRING: {
-					data = _readString();
-					break;
-				}
+					case NUMBER: {
+						double d = _readNumber();
+						token = TOKEN.NUMBER;
+						data = d;
+						break;
+					}
+					case STRING: {
+						data = _readString();
+						break;
+					}
 				}
 			}
 
@@ -308,52 +313,52 @@ public class ExpressionTree {
 		private void _readThis(TOKEN nextToken, String err) throws IllegalArgumentException {
 			if (token != nextToken)
 				throw new IllegalArgumentException(
-						err + ": " + this.token.toString() + "," + this.pos + "," + this.formula);
+						err + ": " + this.token.toString() + "," + this.charPosition + "," + this.cellFormula);
 		}
 
 		private double _readNumber() {
-			int _start = pos;
-			while (pos < len && (Character.isDigit(this.charFormula[pos]) || this.charFormula[pos] == '.'))
-				pos++;
+			int _start = charPosition;
+			while (charPosition < formulaLength && (Character.isDigit(this.charFormula[charPosition]) || this.charFormula[charPosition] == '.'))
+				charPosition++;
 
-			String _s = new String(this.charFormula, _start, pos - _start);
+			String _s = new String(this.charFormula, _start, charPosition - _start);
 
 			return Double.valueOf(_s);
 		}
 
 		private String _readString() {
-			int _p = pos;
-			int _p2 = formula.indexOf('"', _p);
-			while (_p2 == formula.indexOf("\"\"", _p)) {
+			int _p = charPosition;
+			int _p2 = cellFormula.indexOf('"', _p);
+			while (_p2 == cellFormula.indexOf("\"\"", _p)) {
 				_p = _p2 + 2;
-				_p2 = formula.indexOf('"', _p);
+				_p2 = cellFormula.indexOf('"', _p);
 			}
 
-			_p = pos;
-			pos = _p2 + 1;
+			_p = charPosition;
+			charPosition = _p2 + 1;
 
-			return formula.substring(_p, _p2).replace("\"\"", "\"");
+			return cellFormula.substring(_p, _p2).replace("\"\"", "\"");
 		}
 
 		private FUNCTION _readFunctionToken() {
-			if (pos + 5 < len)
-				switch (formula.substring(pos, pos + 5).toUpperCase()) {
+			if (charPosition + 5 < formulaLength)
+				switch (cellFormula.substring(charPosition, charPosition + 5).toUpperCase()) {
 				case "COUNT":
-					pos += 5;
+					charPosition += 5;
 					return FUNCTION.COUNT;
 				}
 
-			if (pos + 4 < len)
-				switch (formula.substring(pos, pos + 4).toUpperCase()) {
+			if (charPosition + 4 < formulaLength)
+				switch (cellFormula.substring(charPosition, charPosition + 4).toUpperCase()) {
 				case "MEAN":
-					pos += 4;
+					charPosition += 4;
 					return FUNCTION.MEAN;
 				}
 
-			if (pos + 3 < len)
-				switch (formula.substring(pos, pos + 3).toUpperCase()) {
+			if (charPosition + 3 < formulaLength)
+				switch (cellFormula.substring(charPosition, charPosition + 3).toUpperCase()) {
 				case "SUM":
-					pos += 3;
+					charPosition += 3;
 					return FUNCTION.SUM;
 				}
 
@@ -477,7 +482,7 @@ public class ExpressionTree {
 						|| token == TOKEN.SMALLER || token == TOKEN.SMALLER_EQUAL || token == TOKEN.NOT_EQUAL) {
 					if (not)
 						throw new IllegalArgumentException("not can not be used with =,<>,!=,>,<,<=,>="
-								+ this.token.toString() + "," + this.pos + "," + this.formula);
+								+ this.token.toString() + "," + this.charPosition + "," + this.cellFormula);
 
 					TOKEN _t = token;
 
@@ -568,7 +573,7 @@ public class ExpressionTree {
 
 				if (token != TOKEN.RIGHT_BRACKET)
 					throw new IllegalArgumentException("unexpected element, must be )" + this.token.toString() + ","
-							+ this.pos + "," + this.formula);
+							+ this.charPosition + "," + this.cellFormula);
 
 				break;
 			case NUMBER:
@@ -602,7 +607,7 @@ public class ExpressionTree {
 				break;
 			default:
 				throw new IllegalArgumentException("unexpected element " + token.toString() + ": "
-						+ this.token.toString() + "," + this.pos + "," + this.formula);
+						+ this.token.toString() + "," + this.charPosition + "," + this.cellFormula);
 			}
 
 			return r;
@@ -789,7 +794,7 @@ public class ExpressionTree {
 		ExpressionTree.ExpressionParser parser = new ExpressionTree.ExpressionParser(formula, cell);
 		parser._readToken();
 		ExpressionTree ret = parser._readOr();
-		if (parser.pos != formula.length() || parser.token != TOKEN.UNDEF)
+		if (parser.charPosition != formula.length() || parser.token != TOKEN.UNDEF)
 			throw new IllegalArgumentException(formula + " Formula has false structure");
 
 		// remove dependency, if exists

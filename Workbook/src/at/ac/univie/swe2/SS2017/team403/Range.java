@@ -35,10 +35,10 @@ public class Range {
 				if (wshtName.substring(0, 1) == "'") {
 					wshtName = wshtName.substring(1, wshtName.length() - 2);					
 				}
-				if (!Application.getActiveWorkbook().getSheets().containsKey(wshtName)) {
+				if (!Application.getActiveWorkbook().getWorksheets().containsKey(wshtName)) {
 					throw new IllegalArgumentException("Worksheet " + wshtName + " doesn't exists");					
 				}
-				worksheet = Application.getActiveWorkbook().getSheet(wshtName);
+				worksheet = Application.getActiveWorkbook().getWorksheet(wshtName);
 				singleCellReference = singleCellReference.substring(singleCellReference.indexOf('!') + 1);
 			}
 
