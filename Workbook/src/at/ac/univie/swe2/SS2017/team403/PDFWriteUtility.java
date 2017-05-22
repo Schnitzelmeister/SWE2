@@ -13,48 +13,54 @@ import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.opencsv.CSVReader;
 
+/**
+ * This class is used to convert a csv-file into a pdf-file. 
+ * Each csv-cell is stored into a pdf-cell.
+ * Every pdf-row contains only five cells. If the csv-row
+ * is longer than five, there will be another pdf-row.
+ */
 public class PDFWriteUtility {
-	
-	public static void convertCSVToPDF(String filepath) throws DocumentException, IOException{
-		
-		File csvFile = new File(filepath+".csv");
-		FileReader fileReader = new FileReader(filepath+".csv");
+
+	public static void convertCSVToPDF(String filepath) throws DocumentException, IOException {
+
+		File csvFile = new File(filepath + ".csv");
+		FileReader fileReader = new FileReader(filepath + ".csv");
 		CSVReader reader = new CSVReader(fileReader, ',');
-		FileOutputStream fileOutputStream = new FileOutputStream(filepath+".pdf");
+		FileOutputStream fileOutputStream = new FileOutputStream(filepath + ".pdf");
 		String[] nextLine;
-		
+
 		int columnCount = reader.readNext().length;
-		Boolean isColumnBiggerFive = ((columnCount>5)?true:false);
-		
+		Boolean isColumnBiggerFive = ((columnCount > 5) ? true : false);
+
 		Document pdfFile = new Document();
 		PdfPTable pdfTable = new PdfPTable(5);
 		pdfTable.setWidthPercentage(100);
 		PdfPCell pdfTableCell;
 		Phrase csvPhrase;
-		
+
 		PdfWriter.getInstance(pdfFile, fileOutputStream);
 		pdfFile.open();
-		
-		while((nextLine = reader.readNext()) != null){
-			
-			for(int i=0;i<columnCount;++i){
+
+		while ((nextLine = reader.readNext()) != null) {
+
+			for (int i = 0; i < columnCount; ++i) {
 				csvPhrase = new Phrase(nextLine[i]);
 				pdfTableCell = new PdfPCell(csvPhrase);
 				pdfTable.addCell(pdfTableCell);
 			}
-			
-			if(isColumnBiggerFive){
-				for(int j=0;j<(4+(columnCount%5));++j){
+
+			if (isColumnBiggerFive) {
+				for (int j = 0; j < (4 + (columnCount % 5)); ++j) {
 					pdfTable.addCell(" ");
 				}
 			}
-			
+
 		}
-		
+
 		pdfFile.add(pdfTable);
 		reader.close();
 		csvFile.delete();
-		
+
 	}
 
 }

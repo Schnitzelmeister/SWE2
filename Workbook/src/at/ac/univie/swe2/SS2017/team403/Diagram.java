@@ -1,5 +1,9 @@
 package at.ac.univie.swe2.SS2017.team403;
-
+/**
+ * 
+ * 
+ *
+ */
 public abstract class Diagram {
 
 	protected String name;
@@ -11,29 +15,30 @@ public abstract class Diagram {
 		this.parent = wbk;
 		this.diagramChangedCallback = diagramChangedCallback;
 	}
-	
-	public String getName() { return name; }
-	public void setName(String name) throws IllegalArgumentException
-	{
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) throws IllegalArgumentException {
 		boolean worksheetExists = true;
-		//check if sheet with new name exists
+		// check if sheet with new name exists
 		try {
-			parent.getSheet(name);
+			parent.getWorksheet(name);
 			worksheetExists = true;
-		}
-		catch(IllegalArgumentException e) {
+		} catch (IllegalArgumentException e) {
 			worksheetExists = false;
 		}
-		
+
 		if (worksheetExists)
 			throw new IllegalArgumentException("Sheet with name " + name + " already exists");
-		
+
 		String oldName = this.name;
 		this.name = name;
-		
-		//inform workbook
+
+		// inform workbook
 		if (diagramChangedCallback != null)
 			diagramChangedCallback.afterDiagramRenamed(oldName, this);
-		
+
 	}
 }

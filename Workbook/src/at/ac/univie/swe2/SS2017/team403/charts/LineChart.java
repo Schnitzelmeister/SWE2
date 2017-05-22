@@ -45,7 +45,7 @@ public class LineChart extends ApplicationFrame implements Charts {
 			String[] title = firstRow.split(";");
 			NumberFormat format = NumberFormat.getInstance();
 
-			// for(int i=0; inputStream.hasNext();i++){
+			
 			while (inputStream.hasNext()) {
 				String data = inputStream.next();
 				String[] values = data.split(";");
@@ -56,10 +56,10 @@ public class LineChart extends ApplicationFrame implements Charts {
 					try {
 						number = format.parse(values[j + 1]);
 						double d = number.doubleValue();
-						// dataset.addValue(d,values[0],title[j+1]);
+					
 						dataset.addValue(d, title[j + 1], values[0]);
 					} catch (ParseException e) {
-						// TODO Auto-generated catch block
+						
 						e.printStackTrace();
 					}
 
