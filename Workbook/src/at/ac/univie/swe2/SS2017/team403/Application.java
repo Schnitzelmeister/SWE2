@@ -43,10 +43,12 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 		return activeWorkbook;
 	}
 
+
 	/**
-	 * Write Csv Format File
 	 * 
-	 * @throws IOException
+	 * @param workSheetName a String which contains the name of worksheet
+	 * @param filePath a string which contains the path fo write a csv
+	 * @throws IOException IOException throws I0Exception 
 	 */
 	public void writeCSV(String workSheetName, String filePath) throws IOException {
 		FileWriter writer = new FileWriter(filePath + ".csv");
@@ -57,10 +59,10 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 	/**
 	 * Write csv in pdf
 	 * 
-	 * @param workSheetName
-	 * @param filepath
-	 * @throws IOException
-	 * @throws DocumentException
+	 * @param workSheetName a String which contains the name of worksheet
+	 * @param filepath  a string which contains the path fo write a pdf
+	 * @throws IOException IOException if not found file
+	 * @throws DocumentException DocumentException
 	 */
 	public void writePDF(String workSheetName, String filepath) throws IOException, DocumentException {
 		writeCSV(workSheetName, filepath);
@@ -68,7 +70,11 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 	}
 
 	/**
-	 * Open CSV format File
+	 * 
+	 * @param fileLocation a String that gives the location of a file
+	 * @param delimiter the char that used as delimiter in csv
+	 * @param quotation the quatiation
+	 * @throws IOException IOException by open a file
 	 */
 	public void openCSV(String fileLocation, char delimiter, char quotation) throws IOException {
 		CSVReader reader = new CSVReader(new FileReader(fileLocation), delimiter, quotation);
