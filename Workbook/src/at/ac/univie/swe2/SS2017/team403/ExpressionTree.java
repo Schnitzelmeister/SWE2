@@ -5,8 +5,18 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * 
+ *The class will used for the expression in a cell
+ *
+ */
 public class ExpressionTree {
 	
+	/**
+	 * 
+	 * The class Token is for the labeling
+	 *
+	 */
 	private enum TOKEN {
         CELL,
         RANGE,
@@ -51,7 +61,11 @@ public class ExpressionTree {
         PERIOD,
         EXPRESSION
 	}
-	
+	/**
+	 * 
+	 * 
+	 *
+	 */
 	private enum FUNCTION {
 		SUM,
 		MEAN,
@@ -59,6 +73,11 @@ public class ExpressionTree {
 		UNDEF
 	}
 
+	/**
+	 * 
+	 * 
+	 *
+	 */
 	private static class ExpressionParser {
 	
 	    private char[] charFormula;
@@ -95,6 +114,11 @@ public class ExpressionTree {
         private static final Pattern regExBool = Pattern.compile(regExBooleanPattern, Pattern.CASE_INSENSITIVE);
 
 	
+        /**
+         * the constructor has a call and the contains of the cell(formula) as input parameters and initializes the instances.
+         * @param formula the contains of a cell
+         * @param cell the cell with formula
+         */
 		public ExpressionParser(String formula, Cell cell) {
 			this.cell = cell;
 			this.cellFormula = formula;
@@ -105,6 +129,7 @@ public class ExpressionTree {
 
 		/**
 		 * At the beginning a Token is undefined if charPoition is same or greater than formulaLength.
+		 * 
 		 * If charPosition is smaller than formulaLength, charPosition is incremented by every loop cycle.
 		 * 
 		 */
@@ -782,12 +807,20 @@ public class ExpressionTree {
 	private ArrayList<ExpressionTree> expressions = new ArrayList<ExpressionTree>();
 	private Object data = null;
 
+	/**
+	 * the method returns the datatype of the expression
+	 * @return datatype
+	 */
 	public CellInputDataType getExpressionDataType() {
 		return dataType;
 	}
 
-	public void setDataType(CellInputDataType value) {
-		dataType = value;
+	/**
+	 * the method sets the datatype of a cell
+	 * @param datatype datatype of a cell
+	 */
+	public void setDataType(CellInputDataType datatype) {
+		dataType = datatype;
 	}
 
 	/**
@@ -813,6 +846,11 @@ public class ExpressionTree {
 		return ret;
 	}
 
+	/**
+	 * The method adds a dependency 
+	 * @param cell the cell for adding dependency
+	 * @param ex the expression for the dependency
+	 */
 	private static void addDependency(Cell cell, ExpressionTree ex) {
 		if (ex.token == TOKEN.RANGE) {
 			Range r = (Range) ex.data;
