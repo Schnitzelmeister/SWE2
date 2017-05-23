@@ -790,6 +790,13 @@ public class ExpressionTree {
 		dataType = value;
 	}
 
+	/**
+	 * If the  cell contains a formula (a formula begins with "="), this method takes the cell  and the contains of the cell(formula) as input   and returns an object of the class ExpressionTree.
+	 * @param cell the cell with formula
+	 * @param formula the contains if a cell, which is a formula
+	 * @return an expression
+	 * @throws IllegalArgumentException 
+	 */
 	public static ExpressionTree parse(Cell cell, String formula) throws IllegalArgumentException {
 		ExpressionTree.ExpressionParser parser = new ExpressionTree.ExpressionParser(formula, cell);
 		parser._readToken();
