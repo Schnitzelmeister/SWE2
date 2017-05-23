@@ -2,6 +2,8 @@ package at.ac.univie.swe2.SS2017.team403;
 
 import com.itextpdf.text.DocumentException;
 import com.opencsv.CSVReader;
+import com.opencsv.CSVWriter;
+
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -49,9 +51,13 @@ public class WorkbookMainGui extends javax.swing.JFrame implements WorkbookListe
 	 * @throws IOException
 	 */
 	public void writeCSV(String workSheetName, String filePath) throws IOException {
-		FileWriter writer = new FileWriter(filePath + ".csv");
-		CsvWriteUtility.convertWorkSheetToCsv(activeWorkbook.getSheet(workSheetName), writer);
-		writer.close();
+		//FileWriter writer = new FileWriter(filePath + ".csv");
+		//CsvWriteUtility.convertWorkSheetToCsv(activeWorkbook.getWorksheet(workSheetName), writer);
+		
+		 CSVWriter writer = new CSVWriter(new FileWriter("yourfile.csv"), '\t');
+	     String[] entries = "first#second#third".split("#");
+	     writer.writeNext(entries);
+		 writer.close();
 	}
 
 	/**
@@ -73,7 +79,7 @@ public class WorkbookMainGui extends javax.swing.JFrame implements WorkbookListe
 	public void openCSV(String fileLocation, char delimiter, char quotation) throws IOException {
 		CSVReader reader = new CSVReader(new FileReader(fileLocation), delimiter, quotation);
 		List<String[]> csvValues = reader.readAll();
-		String worksheetName = "Worksheet " + Application.getActiveWorkbook().getNewId();
+		String worksheetName = "Worksheet " + Application.getActiveWorkbook().generateNewId();
 		Worksheet sheet = Application.getActiveWorkbook().addSheet(worksheetName);
 		int r = 0;
 		for (String[] ar : csvValues) {
@@ -127,7 +133,7 @@ public class WorkbookMainGui extends javax.swing.JFrame implements WorkbookListe
 
 		setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-		Integer numberOfWorksheets = activeWorkbook.getNumberOfSheets() + 1;
+		Integer numberOfWorksheets = activeWorkbook.numOfWorksheets() + 1;
 		Worksheet worksheet = activeWorkbook.addSheet("Worksheet " + numberOfWorksheets);
 
 		jScrollPane1.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
@@ -301,7 +307,7 @@ public class WorkbookMainGui extends javax.swing.JFrame implements WorkbookListe
 	}
 
 	private void openNewTabActionPerformed(java.awt.event.ActionEvent evt) {
-		String worksheetName = "Worksheet " + (Application.getActiveWorkbook().getNewId() - 1);
+		String worksheetName = "Worksheet " + (Application.getActiveWorkbook().generateNewId() - 1);
 		Application.getActiveWorkbook().addSheet(worksheetName);
 		afterWorksheetAdded(worksheetName);
 	}
@@ -663,7 +669,7 @@ public class WorkbookMainGui extends javax.swing.JFrame implements WorkbookListe
 	public void afterWorksheetAdded(String worksheetName) {
 		JScrollPane jPane = new JScrollPane();
 		JTable albumTable = new JTable();
-		Worksheet sheet = Application.getActiveWorkbook().getSheet(worksheetName);
+		Worksheet sheet = Application.getActiveWorkbook().getWorksheet(worksheetName);
 		
 		TableModel model = new CustomTableModel(sheet);
 		albumTable.setModel(model);
@@ -703,7 +709,7 @@ public class WorkbookMainGui extends javax.swing.JFrame implements WorkbookListe
 	public void afterWorksheetRenamed(String worksheetOldName, String worksheetNewName) {
 		JTable currentTable = returnTableForCurrentTab();
 		CustomTableModel model = (CustomTableModel) currentTable.getModel();
-		Worksheet sheet = Application.getActiveWorkbook().getSheet(model.getWorksheetName());
+		Worksheet sheet = Application.getActiveWorkbook().getWorksheet(model.getWorksheetName());
 		System.out.println("The worksheet with the name: " + worksheetOldName + " has been changed to the name: "
 				+ worksheetNewName);
 		sheet.setWorksheetName(worksheetNewName);
