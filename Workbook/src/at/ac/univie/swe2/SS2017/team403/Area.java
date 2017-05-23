@@ -16,28 +16,22 @@ public class Area {
 
 	private int firstRow, lastRow, firstColumn, lastColumn;
 
-	/**
-	 * 
-	 * @return an int that gives the number of the first row
-	 */
+	/** firstRow -> top row. */
 	public int getFirstRow() {
 		return firstRow;
 	}
 
-	/**
-	 * 
-	 * @return an int value that returns the number of the last row
-	 */
+	/** lastRow -> below row. */
 	public int getLastRow() {
 		return lastRow;
 	}
 
-	/** firstColumn left-side column. */
+	/** firstColumn -> left-side column. */
 	public int getFirstColumn() {
 		return firstColumn;
 	}
 
-	/** lastColumn  right-side column. */
+	/** lastColumn -> right-side column. */
 	public int getLastColumn() {
 		return lastColumn;
 	}

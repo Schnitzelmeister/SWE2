@@ -2,7 +2,6 @@ package at.ac.univie.swe2.SS2017.team403;
 
 // Workbook Listener
 public interface WorkbookListener {
-	
 	void afterWorksheetAdded(String worksheetName);
 	void afterWorksheetRemoved(String worksheetName);
 	void afterWorksheetRenamed(String worksheetOldName, String worksheetNewName);
@@ -21,7 +20,6 @@ interface WorksheetRenameCallback {
 
 // Inernal Interface for Workbook-Diagram Relation
 interface DiagramChangedCallback {
-	
 	void afterDiagramRenamed(String diagramOldName, Diagram diagram);
 	void afterDiagramChanged(String diagramName);
 	
