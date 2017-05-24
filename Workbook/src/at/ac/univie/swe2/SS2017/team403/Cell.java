@@ -21,7 +21,7 @@ public class Cell {
 	/**
 	 * Use setNumericValue to store a double-value in a Cell.
 	 * 
-	 * @param value -> cell-input-double-value
+	 * @param value  cell-input-double-value
 	 */
 	public void setNumericValue(double value) {
 		Application.getActiveWorkbook().removeReferenceDependencies(this);
@@ -36,7 +36,7 @@ public class Cell {
 	/**
 	 * Use setTextValue to store a String-value in a Cell.
 	 * 
-	 * @param value  -> cell-input-value
+	 * @param value   cell-input-value
 	 */
 	public void setTextValue(String value) {
 		Application.getActiveWorkbook().removeReferenceDependencies(this);
@@ -51,8 +51,8 @@ public class Cell {
 	/**
 	 * Use setFormula to store a formula in a Cell.
 	 * 
-	 * @param formula -> cell-input-formula-value
-	 * @throws IllegalArgumentException -> Exception will be thrown if the formula doesn't begin with "="
+	 * @param formula  cell-input-formula-value
+	 * @throws IllegalArgumentException  Exception will be thrown if the formula doesn't begin with "="
 	 */
 	public void setFormula(String formula) throws IllegalArgumentException {
 		if (!formula.startsWith("=")) {
@@ -87,7 +87,7 @@ public class Cell {
 	/**
 	 * A cell contains a formula which is a reference of other cells.
 	 * 
-	 * @return -> referenced cell
+	 * @return  referenced cell
 	 */
 	public String getCellReferences() {
 		return "'" + parentWorksheet.getWorksheetName() + "'!R" + cellRow + "C" + cellColumn;
@@ -98,7 +98,7 @@ public class Cell {
 	}
 
 	/**
-	 * @return 0d -> double or double value
+	 * @return 0d  double or double value
 	 */
 	public double getNumericValue() {
 		if (cellValue == null) {

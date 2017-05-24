@@ -34,7 +34,7 @@ public class Workbook implements Serializable {
 
 	/**
 	 * This method removes observer from the observer-list.
-	 * @param listener -> observer
+	 * @param listener  observer
 	 */
 	public void removeListener(WorkbookListener listener) {
 		for (int i = listeners.size() - 1; i <= 0; --i) {
@@ -64,8 +64,8 @@ public class Workbook implements Serializable {
 	 * Where this is not the case, a new worktsheet will be created and the
 	 * observer will be informed.
 	 * 
-	 * @param name -> worksheetname
-	 * @return -> returns a worksheet
+	 * @param name  worksheetname
+	 * @return  returns a worksheet
 	 */
 	public Worksheet addSheet(String name) {
 		if (worksheetCollection.containsKey(name)) {
@@ -109,7 +109,7 @@ public class Workbook implements Serializable {
 	 * If the worksheet doesn't exist, an exception is raised.
 	 * Finally observers will be informed.
 	 * 
-	 * @param name -> name of new worksheet
+	 * @param name  name of new worksheet
 	 */
 	public void removeSheet(String name) {
 		if (!worksheetCollection.containsKey(name))
@@ -134,9 +134,9 @@ public class Workbook implements Serializable {
 	 * Where this is not the case, a new diagram will be created and
 	 * observers will be informed.
 	 * 
-	 * @param name -> diagram-name
-	 * @param cls -> diagram-class
-	 * @return -> returns a diagram
+	 * @param name  diagram-name
+	 * @param cls  diagram-class
+	 * @return  returns a diagram
 	 */
 	public Diagram addDiagram(String name, Class<? extends Diagram> cls) {
 		if (diagramCollection.containsKey(name)) {
@@ -215,7 +215,7 @@ public class Workbook implements Serializable {
 	 * If the diagram doesn't exist, an exception is raised.
 	 * Finally all observers will be informed.
 	 * 
-	 * @param name -> name of new worksheet
+	 * @param name  name of new worksheet
 	 */
 	public void removeDiagram(String name) {
 		if (!diagramCollection.containsKey(name)){ 

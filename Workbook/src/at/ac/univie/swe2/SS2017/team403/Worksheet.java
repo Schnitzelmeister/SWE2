@@ -46,7 +46,7 @@ public class Worksheet {
 	 * Where this is not the case, the worktsheet will be renamed and the
 	 * observer pattern will be used.
 	 * 
-	 * @param name -> worksheetname 
+	 * @param name  worksheetname 
 	 */
 	public void setWorksheetName(String name) {
 		if (parentWorkbook.getWorksheets().containsKey(name)) {
@@ -78,10 +78,10 @@ public class Worksheet {
 	 * there is a similar key it returns the existing cell, otherwise it returns
 	 * a new cell.
 	 * 
-	 * @param row -> cell row
-	 * @param column -> cell column
-	 * @param isCellExisting -> is cell existing?
-	 * @return -> returns existing/new cell 
+	 * @param row  cell row
+	 * @param column  cell column
+	 * @param isCellExisting  is cell existing?
+	 * @return  returns existing/new cell 
 	 */
 	public Cell getCell(int row, int column, boolean isCellExisting) {
 		long key = getUniqueCellKey(row, column);
@@ -120,9 +120,9 @@ public class Worksheet {
 	 * If there is a column reference which starts with a square bracket we will take
 	 * the column-position and the complete formula.
 	 * 
-	 * @param cellReferences -> cell-references
-	 * @param cellContext -> selected cell
-	 * @return -> returns a cell with/without references
+	 * @param cellReferences  cell-references
+	 * @param cellContext  selected cell
+	 * @return  returns a cell with/without references
 	 */
 	public Cell getCell(String cellReferences, Cell cellContext) {
 		int row, column;

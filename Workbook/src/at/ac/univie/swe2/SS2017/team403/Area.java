@@ -16,22 +16,35 @@ public class Area {
 
 	private int firstRow, lastRow, firstColumn, lastColumn;
 
-	/** firstRow -> top row. */
+	
+	/**
+	 * 
+	 * @return an int that gives the number of the first row
+	 */
 	public int getFirstRow() {
 		return firstRow;
 	}
 
-	/** lastRow -> below row. */
+	/**
+	 * 
+	 * @return an int value that returns the number of the last row
+	 */
 	public int getLastRow() {
 		return lastRow;
 	}
 
-	/** firstColumn -> left-side column. */
+	/**
+	 * 
+	 * @return an int value that returns the number of the first column
+	 */
 	public int getFirstColumn() {
 		return firstColumn;
 	}
 
-	/** lastColumn -> right-side column. */
+	/**
+	 * 
+	 * @return an int value that returns the number of the last column
+	 */
 	public int getLastColumn() {
 		return lastColumn;
 	}
@@ -40,8 +53,8 @@ public class Area {
 	 * This constructor is used to set a range which contains different cells.
 	 * We need only two cells to build a rectangle to define the area.
 	 * 
-	 * @param cellTopLeft
-	 * @param cellBottomRight
+	 * @param cellTopLeft the top left cell of an area
+	 * @param cellBottomRight the bottom right cell of an area
 	 */
 	public Area(Cell cellTopLeft, Cell cellBottomRight) {
 		parentWorksheet = cellTopLeft.getParentWorksheet();
@@ -54,7 +67,7 @@ public class Area {
 	/**
 	 * This constructor is used to set a specific cell.
 	 * 
-	 * @param cell
+	 * @param cell a cell which is only one cell of an area
 	 */
 	public Area(Cell cell) {
 		parentWorksheet = cell.getParentWorksheet();
@@ -67,9 +80,9 @@ public class Area {
 	/**
 	 * This constructor is used to set a referenced area of a cell.
 	 * 
-	 * @param cellReferences -> references of the selected cell
-	 * @param worksheet -> selected worksheet
-	 * @param cellContext -> selected cell
+	 * @param cellReferences  references of the selected cell
+	 * @param worksheet  selected worksheet
+	 * @param cellContext  selected cell
 	 */
 	public Area(String cellReferences, Worksheet worksheet, Cell cellContext) {
 		parentWorksheet = worksheet;
@@ -86,7 +99,7 @@ public class Area {
 	 * A cell contains multiple referenced cells as a string.
 	 * Here you get the cell content as a String. 
 	 * 
-	 * @return -> referenced area as a String
+	 * @return  referenced area as a String
 	 */
 	public String getCellReferences() {
 		return "'" + parentWorksheet.getWorksheetName() + "'!R" + firstRow + "C" + firstColumn + ":" + "R" + lastRow
