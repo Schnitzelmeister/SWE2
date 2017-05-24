@@ -1,7 +1,6 @@
 # Hello 2017s SE2 Work Group 403!
 
-## Master Branch
+## 2017s SE2 Task3 Branch
 
-This is your work group submission repository.
-
-You can find your work group members in the project view under 'Members' or you can directly click on this [Link](https://gitlab.swa.univie.ac.at/submission/g2017s_se2_0403/project_members)
+This branch is used for the **Task 3** submission.
+The assignment of this task is provided in the 'assignment.pdf' PDF file.
