@@ -1,5 +1,9 @@
 package at.ac.univie.swe2.SS2017.team403;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.Comparator;
 
 /**
@@ -8,9 +12,9 @@ import java.util.Comparator;
  * which is also an object or a formula.
  * 
  */
-public class Cell {
+public class Cell implements Externalizable {
 
-	private Worksheet parentWorksheet;
+	private transient Worksheet parentWorksheet;
 	private int cellRow, cellColumn;
 
 	private CellInputDataType cellInputDataType = CellInputDataType.General;
@@ -59,11 +63,29 @@ public class Cell {
 			throw new IllegalArgumentException(formula + " Formula must begin with = symbol");
 		}
 
-		this.cellFormula = formula;
-		cellExpression = ExpressionTree.parse(this, formula);
-		cellInputDataType = cellExpression.getExpressionDataType();
-		calculateCellExpression();
-		parentWorksheet.getParentWorkbook().calculateReferenceDependencies(this);
+		if (!this.parentWorksheet.getParentWorkbook().getAutoCalculate()) {
+			cellFormula = formula;
+			cellExpression = null;
+			return;
+		}
+		
+		String previous = this.cellFormula;
+		try {
+			cellFormula = formula;
+			cellExpression = ExpressionTree.parse(this, formula);
+			cellInputDataType = cellExpression.getExpressionDataType();
+			calculateCellExpression();
+		}
+		catch (IllegalArgumentException e) { this.cellFormula = previous; cellExpression = null; throw e; }
+		
+		try {
+			parentWorksheet.getParentWorkbook().calculateReferenceDependencies(this);
+		} catch (IllegalArgumentException e) {
+			cellFormula = null;
+			cellExpression = null;
+	    	Application.getActiveWorkbook().removeReferenceDependencies(this);
+			throw e;
+		}
 	}
 
 	public void calculateCellExpression() {
@@ -100,18 +122,32 @@ public class Cell {
 	/**
 	 * @return 0d  double or double value
 	 */
-	public double getNumericValue() {
+	public double getNumericValue() throws ClassCastException {
 		if (cellValue == null) {
 			return 0d;
 		}
-		return (double) cellValue;
+
+		if (cellInputDataType == CellInputDataType.Number)
+			return (double)cellValue;
+		
+		if (cellInputDataType == CellInputDataType.General) {
+			try {
+				return Double.parseDouble(cellValue.toString());
+			}
+			catch (NumberFormatException e) {
+				return 0d;
+			}
+		}
+		
+    	throw new ClassCastException (this.getCellReferences() + " Incompatible DataType");
+
 	}
 
 	public String getTextValue() {
 		if (cellValue == null) {
 			return "";
 		}
-		return (String) cellValue;
+		return cellValue.toString();
 	}
 
 	public Cell(Worksheet parent, int row, int column) {
@@ -119,7 +155,19 @@ public class Cell {
 		this.cellRow = row;
 		this.cellColumn = column;
 	}
+	
+	
+	Cell(Cell cell, Worksheet parent) {
+		this.parentWorksheet = parent;
+		this.cellRow = cell.cellRow;
+		this.cellColumn = cell.cellColumn;
+		this.cellInputDataType = cell.cellInputDataType;
+		this.cellValue = cell.cellValue;
+		if (this.cellFormula != null)
+			this.setFormula(cell.cellFormula);
+	}
 
+	
 	public Worksheet getParentWorksheet() {
 		return parentWorksheet;
 	}
@@ -146,6 +194,45 @@ public class Cell {
 			} else {
 				return var;
 			}
+		}
+	}
+	
+	
+	//Externalizable
+	public void writeExternal(ObjectOutput out) throws IOException {
+		out.writeInt(cellRow);
+		out.writeInt(cellColumn);
+		out.writeUTF(cellFormula); 
+		out.writeInt(cellInputDataType.getNumVal());
+		switch(cellInputDataType) {
+		case Boolean:
+			out.writeBoolean((boolean)cellValue);
+			break;
+		case Number:
+			out.writeDouble((double)cellValue);
+			break;
+		default:
+			out.writeUTF(cellValue.toString());
+			break;
+		}
+	}
+
+	//Externalizable
+	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+		cellRow = in.readInt();
+		cellColumn = in.readInt();
+		cellFormula = in.readUTF();
+		cellInputDataType = CellInputDataType.values()[in.readInt()];
+		switch(cellInputDataType) {
+		case Boolean:
+			cellValue = in.readBoolean();
+			break;
+		case Number:
+			cellValue = in.readDouble();
+			break;
+		default:
+			cellValue = in.readUTF();
+			break;
 		}
 	}
 

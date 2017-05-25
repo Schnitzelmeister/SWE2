@@ -2,22 +2,38 @@ package at.ac.univie.swe2.SS2017.team403;
 
 import com.itextpdf.text.DocumentException;
 import com.opencsv.CSVReader;
+import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
+import java.util.TreeMap;
 
+import javax.swing.Box;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JViewport;
+import javax.swing.ListSelectionModel;
+import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
@@ -26,11 +42,37 @@ import javax.swing.JMenuItem;
 import javax.swing.JMenu;
 
 public class Application extends javax.swing.JFrame implements WorkbookListener {
-
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
+
+    private class BoxKeyListener implements KeyListener {
+        private JButton ok;
+        private JButton cancel;
+
+        public BoxKeyListener(JButton ok, JButton cancel) {
+            this.ok = ok;
+            this.cancel = cancel;
+        }
+
+        @Override
+        public void keyPressed(KeyEvent e){
+            if(e.getKeyCode() == KeyEvent.VK_ENTER){
+            	e.consume();
+            	ok.doClick();
+            }
+            else if(e.getKeyCode() == KeyEvent.VK_ESCAPE){
+            	e.consume();
+            	cancel.doClick();
+            }
+        }
+
+        @Override
+        public void keyTyped(KeyEvent e) {
+        }
+
+        @Override
+        public void keyReleased(KeyEvent e) {
+        }
+    }
 
 	/**
 	 * Creates new form WorkbookGui
@@ -39,10 +81,22 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 		initComponents();
 	}
 
+	private static Workbook activeWorkbook = new Workbook();
 	public static Workbook getActiveWorkbook() {
 		return activeWorkbook;
 	}
 
+	/**
+	 * Open proprietary Format File
+	 * @param filePath a string which contains the path to File
+	 * @throws IOException IOException throws I0Exception 
+	 */
+	public void openFile(String filefilePathName) throws IOException
+	{
+		//activeWorkbook
+		loadModel();
+	}
+	
 	/**
 	 * Write Csv Format File
 	 * @param workSheetName a String which contains the name of worksheet
@@ -92,27 +146,47 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 		}
 		reader.close();
 
-		// System.out.println("gelesen rows=" + r + ", cols=" +
-		// sheet.getUsedArea().getC2());
-
-		TableModel model = new CustomTableModel(sheet);
-		returnTableForCurrentTab().setModel(model);
-	}
-
-	public JTable returnTableForCurrentTab() {
-		Component selected = jTabbedPane1.getSelectedComponent();
-		JViewport viewport = ((JScrollPane) selected).getViewport();
-		JTable table = (JTable) viewport.getView();
-		return table;
+		loadModel();
 	}
 
 	/**
 	 * This method is called from within the constructor to initialize the form.
 	 */
 	private void initComponents() {
+		Container pane = this.getContentPane();
 
-		activeWorkbook = new Workbook();
+		Box box = Box.createHorizontalBox();
+		labelBox = new JLabel();
+		textBox = new JTextArea();
+		textBox.setLineWrap(true);
+		textBox.getDocument().putProperty("filterNewlines", Boolean.TRUE);
+        box.add(labelBox);
+        box.add(textBox);
+        JButton jButtonOK = new JButton("OK");
+        jButtonOK.addActionListener(new ActionListener()
+        {
+        	public void actionPerformed(ActionEvent e) {
+        		boxDataAccepted();
+        	}
+        });
+        box.add(jButtonOK);
+        
+        
+        JButton jButtonCancel = new JButton("Cancel");
+        jButtonCancel.addActionListener(new ActionListener()
+        {
+        	public void actionPerformed(ActionEvent e) {
+        		boxDataCanceled();
+        	}
+        });
+        box.add(jButtonCancel);
+        
+        textBox.addKeyListener(new BoxKeyListener(jButtonOK, jButtonCancel));
+
+        
+		
 		jTabbedPane1 = new javax.swing.JTabbedPane();
+		jTabbedPane1.setTabPlacement(JTabbedPane.BOTTOM);
 		jScrollPane1 = new javax.swing.JScrollPane();
 		jTable1 = new javax.swing.JTable();
 		menuBar = new javax.swing.JMenuBar();
@@ -123,35 +197,16 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 		exitMenuItem = new javax.swing.JMenuItem();
 		editMenu = new javax.swing.JMenu();
 		openNewTab = new javax.swing.JMenuItem();
-		cutMenuItem = new javax.swing.JMenuItem();
-		copyMenuItem = new javax.swing.JMenuItem();
-		deleteMenuItem = new javax.swing.JMenuItem();
-		helpMenu = new javax.swing.JMenu();
-		contentsMenuItem = new javax.swing.JMenuItem();
-		aboutMenuItem = new javax.swing.JMenuItem();
-
 		setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-
-		Integer numberOfWorksheets = activeWorkbook.numOfWorksheets() + 1;
+		Integer numberOfWorksheets = activeWorkbook.getWorksheets().size() + 1;
 		Worksheet worksheet = activeWorkbook.addSheet("Worksheet " + numberOfWorksheets);
-
-		jScrollPane1.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
-			public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
-				jScrollPane1MouseWheelMoved(evt);
-			}
-		});
-
-		jTable1.setModel(new CustomTableModel(worksheet));
-
+		jTable1.setModel(new CustomTableModel(worksheet, jTable1, jScrollPane1));
 		jTable1.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
 		jTable1.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
 		jTable1.setGridColor(new java.awt.Color(0, 0, 0));
 		jScrollPane1.setViewportView(jTable1);
-
 		jTabbedPane1.addTab(worksheet.getWorksheetName(), jScrollPane1);
-
 		fileMenu.setText("File");
-
 		openMenuItem.setText("Open");
 		openMenuItem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -159,7 +214,6 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 			}
 		});
 		fileMenu.add(openMenuItem);
-
 		saveMenuItem.setText("Save");
 		saveMenuItem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -167,7 +221,6 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 			}
 		});
 		fileMenu.add(saveMenuItem);
-
 		saveAsMenuItem.setText("Save As ...");
 		saveAsMenuItem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -175,7 +228,6 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 			}
 		});
 		fileMenu.add(saveAsMenuItem);
-
 		exitMenuItem.setText("Exit");
 		exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -183,61 +235,33 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 			}
 		});
 		fileMenu.add(exitMenuItem);
-
 		menuBar.add(fileMenu);
-
-		editMenu.setText("Edit");
-
-		openNewTab.setText("New Tab");
+		editMenu.setText("Worksheets");
+		openNewTab.setText("Add New Worksheet");
 		openNewTab.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				openNewTabActionPerformed(evt);
 			}
 		});
 		editMenu.add(openNewTab);
-
-		closeCurrentTab = new JMenuItem("Close Tab");
-		closeCurrentTab.addActionListener(new java.awt.event.ActionListener() {
+		closeCurrentTab = new JMenuItem("Remove Worksheet");
+		/*closeCurrentTab.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				closeTab();
 			}
 		});
+		*/
 		editMenu.add(closeCurrentTab);
-
-		renameTabMenuItem = new JMenuItem("Rename Tab");
+		renameTabMenuItem = new JMenuItem("Rename Worksheet");
 		editMenu.add(renameTabMenuItem);
-		renameTabMenuItem.addActionListener(new java.awt.event.ActionListener() {
+		/*renameTabMenuItem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				renameTabActionPerformed(evt);
 			}
-		});
-
-		cutMenuItem.setText("Cut");
-		editMenu.add(cutMenuItem);
-
-		copyMenuItem.setText("Copy");
-		editMenu.add(copyMenuItem);
-
-		deleteMenuItem.setText("Delete");
-		editMenu.add(deleteMenuItem);
-
+		});*/
 		menuBar.add(editMenu);
-
-		helpMenu.setText("Help");
-
-		contentsMenuItem.setText("Contents");
-		helpMenu.add(contentsMenuItem);
-
-		aboutMenuItem.setText("About");
-		helpMenu.add(aboutMenuItem);
-
-		menuBar.add(helpMenu);
-
-		setJMenuBar(menuBar);
-
 		mnCharts = new JMenu("Charts");
 		menuBar.add(mnCharts);
-
 		createLinechartMenu = new JMenuItem("Create Linechart");
 		mnCharts.add(createLinechartMenu);
 		createLinechartMenu.addActionListener(new java.awt.event.ActionListener() {
@@ -245,28 +269,38 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 				createLineChartActionPerformed(evt);
 			}
 		});
-
 		createBarchartMenu = new JMenuItem("Create Barchart");
 		mnCharts.add(createBarchartMenu);
+		
+		renameDiagram = new JMenuItem("Rename Diagram");
+		mnCharts.add(renameDiagram);
+		
+		removeDiagram = new JMenuItem("Remove Diagram");
+		mnCharts.add(removeDiagram);
 		createBarchartMenu.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				createBarchartMenuActionPerformed(evt);
 			}
 		});
-
-		javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-		getContentPane().setLayout(layout);
-		layout.setHorizontalGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-				.addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 800, Short.MAX_VALUE));
-		layout.setVerticalGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-				.addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 579, Short.MAX_VALUE));
-
+		setJMenuBar(menuBar);
+		
+		
+		pane.add(box, BorderLayout.PAGE_START);
+		pane.add(jTabbedPane1, BorderLayout.CENTER);
+		jTabbedPane1.addChangeListener(new ChangeListener() {
+	        public void stateChanged(ChangeEvent e) {
+	        	tabChanged(e);
+	        }
+	    });
+		
 		pack();
 		setLocationRelativeTo(null);
+
 	}
 
 	private void createLineChartActionPerformed(java.awt.event.ActionEvent evt) {
 		// TODO open new tab and place linechart on tab
+		//Application.getActiveWorkbook().addDiagram("name", DiagramLine.class);
 	}
 
 	private void createBarchartMenuActionPerformed(java.awt.event.ActionEvent evt) {
@@ -278,7 +312,7 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 	}
 
 	private void renameTabActionPerformed(java.awt.event.ActionEvent evt) {
-		try {
+		/*try {
 			JTable currentTable = returnTableForCurrentTab();
 			CustomTableModel model = (CustomTableModel) currentTable.getModel();
 			String oldName = model.getWorksheetName();
@@ -302,7 +336,7 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 		} catch (IllegalArgumentException i) {
 			JOptionPane.showMessageDialog(this, i.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 		}
-
+*/
 	}
 
 	private void openNewTabActionPerformed(java.awt.event.ActionEvent evt) {
@@ -565,7 +599,7 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 	}
 
 	private void jScrollPane1MouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
-		int verticalExtent = jScrollPane1.getVerticalScrollBar().getModel().getExtent();
+		/*int verticalExtent = jScrollPane1.getVerticalScrollBar().getModel().getExtent();
 		int horizontalExtent = jScrollPane1.getHorizontalScrollBar().getModel().getExtent();
 
 		if ((jScrollPane1.getVerticalScrollBar().getValue() + verticalExtent) == jScrollPane1.getVerticalScrollBar()
@@ -579,10 +613,11 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 			sizeColumns++;
 			TableModel model = (CustomTableModel) jTable1.getModel();
 			// model.setColumnCount(++sizeColumns); //TODO
-		}
+		}*/
 	}
 
 	public void closeTab() {
+		/*
 		Component selected = jTabbedPane1.getSelectedComponent();
 		JViewport viewport = ((JScrollPane) selected).getViewport();
 		JTable mytable = (JTable) viewport.getView();
@@ -593,7 +628,7 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 		if (selected != null)
 			jTabbedPane1.remove(selected);
 
-		afterWorksheetRemoved(sheetName);
+		afterWorksheetRemoved(sheetName);*/
 	}
 
 	/**
@@ -624,14 +659,51 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 
 		java.awt.EventQueue.invokeLater(new Runnable() {
 			public void run() {
-				new Application().setVisible(true);
+				Application gui = new Application();
+				
+				boolean createDefaultWorkbook = true;
+				
+				if (args.length > 0) {
+					//open file
+					if (args[0].toUpperCase().endsWith(".wbk")) {
+						try { gui.openFile(args[0]); }
+						catch(IOException e) {
+							e.printStackTrace();
+							JOptionPane.showMessageDialog(null, e.getMessage());
+						}
+						createDefaultWorkbook = false;
+					}
+					//open csv
+					else if (args.length > 2) {
+						try { gui.openCSV(args[0], args[1].charAt(0), args[2].charAt(0)); }
+						catch(IOException e) {
+							e.printStackTrace();
+							JOptionPane.showMessageDialog(null, e.getMessage());
+						}
+						createDefaultWorkbook = false;
+					}
+				}
+				
+				if (createDefaultWorkbook) {
+					//create default workbook
+					System.out.println("create default workbook");
+
+					Application.activeWorkbook = new Workbook();
+					Application.activeWorkbook.addSheet("Sheet 1");
+					Application.activeWorkbook.addSheet("Sheet 2");
+					Application.activeWorkbook.addSheet("Sheet 3");
+				}
+				
+				gui.loadModel();
+								
+				gui.setVisible(true);
 			}
 		});
 	}
 
 	public boolean isNumber(String str) {
 		try {
-			double d = Double.parseDouble(str);
+			Double.parseDouble(str);
 		} catch (NumberFormatException nfe) {
 			return false;
 		}
@@ -639,6 +711,10 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 	}
 
 	// Variables declaration
+	private JLabel labelBox;
+	private JTextArea textBox;
+
+
 	private javax.swing.JMenuItem aboutMenuItem;
 	private javax.swing.JMenuItem contentsMenuItem;
 	private javax.swing.JMenuItem copyMenuItem;
@@ -657,7 +733,6 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 	private javax.swing.JMenuItem saveAsMenuItem;
 	private javax.swing.JMenuItem saveMenuItem;
 
-	private static Workbook activeWorkbook = new Workbook();
 	private String choosedAbsolutFile = null;
 	private Integer sizeRows = 80;
 	private Integer sizeColumns = 30;
@@ -666,23 +741,12 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 	private JMenu mnCharts;
 	private JMenuItem createLinechartMenu;
 	private JMenuItem createBarchartMenu;
-
+	private JMenuItem removeDiagram;
+	private JMenuItem renameDiagram;
+	
 	@Override
 	public void afterWorksheetAdded(String worksheetName) {
-		JScrollPane jPane = new JScrollPane();
-		JTable albumTable = new JTable();
-		Worksheet sheet = Application.getActiveWorkbook().getWorksheet(worksheetName);
-
-		TableModel model = new CustomTableModel(sheet);
-		albumTable.setModel(model);
-
-		jPane.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
-		jPane.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-
-		jPane.setViewportView(albumTable);
-		int tabCount = jTabbedPane1.getTabCount();
-		albumTable.setName("TableNr.: " + tabCount);
-		jTabbedPane1.addTab(worksheetName, jPane);
+		loadWorksheet(Application.getActiveWorkbook().getWorksheet(worksheetName));
 	}
 
 	/*
@@ -695,7 +759,8 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 	 */
 	@Override
 	public void afterWorksheetRemoved(String worksheetName) {
-		Application.getActiveWorkbook().removeSheet(worksheetName);
+		tables.remove(worksheetName);
+		jTabbedPane1.remove(jTabbedPane1.indexOfTab(worksheetName));
 	}
 
 	/*
@@ -709,44 +774,259 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 	 */
 	@Override
 	public void afterWorksheetRenamed(String worksheetOldName, String worksheetNewName) {
-		JTable currentTable = returnTableForCurrentTab();
-		CustomTableModel model = (CustomTableModel) currentTable.getModel();
-		Worksheet sheet = Application.getActiveWorkbook().getWorksheet(model.getWorksheetName());
-		System.out.println("The worksheet with the name: " + worksheetOldName + " has been changed to the name: "
-				+ worksheetNewName);
-		sheet.setWorksheetName(worksheetNewName);
-		int indexOfTab = jTabbedPane1.getSelectedIndex();
-		jTabbedPane1.setTitleAt(indexOfTab, worksheetNewName);
+		tables.put(worksheetNewName, tables.get(worksheetOldName));
+		tables.remove(worksheetOldName);
+		jTabbedPane1.setTitleAt(jTabbedPane1.indexOfTab(worksheetOldName), worksheetNewName);
 	}
 
 	@Override
 	public void afterCellChanged(String worksheetName, int row, int column, Object newValue) {
-		// TODO Auto-generated method stub
-
+		JTable t = tables.get(worksheetName);
+		((CustomTableModel)t.getModel()).fireTableCellUpdated(row - 1, column - 1);
 	}
 
 	@Override
 	public void afterDiagramAdded(String diagramName) {
-		// TODO Auto-generated method stub
-
+		loadDiagram(Application.getActiveWorkbook().getDiagram(diagramName));
 	}
 
 	@Override
 	public void afterDiagramRemoved(String diagramName) {
-		// TODO Auto-generated method stub
-
+		diagrams.remove(diagramName);
+		jTabbedPane1.remove(jTabbedPane1.indexOfTab(diagramName));
 	}
 
 	@Override
 	public void afterDiagramRenamed(String diagramOldName, String diagramNewName) {
-		// TODO Auto-generated method stub
-
+		diagrams.put(diagramNewName, diagrams.get(diagramOldName));
+		diagrams.remove(diagramOldName);
+		jTabbedPane1.setTitleAt(jTabbedPane1.indexOfTab(diagramOldName), diagramNewName);
 	}
 
 	@Override
 	public void afterDiagramChanged(String diagramName) {
-		// TODO Auto-generated method stub
+		diagrams.get(diagramName).Invalidate();
+	}
 
+	
+	
+	private TreeMap<String, DiagramInvalidateStrategy> diagrams = new TreeMap<String, DiagramInvalidateStrategy>();
+	private TreeMap<String, JTable> tables = new TreeMap<String, JTable>();
+	private boolean isCurrentWorkbook = true;
+	private String activeObjectName;
+
+	private void selectedCellChanged() {
+		boxDataCanceled();
+	}
+
+	private void tabChanged(ChangeEvent e) throws IllegalArgumentException {
+		if (jTabbedPane1.getSelectedIndex() == -1)
+			return;
+		activeObjectName = jTabbedPane1.getTitleAt(jTabbedPane1.getSelectedIndex());
+		isCurrentWorkbook = (Application.getActiveWorkbook().getWorksheets().containsKey(activeObjectName));
+		
+		if (isCurrentWorkbook) {
+			labelBox.setText("Cell value:");
+		}
+		else {
+			labelBox.setText("Diagram area:");
+			Diagram d = Application.getActiveWorkbook().getDiagram(activeObjectName);
+			Area a = null;
+			if (d instanceof DiagramBar)
+				a = ((DiagramBar)d).getValues();
+			else if (d instanceof DiagramLine)
+				a = ((DiagramLine)d).getValues();
+			else
+				throw new IllegalArgumentException("Unknown DiagramClass " + d.getClass().getName());
+			
+			if (a == null)
+				textBox.setText("");
+			else
+				textBox.setText(a.getCellReferences());
+		}
+		
+	}
+	
+	private void boxDataAccepted() throws IllegalArgumentException {
+		try {
+			if (isCurrentWorkbook) {
+				JTable t = tables.get(activeObjectName);
+				Cell cell = Application.getActiveWorkbook().getWorksheet(activeObjectName).getCell(t.getSelectedRow() + 1, t.getSelectedColumn() + 1);
+				if (textBox.getText().startsWith("="))
+					cell.setFormula(textBox.getText());
+				else if (isNumber(textBox.getText()))
+					cell.setNumericValue(Double.parseDouble(textBox.getText()));
+				else
+					cell.setTextValue(textBox.getText());
+				
+				t.grabFocus();
+			}
+			else {
+				Diagram d = Application.getActiveWorkbook().getDiagram(activeObjectName);
+				if (d instanceof DiagramBar)
+					((DiagramBar)d).setValues(Range.getRangeByAddress(textBox.getText(), null).getWorksheetAreas().firstKey());
+				else if (d instanceof DiagramLine)
+					((DiagramLine)d).setValues(Range.getRangeByAddress(textBox.getText(), null).getWorksheetAreas().firstKey());
+				else
+					throw new IllegalArgumentException("Unknown DiagramClass " + d.getClass().getName());
+			}
+		}
+		catch(IllegalArgumentException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage());
+			boxDataCanceled();
+		}
+	}
+	
+	private void boxDataCanceled() throws IllegalArgumentException {
+		if (isCurrentWorkbook) {
+			JTable t = tables.get(activeObjectName);
+			if (t.getSelectedRow() < 0 || t.getSelectedColumn() < 0) {
+				textBox.setText("");
+				return;
+			}
+			
+			Cell cell = Application.getActiveWorkbook().getWorksheet(activeObjectName).getCell(t.getSelectedRow() + 1, t.getSelectedColumn() + 1, false);
+			if (cell == null)
+				textBox.setText("");
+			else if (cell.getFormula() != null)
+				textBox.setText(cell.getFormula());
+			else if (cell.getCellValue() == null)
+				textBox.setText("");
+			else
+				textBox.setText(cell.getTextValue());
+			
+			t.grabFocus();
+		}
+		else {
+			Diagram d = Application.getActiveWorkbook().getDiagram(activeObjectName);
+			Area a = null;
+			if (d instanceof DiagramBar)
+				a = ((DiagramBar)d).getValues();
+			else if (d instanceof DiagramLine)
+				a = ((DiagramLine)d).getValues();
+			else
+				throw new IllegalArgumentException("Unknown DiagramClass " + d.getClass().getName());
+			
+			if (a == null)
+				textBox.setText("");
+			else
+				textBox.setText(a.getCellReferences());
+		}
+
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * load current object modell in gui
+	 */
+	private void loadModel() {
+		//observe Application
+		Application.activeWorkbook.removeListener(this);
+
+		jTabbedPane1.removeAll();
+		
+		for (Worksheet w : Application.getActiveWorkbook().getWorksheets().values()) {
+			System.out.println(w.getWorksheetName());
+			loadWorksheet(w);
+		}
+
+		for (Diagram d : Application.getActiveWorkbook().getDiagrams().values())
+			loadDiagram(d);
+		
+		jTabbedPane1.setSelectedIndex(0);
+		
+		//observe Application
+		Application.activeWorkbook.addListener(this);
+
+	}
+	
+	private void loadWorksheet(Worksheet worksheet) {
+
+		if ( jTabbedPane1.indexOfTab(worksheet.getWorksheetName()) != -1 )
+			jTabbedPane1.remove(jTabbedPane1.indexOfTab(worksheet.getWorksheetName()));
+		
+		JScrollPane jPane = new JScrollPane();
+		JTable table = new JTable();
+		CustomTableModel model = new CustomTableModel(worksheet, table, jPane);
+		table.setModel(model);
+		table.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
+		table.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+		table.setRowSelectionAllowed(false);
+		table.setGridColor(new java.awt.Color(0, 0, 0));
+		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		table.setCellSelectionEnabled(true);
+		
+		jPane.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+		jPane.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		table.setBorder(new EtchedBorder(EtchedBorder.RAISED));
+		table.setShowHorizontalLines(true);
+		table.setShowVerticalLines(true);
+		jPane.setViewportView(table);
+		jTabbedPane1.addTab(worksheet.getWorksheetName(), jPane);
+		tables.put(worksheet.getWorksheetName(), table);
+
+		ListSelectionListener l = new ListSelectionListener() {
+			public void valueChanged(ListSelectionEvent e) {
+				//if (e.getValueIsAdjusting())
+					selectedCellChanged();
+			}
+		};
+		
+		table.getSelectionModel().addListSelectionListener(l);
+		table.getColumnModel().getSelectionModel().addListSelectionListener(l);
+		
+		table.addKeyListener(new KeyListener() {
+	        @Override
+	        public void keyPressed(KeyEvent e){
+	        }
+
+	        @Override
+	        public void keyTyped(KeyEvent e) {
+	            switch(e.getKeyCode()) {
+	            	case KeyEvent.VK_ENTER:
+	        		case KeyEvent.VK_LEFT:
+	        		case KeyEvent.VK_RIGHT:
+	        		case KeyEvent.VK_UP:
+	        		case KeyEvent.VK_DOWN:
+	        		case KeyEvent.VK_PAGE_UP:
+	        		case KeyEvent.VK_PAGE_DOWN:
+	        			break;
+	        		default:
+	        			textBox.grabFocus();
+	        			textBox.setText(e.getKeyChar() + "");
+	        			break;
+	            }
+	        }
+
+	        @Override
+	        public void keyReleased(KeyEvent e) {
+	        }
+		});
+		
+		table.setRowSelectionInterval(0, 0);
+	    table.setColumnSelectionInterval(0, 0);
+
+	}
+
+	private void loadDiagram(Diagram diagram) throws IllegalArgumentException {
+		if ( jTabbedPane1.indexOfTab(diagram.getName()) != -1 )
+			jTabbedPane1.remove(jTabbedPane1.indexOfTab(diagram.getName()));
+
+		JPanel container = new JPanel();
+		jTabbedPane1.addTab(diagram.getName(), container);
+		DiagramInvalidateStrategy strategy;
+
+		if (diagram instanceof DiagramBar)
+			strategy = new BarDiagramInvalidateStrategy();
+		else if (diagram instanceof DiagramLine)
+			strategy = new LineDiagramInvalidateStrategy();
+		else
+			throw new IllegalArgumentException("Unknown DiagramClass " + diagram.getClass().getName());
+		
+		diagrams.put(diagram.getName(), strategy);
+		strategy.Initialize(diagram, container);
+		strategy.Invalidate();
 	}
 
 }

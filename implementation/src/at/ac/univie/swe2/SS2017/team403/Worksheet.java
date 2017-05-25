@@ -1,5 +1,10 @@
 package at.ac.univie.swe2.SS2017.team403;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.lang.reflect.InvocationTargetException;
 import java.util.TreeMap;
 
 /**
@@ -8,7 +13,7 @@ import java.util.TreeMap;
  * a workbook.
  * 
  */
-public class Worksheet {
+public class Worksheet implements Externalizable {
 
 	private transient int worksheetId;
 	private TreeMap<Long, Cell> worksheetCells = new TreeMap<Long, Cell>();
@@ -26,14 +31,24 @@ public class Worksheet {
 	 * @param worksheetRenameCallback -> is part of the observer pattern
 	 * 
 	 */
-	Worksheet(String name, Workbook workbook, WorksheetRenameCallback worksheetRenameCallback) {
-		this.worksheetId = Application.getActiveWorkbook().generateNewId();
+	public Worksheet(String name, Workbook workbook, WorksheetRenameCallback worksheetRenameCallback) {
+		this.worksheetId = workbook.generateNewId();
 		this.worksheetName = name;
 		this.parentWorkbook = workbook;
 		this.worksheetRenameCallback = worksheetRenameCallback;
 	}
+	
+	Worksheet(Worksheet worksheet, Workbook workbook, WorksheetRenameCallback worksheetRenameCallback) {
+		this.worksheetId = workbook.generateNewId();
+		this.worksheetName = worksheet.getWorksheetName();
+		this.parentWorkbook = workbook;
+		this.worksheetRenameCallback = worksheetRenameCallback;
+		
+		for (Cell c : worksheet.worksheetCells.values())
+			this.worksheetCells.put(getUniqueCellKey(c.getCellRow(), c.getCellColumn()), new Cell(c, this));
+	}
 
-	public int getId() {
+	int getId() {
 		return worksheetId;
 	}
 
@@ -49,10 +64,18 @@ public class Worksheet {
 	 * @param name  worksheetname 
 	 */
 	public void setWorksheetName(String name) {
-		if (parentWorkbook.getWorksheets().containsKey(name)) {
-			throw new IllegalArgumentException("Sheet with name " + name + " already exists");
-		}
+		if (this.worksheetName.equals(name))
+			return;
 
+		//check if sheet with new name exists
+		if (parentWorkbook.getWorksheets().containsKey(name))
+			throw new IllegalArgumentException("Sheet with name " + name + " already exists");
+
+		//check if diagram with new name exists
+		if (parentWorkbook.getDiagrams().containsKey(name))
+			throw new IllegalArgumentException("Diagram with name " + name + " already exists");
+
+		
 		String oldName = this.worksheetName;
 		this.worksheetName = name;
 
@@ -80,13 +103,16 @@ public class Worksheet {
 	 * 
 	 * @param row  cell row
 	 * @param column  cell column
-	 * @param isCellExisting  is cell existing?
+	 * @param createIfNotExist wenn cell not exists in Buffer, the Method create it in put in Buffer
 	 * @return  returns existing/new cell 
 	 */
-	public Cell getCell(int row, int column, boolean isCellExisting) {
+	public Cell getCell(int row, int column, boolean createIfNotExist) {
+		if (row <= 0 || column <= 0)
+			throw new IllegalArgumentException("Invalid row, column for getCell(" + row + ", " + column + "). They must be positiv");
+
 		long key = getUniqueCellKey(row, column);
 
-		if (!isCellExisting) {
+		if (createIfNotExist) {
 			if (row > furthestRowUsed) {
 				furthestRowUsed = row;
 			}
@@ -94,17 +120,18 @@ public class Worksheet {
 				furthestColumnUsed = column;
 			}
 		}
-			if (!worksheetCells.containsKey(key)) {
-				if (!isCellExisting) {
-					return null;
-				}
-				worksheetCells.put(key, new Cell(this, row, column));
+	
+		if (!worksheetCells.containsKey(key)) {
+			if (!createIfNotExist) {
+				return null;
 			}
+			worksheetCells.put(key, new Cell(this, row, column));
+		}
 
 		return worksheetCells.get(key);
 	}
 
-	public long getUniqueCellKey(int row, int column) {
+	private long getUniqueCellKey(int row, int column) {
 		return (long) row << 32 | column & 0xFFFFFFFFL;
 	}
 
@@ -151,6 +178,24 @@ public class Worksheet {
 		}
 
 		return getCell(row, column);
+	}
+	
+	
+	public void calculate() {
+		for (Cell c : this.worksheetCells.values())
+			if (c.getFormula() != null)
+				c.setFormula(c.getFormula());
+	}
+
+	//Externalizable
+	public void writeExternal(ObjectOutput out) throws IOException {
+		out.writeObject(this.worksheetCells);
+	}
+
+	//Externalizable
+	@SuppressWarnings("unchecked")
+	public void readExternal(ObjectInput in) throws ClassNotFoundException, IOException {
+		this.worksheetCells = (TreeMap<Long, Cell>)in.readObject();
 	}
 
 }

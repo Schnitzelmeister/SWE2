@@ -1,14 +1,18 @@
 package at.ac.univie.swe2.SS2017.team403;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.Comparator;
 
 /**
  * This class is used to handle all operations connected to Area.
  * An Area can be either one cell or more cells. 
  */
-public class Area {
+public class Area implements Externalizable {
 
-	private Worksheet parentWorksheet;
+	private transient Worksheet parentWorksheet;
 
 	public Worksheet getParent() {
 		return parentWorksheet;
@@ -62,6 +66,7 @@ public class Area {
 		firstColumn = cellTopLeft.getCellColumn();
 		lastRow = cellBottomRight.getCellRow();
 		lastColumn = cellBottomRight.getCellColumn();
+		correctCoordinates();
 	}
 
 	/**
@@ -93,7 +98,19 @@ public class Area {
 		firstColumn = cellTopLeft.getCellColumn();
 		lastRow = cellBottomRight.getCellRow();
 		lastColumn = cellBottomRight.getCellColumn();
+		correctCoordinates();
 	}
+	
+    private void correctCoordinates()
+    {
+    	if (lastRow < firstRow) {
+    		int tmp = lastRow; lastRow = firstRow; firstRow =tmp;
+    	}
+    	
+    	if (lastColumn < firstColumn) {
+    		int tmp = lastColumn; lastColumn = firstColumn; firstColumn =tmp;
+    	}		
+    }
 
 	/**
 	 * A cell contains multiple referenced cells as a string.
@@ -134,4 +151,20 @@ public class Area {
 		}
 	}
 
+	
+	
+	//Externalizable
+	public void writeExternal(ObjectOutput out) throws IOException {
+		out.writeUTF(getCellReferences());
+	}
+
+	//Externalizable
+	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+		Area area = Range.getRangeByAddress(in.readUTF(), null).getWorksheetAreas().firstKey();
+		this.parentWorksheet = area.parentWorksheet;
+		this.firstRow = area.firstRow;
+		this.firstColumn = area.firstColumn;
+		this.lastRow = area.lastRow;
+		this.lastColumn = area.lastColumn;
+	}
 }

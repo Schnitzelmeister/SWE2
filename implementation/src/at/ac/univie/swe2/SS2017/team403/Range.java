@@ -24,7 +24,10 @@ public class Range {
 	 */
 	static Range getRangeByAddress(String cellReferences, Cell cellContext) {
 		
-		Worksheet worksheet = cellContext.getParentWorksheet();
+		Worksheet worksheet = null;
+		if (cellContext != null)
+			worksheet = cellContext.getParentWorksheet();
+
 		Range worksheetRange = new Range();
 		
 		for (String s : cellReferences.split(";")) {
@@ -32,8 +35,8 @@ public class Range {
 
 			if (singleCellReference.indexOf('!') >= 0) {
 				String wshtName = singleCellReference.substring(0, singleCellReference.indexOf('!'));
-				if (wshtName.substring(0, 1) == "'") {
-					wshtName = wshtName.substring(1, wshtName.length() - 2);					
+				if (wshtName.substring(0, 1).equals("'")) {
+					wshtName = wshtName.substring(1, wshtName.length() - 1);					
 				}
 				if (!Application.getActiveWorkbook().getWorksheets().containsKey(wshtName)) {
 					throw new IllegalArgumentException("Worksheet " + wshtName + " doesn't exists");					

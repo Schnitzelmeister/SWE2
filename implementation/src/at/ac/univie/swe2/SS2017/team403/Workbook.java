@@ -7,8 +7,12 @@ import java.util.Map;
 import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * This class is used to handle all operations connected to the workbook-object.
@@ -19,9 +23,18 @@ import java.lang.reflect.Constructor;
 public class Workbook implements Serializable {
 	private static final long serialVersionUID = 1L;
 
+	private transient boolean autoCalculate = true;
+	public boolean getAutoCalculate() {
+		return autoCalculate;
+	}
+	
+	public void setAutoCalculate(boolean autoCalculate) {
+		this.autoCalculate = autoCalculate;
+	}
+
 	private transient AtomicInteger workbookId = new AtomicInteger(0);
 
-	public int generateNewId() {
+	int generateNewId() {
 		return workbookId.incrementAndGet();
 	}
 
@@ -37,6 +50,9 @@ public class Workbook implements Serializable {
 	 * @param listener  observer
 	 */
 	public void removeListener(WorkbookListener listener) {
+		if (listeners.size() <= 0)
+			return;
+		
 		for (int i = listeners.size() - 1; i <= 0; --i) {
 			if (listeners.get(i) == listener)
 				listeners.remove(i);
@@ -71,6 +87,9 @@ public class Workbook implements Serializable {
 		if (worksheetCollection.containsKey(name)) {
 			throw new IllegalArgumentException("Sheet with name " + name + " already exists");	
 		}
+		
+		if (diagramCollection.containsKey(name))
+			throw new IllegalArgumentException("Diagram with name " + name + " already exists");
 
 		worksheetCollection.put(name, new Worksheet(name, this, new WorksheetRenameCallback() {
 			@Override
@@ -83,6 +102,29 @@ public class Workbook implements Serializable {
 			l.afterWorksheetAdded(name);
 
 		return worksheetCollection.get(name);
+	}
+	
+	
+	private Worksheet addSheet(Worksheet worksheet) throws IllegalArgumentException {
+		if (worksheetCollection.containsKey(worksheet.getWorksheetName())) {
+			throw new IllegalArgumentException("Sheet with name " + worksheet.getWorksheetName() + " already exists");	
+		}
+		
+		if (diagramCollection.containsKey(worksheet.getWorksheetName()))
+			throw new IllegalArgumentException("Diagram with name " + worksheet.getWorksheetName() + " already exists");
+
+		worksheetCollection.put(worksheet.getWorksheetName(), new Worksheet(worksheet, this, new WorksheetRenameCallback() {
+            @Override
+            public void afterWorksheetRenamed(String worksheetOldName, Worksheet sheet) {
+            	renameSheet(worksheetOldName, sheet);
+            }
+        }));
+		
+		// inform observers
+		for(WorkbookListener l : listeners)
+			l.afterWorksheetAdded(worksheet.getWorksheetName());
+
+		return worksheetCollection.get(worksheet.getWorksheetName());
 	}
 
 	/**
@@ -99,6 +141,47 @@ public class Workbook implements Serializable {
 			worksheetCollection.remove(worksheetOldName);
 			worksheetCollection.put(sheet.getWorksheetName(), sheet);
 
+			TreeSet<Cell> changedCells = new TreeSet<Cell>(new Cell.CellComparator());
+			
+			//search for dependent cells and make their formula null
+			for(Iterator< Map.Entry<Area, TreeSet<Cell> > > idep = dependenciesOfArea.entrySet().iterator(); idep.hasNext(); ) {
+				Map.Entry<Area, TreeSet<Cell> > e = idep.next();
+				
+				//get only rename sheets ranges
+				if ( e.getKey().getParent().getId() > sheet.getId() )
+					break;
+				else if ( e.getKey().getParent() != sheet )
+					continue;
+
+				//collect cells
+				changedCells.addAll(e.getValue());
+			}
+
+			//set textValue = '+Formula
+			for(Cell c : changedCells )
+				c.setTextValue("'" + c.getFormula());
+			changedCells.clear();
+
+			TreeSet<String> changedDiagrams = new TreeSet<String>();
+			for(Iterator< Map.Entry<Area, ArrayList<Diagram> > > idep = diagramDependencies.entrySet().iterator(); idep.hasNext(); ) {
+				Map.Entry<Area, ArrayList<Diagram> > e = idep.next();
+				
+				//get only removed sheets ranges
+				if ( e.getKey().getParent().getId() > sheet.getId() )
+					break;
+				else if ( e.getKey().getParent() != sheet )
+					continue;
+
+				for(Diagram d : e.getValue() ) {
+					changedDiagrams.add(d.name);
+				}
+			}
+
+			for(String c : changedDiagrams )
+				this.removeDiagram(c);
+			changedDiagrams.clear();
+
+			
 			for (WorkbookListener l : listeners)
 				l.afterWorksheetRenamed(worksheetOldName, sheet.getWorksheetName());
 		}
@@ -115,6 +198,49 @@ public class Workbook implements Serializable {
 		if (!worksheetCollection.containsKey(name))
 			throw new IllegalArgumentException("Sheet with name " + name + " does not exist");
 
+		Worksheet sheet = worksheetCollection.get(name);		
+		TreeSet<Cell> changedCells = new TreeSet<Cell>(new Cell.CellComparator());
+		
+		//search for dependent cells and make their formula null
+		for(Iterator< Map.Entry<Area, TreeSet<Cell> > > idep = dependenciesOfArea.entrySet().iterator(); idep.hasNext(); ) {
+			Map.Entry<Area, TreeSet<Cell> > e = idep.next();
+			
+			//get only removed sheets ranges
+			if ( e.getKey().getParent().getId() > sheet.getId() )
+				break;
+			else if ( e.getKey().getParent() != sheet )
+				continue;
+
+			//collect cells
+			changedCells.addAll(e.getValue());
+		}
+		
+		//set textValue = '+Formula
+		for(Cell c : changedCells )
+			if (c.getParentWorksheet() != sheet)
+				c.setTextValue("'" + c.getFormula());
+		changedCells.clear();
+		
+		TreeSet<String> changedDiagrams = new TreeSet<String>();
+		for(Iterator< Map.Entry<Area, ArrayList<Diagram> > > idep = diagramDependencies.entrySet().iterator(); idep.hasNext(); ) {
+			Map.Entry<Area, ArrayList<Diagram> > e = idep.next();
+			
+			//get only removed sheets ranges
+			if ( e.getKey().getParent().getId() > sheet.getId() )
+				break;
+			else if ( e.getKey().getParent() != sheet )
+				continue;
+
+			for(Diagram d : e.getValue() ) {
+				changedDiagrams.add(d.name);
+			}
+		}
+
+		for(String c : changedDiagrams )
+			this.removeDiagram(c);
+		changedDiagrams.clear();
+
+		
 		worksheetCollection.remove(name);
 
 		for (WorkbookListener l : listeners)
@@ -122,7 +248,12 @@ public class Workbook implements Serializable {
 	}
 
 	
-	private TreeMap<String, Diagram> diagramCollection;
+	private TreeMap<String, Diagram> diagramCollection = new TreeMap<String, Diagram>();
+
+	public TreeMap<String, Diagram> getDiagrams()
+	{
+		return diagramCollection;		
+	}
 
 	public Diagram getDiagram(String name) {
 		return diagramCollection.get(name);
@@ -138,35 +269,25 @@ public class Workbook implements Serializable {
 	 * @param cls  diagram-class
 	 * @return  returns a diagram
 	 */
-	public Diagram addDiagram(String name, Class<? extends Diagram> cls) {
+	public Diagram addDiagram(String name, DiagramCreator creator) {
 		if (diagramCollection.containsKey(name)) {
 			throw new IllegalArgumentException("Diagram with name " + name + " already exists");		
 		}
 
-		@SuppressWarnings("unchecked")
-		Constructor<? extends Diagram> diagramConstructor = (Constructor<? extends Diagram>) cls.getConstructors()[0];
+		if (worksheetCollection.containsKey(name))
+			throw new IllegalArgumentException("Sheet with name " + name + " already exists");
 
-		Object[] constructorArguments = new Object[3];
-		constructorArguments[0] = name;
-		constructorArguments[1] = this;
-		constructorArguments[2] = new DiagramChangedCallback() {
-			@Override
-			public void afterDiagramRenamed(String diagramOldName, Diagram diagram) {
-				renameDiagram(diagramOldName, diagram);
-			}
+		Diagram newDiagram = creator.factoryMethod(name, this, new DiagramChangedCallback() {
+				@Override
+				public void afterDiagramRenamed(String diagramOldName, Diagram diagram) {
+					renameDiagram(diagramOldName, diagram);
+				}
 
-			@Override
-			public void afterDiagramChanged(String diagramName) {
-				changeDiagram(diagramName);
-			}
-		};
-
-		Diagram newDiagram;
-		try {
-			newDiagram = (Diagram) diagramConstructor.newInstance(new Object[] { constructorArguments });
-		} catch (Exception e) {
-			throw new IllegalArgumentException("Failed to create diagram " + cls.getTypeName());
-		}
+				@Override
+				public void afterDiagramChanged(String diagramName) {
+					changeDiagram(diagramName);
+				}
+			});
 
 		diagramCollection.put(name, newDiagram);
 
@@ -176,6 +297,38 @@ public class Workbook implements Serializable {
 		return diagramCollection.get(name);
 	}
 
+	private void addDiagram(Diagram diagram) throws IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, SecurityException {
+		if (diagramCollection.containsKey(diagram.getName())) {
+			throw new IllegalArgumentException("Diagram with name " + diagram.getName() + " already exists");		
+		}
+
+		if (worksheetCollection.containsKey(diagram.getName()))
+			throw new IllegalArgumentException("Sheet with name " + diagram.getName() + " already exists");
+
+		@SuppressWarnings("unchecked")
+		Constructor<? extends Diagram> ctor = (Constructor<? extends Diagram>)diagram.getClass().getDeclaredConstructor(Diagram.class, Workbook.class, DiagramChangedCallback.class);
+		
+		Object[] ctorArgument = new Object[3];
+		ctorArgument[0] = diagram;
+		ctorArgument[1] = this;
+		ctorArgument[2] = new DiagramChangedCallback() {
+            @Override
+            public void afterDiagramRenamed(String diagramOldName, Diagram diagram) {
+            	renameDiagram(diagramOldName, diagram);
+            }
+
+            @Override
+            public void afterDiagramChanged(String diagramName) {
+            	changeDiagram(diagramName);
+            }};
+    
+        Diagram newDiagram = (Diagram)ctor.newInstance(ctorArgument);
+
+        diagramCollection.put(diagram.getName(), newDiagram);
+
+	}
+	
+	
 	/**
 	 * This method allows you to rename a diagram.
 	 * If the diagram and the oldname of a diagram exist, the oldname 
@@ -186,6 +339,13 @@ public class Workbook implements Serializable {
 	 * @param diagram -> diagram that should be renamed
 	 */
 	private void renameDiagram(String diagramOldName, Diagram diagram) {
+		if (diagramCollection.containsKey(diagram.getName())) {
+			throw new IllegalArgumentException("Diagram with name " + diagram.getName() + " already exists");		
+		}
+
+		if (worksheetCollection.containsKey(diagram.getName()))
+			throw new IllegalArgumentException("Sheet with name " + diagram.getName() + " already exists");
+
 		if (diagramCollection.containsKey(diagramOldName) && diagramCollection.get(diagramOldName) == diagram) {
 			diagramCollection.remove(diagramOldName);
 			diagramCollection.put(diagram.getName(), diagram);
@@ -222,6 +382,7 @@ public class Workbook implements Serializable {
 			throw new IllegalArgumentException("Diagram with name " + name + " does not exist");			
 		}
 
+		removeReferenceDependencies(diagramCollection.get(name));
 		diagramCollection.remove(name);
 
 		for (WorkbookListener l : listeners)
@@ -234,6 +395,8 @@ public class Workbook implements Serializable {
 			new Area.AreaComparator());
 	private transient TreeMap<Cell, TreeSet<Area>> dependenciesOfCell = new TreeMap<Cell, TreeSet<Area>>(
 			new Cell.CellComparator());
+
+	private transient TreeMap<Area, ArrayList<Diagram> > diagramDependencies = new TreeMap<Area, ArrayList<Diagram> >(new Area.AreaComparator());
 
 	/**
 	 * This method removes all dependencies of different areas where a specific cell is involved.
@@ -279,12 +442,36 @@ public class Workbook implements Serializable {
 		addDependency(cell, new Area(precedent));
 	}
 
+	void removeReferenceDependencies(Diagram diagram) {
+		for(Iterator< Map.Entry<Area, ArrayList<Diagram> > > idep = diagramDependencies.entrySet().iterator(); idep.hasNext(); ) {
+			Map.Entry<Area, ArrayList<Diagram> > e = idep.next();
+			
+			for (int j = e.getValue().size()-1; j >= 0; j--)
+				if (e.getValue().get(j) == diagram)
+					e.getValue().remove(j);
+			
+			if (e.getValue().size() == 0)
+				idep.remove();				
+		}
+	}
+
+	void addDependency(Diagram diagram, Area precedent) {
+		if (!diagramDependencies.containsKey(precedent)) {
+			diagramDependencies.put(precedent, new ArrayList<Diagram>() );
+		}
+		diagramDependencies.get(precedent).add(diagram);
+		
+	}
 	
 	private TreeSet<Cell> dynamicCells = new TreeSet<Cell>(new Cell.CellComparator());
+
+	//recalculated diagrams - dynamic TreeSet
+	private transient TreeSet<String> recalcDiagrams = new TreeSet<String>();
 
 	void calculateReferenceDependencies(Cell cell) throws IllegalArgumentException {
 		// empty dependency cells
 		dynamicCells.clear();
+		recalcDiagrams.clear();
 
 		dynamicCells.add(cell);
 
@@ -292,9 +479,8 @@ public class Workbook implements Serializable {
 		try {
 			_calculateDependencies(cell);
 		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
 			throw new IllegalArgumentException(
-					e.getMessage() + ", source cell R" + cell.getCellRow() + "C" + cell.getCellColumn());
+					e.getMessage() + ", source cell " + cell.getCellReferences());
 		}
 
 		// inform observers
@@ -305,6 +491,11 @@ public class Workbook implements Serializable {
 
 		// empty dependencies
 		dynamicCells.clear();
+		
+		for(String d : recalcDiagrams) {
+			changeDiagram(d);
+		}
+		recalcDiagrams.clear();
 	}
 
 	private void _calculateDependencies(Cell cell) throws IllegalArgumentException {
@@ -335,5 +526,56 @@ public class Workbook implements Serializable {
 
 			}
 		}
+		
+		for(Iterator< Map.Entry<Area, ArrayList<Diagram> > > idep = diagramDependencies.entrySet().iterator(); idep.hasNext(); ) {
+			Map.Entry<Area, ArrayList<Diagram> > e = idep.next();
+			
+			//get only overlapped with cells ranges
+			if ( e.getKey().getParent().getId() > cell.getParentWorksheet().getId() )
+				return;
+			else if ( e.getKey().getParent() != cell.getParentWorksheet() )
+				continue;
+
+			if ( e.getKey().getFirstRow() > cell.getCellRow() )
+				return;
+
+			if (e.getKey().getFirstColumn() > cell.getCellColumn()
+					|| e.getKey().getLastRow() < cell.getCellRow()
+					|| e.getKey().getLastColumn() < cell.getCellColumn()  )
+				continue;
+
+			for(Diagram d : e.getValue() ) {
+				recalcDiagrams.add(d.name);
+			}
+		}
+
 	}
+	
+	public void calculate() {
+		for (Worksheet w : this.worksheetCollection.values())
+			w.calculate();
+	}
+	
+	
+	//Externalizable
+	public void writeExternal(ObjectOutput out) throws IOException {
+		out.writeObject(this.worksheetCollection);
+		out.writeObject(this.diagramCollection);
+	}
+
+	//Externalizable
+	@SuppressWarnings("unchecked")
+	public void readExternal(ObjectInput in) throws IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException, IOException {
+		TreeMap<String, Worksheet> tempSheets = (TreeMap<String, Worksheet>)in.readObject();
+		this.setAutoCalculate(false);
+		for(Worksheet w : tempSheets.values())
+			this.addSheet(w);
+
+		TreeMap<String, Diagram> tempDiagrams = (TreeMap<String, Diagram>)in.readObject();
+		for(Diagram d : tempDiagrams.values())
+			this.addDiagram(d);
+		this.setAutoCalculate(true);
+		this.calculate();
+	}
+
 }
