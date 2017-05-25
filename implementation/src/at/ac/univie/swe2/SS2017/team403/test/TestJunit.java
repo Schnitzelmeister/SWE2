@@ -8,16 +8,28 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+
 
 public class TestJunit {
 
-	@Test(expected=IllegalArgumentException.class)
-	public static void testFormulas() 
+	@BeforeClass 
+	public static void setUp() 
 	{
-		boolean thrown;
-		
 		Workbook wbk = Application.getActiveWorkbook();
-		Worksheet sheet = wbk.addSheet("sheet1");
+		if (!wbk.getWorksheets().containsKey("sheet1"))
+			wbk.addSheet("sheet1");
+		if (!wbk.getWorksheets().containsKey("sheet2"))
+			wbk.addSheet("sheet2");
+	}
+	
+	@Test
+	public void testFormulas() 
+	{
+		Workbook wbk = Application.getActiveWorkbook();
+		Worksheet sheet = wbk.getWorksheet("sheet1");
 		sheet.getCell(1, 1).setNumericValue(11);
 		sheet.getCell(2, 1).setNumericValue(12);
 		sheet.getCell(3, 1).setNumericValue(13);
@@ -31,7 +43,7 @@ public class TestJunit {
 		//System.out.println(sheet.getCell(1, 2).getNumericValue());
 		assertEquals(207.75d, sheet.getCell(1, 2).getNumericValue(), 0 );
 		
-		sheet = wbk.addSheet("sheet2");
+		sheet = wbk.getWorksheet("sheet2");
 		
 		sheet.getCell(1, 2).setFormula("=SUM(sheet1!RC[-1]:R[3]C[-1];RC[-1]:R[3]C[-1])+COUNT(sheet1!RC[-1]:R[3]C[-1];sheet2!RC[-1]:R[3]C[-1])+MEAN(sheet1!RC[-1]:R[3]C[-1])");
 		//System.out.println(sheet.getCell(1, 2).getNumericValue());
@@ -73,27 +85,45 @@ public class TestJunit {
 		sheet.getCell(2, 2).setFormula("=RC[1]+RC[-1]");
 		//System.out.println(sheet.getCell(2, 2).getNumericValue());
 		assertEquals(3d, sheet.getCell(2, 2).getNumericValue(), 0 );
-
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void testCircularReference1() 
+	{
+		Workbook wbk = Application.getActiveWorkbook();
+		Worksheet sheet = wbk.getWorksheet("sheet2");
+		
 		//Circular reference
 		sheet.getCell(1, 2).setFormula("=rc[-1]");
 		sheet.getCell(1, 3).setFormula("=rc[-1]");
-		thrown = false;
-		try { sheet.getCell(1, 1).setFormula("=rc3"); }
-		catch (IllegalArgumentException e) { thrown = true; }
-		assertTrue(thrown);
+		sheet.getCell(1, 1).setFormula("=rc3");
+	}
 
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void testCircularReference2() 
+	{
+		Workbook wbk = Application.getActiveWorkbook();
+		Worksheet sheet = wbk.getWorksheet("sheet2");
 		//Circular reference
-		sheet.getCell(1, 2).setFormula("=rc[-1]");
-		sheet.getCell(1, 3).setFormula("=rc[-1]");
-		thrown = false;
-		try { sheet.getCell(2, 2).setFormula("=sum(rc[1]:rc[-1])"); }
-		catch (IllegalArgumentException e) { thrown = true; }
-		assertTrue(thrown);
-				
-		//divide by 0
-		thrown = false;
-		try { sheet.getCell(2, 2).setFormula("=1/R10C10"); }
-		catch (IllegalArgumentException e) { thrown = true; }
-		assertTrue(thrown);
+		sheet.getCell(2, 2).setFormula("=sum(rc[1]:rc[-1])");
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void testDivideByNill() 
+	{
+		Workbook wbk = Application.getActiveWorkbook();
+		Worksheet sheet = wbk.getWorksheet("sheet2");
+		//div by 0
+		sheet.getCell(2, 2).setFormula("=1/R10C10");
+	}
+	
+	@Test(expected=ClassCastException.class)
+	public void testGetTextAsNumber() 
+	{
+		Workbook wbk = Application.getActiveWorkbook();
+		Worksheet sheet = wbk.getWorksheet("sheet2");
+		sheet.getCell(2, 2).setTextValue("text value");
+		sheet.getCell(2, 2).getNumericValue();
 	}
 }

@@ -27,6 +27,8 @@ public abstract class Diagram implements Externalizable {
 		return name;
 	}
 
+	public abstract void calculate();
+	
 	public void setName(String name) throws IllegalArgumentException {
 		if (this.name.equals(name))
 			return;

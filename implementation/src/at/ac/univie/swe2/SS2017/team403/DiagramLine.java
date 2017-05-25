@@ -21,11 +21,18 @@ public class DiagramLine extends Diagram {
 	public Area getValues() { return values; }
 	public void setValues(Area values) {
 		this.values = values; 
-		this.parent.removeReferenceDependencies(this); 
-		this.parent.addDependency(this, values); 
+		this.parent.removeReferenceDependencies(this);
+		if (this.parent.getAutoCalculate())
+			this.parent.addDependency(this, values); 
 		diagramChangedCallback.afterDiagramChanged(this.name); 
 	}
-	
+
+	@Override
+	public void calculate() {
+		this.parent.removeReferenceDependencies(this);
+		this.parent.addDependency(this, values); 
+	}
+
 	//Externalizable
 	@Override
 	public void writeExternal(ObjectOutput out) throws IOException {
@@ -39,7 +46,6 @@ public class DiagramLine extends Diagram {
 		super.readExternal(in);
 		values = (Area)in.readObject();
 	}
-
 }
 
 
