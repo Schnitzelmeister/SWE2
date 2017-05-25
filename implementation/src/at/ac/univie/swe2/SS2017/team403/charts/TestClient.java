@@ -14,15 +14,14 @@ public class TestClient {
 		File file = new File(filename);
 
 		/**
-		LineChart lchart = new LineChart(file);
+		 * LineChart lchart = new LineChart(file);
+		 * 
+		 * lchart.pack(); RefineryUtilities.centerFrameOnScreen(lchart);
+		 * lchart.setVisible(true);
+		 * 
+		 */
 
-		lchart.pack();
-		RefineryUtilities.centerFrameOnScreen(lchart);
-		lchart.setVisible(true);
-		
-		*/
-		
-		BarChart bchart=new BarChart(file);
+		BarChart bchart = new BarChart(file);
 		bchart.pack();
 		RefineryUtilities.centerFrameOnScreen(bchart);
 		bchart.setVisible(true);
