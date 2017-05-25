@@ -415,6 +415,9 @@ public class ExpressionTree {
 					}
 	
 					break;
+				default:
+					throw new IllegalArgumentException("Undefined formula " + _func);
+
 			}
 
 			_readThis(TOKEN.RIGHT_BRACKET, "must be ) after function params");
@@ -599,6 +602,8 @@ public class ExpressionTree {
 					if (token != TOKEN.RIGHT_BRACKET)
 						throw new IllegalArgumentException("unexpected element, must be )" + this.token.toString() + ","
 								+ this.charPosition + "," + this.cellFormula);
+					
+					_readToken();
 	
 					break;
 				case NUMBER:

@@ -592,8 +592,6 @@ public class Workbook implements Externalizable {
 				//Failed to deserialise object
 				e.printStackTrace();
 			}
-		this.setAutoCalculate(true);
-		this.calculate();
 	}
 
 }

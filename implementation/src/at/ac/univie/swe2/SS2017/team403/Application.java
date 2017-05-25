@@ -129,6 +129,9 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 			activeWorkbook = (Workbook)ois.readObject();
 			ois.close();
 			fileActualName = filePath;
+			activeWorkbook.setAutoCalculate(true);
+			activeWorkbook.calculate();
+
 		}
 		catch (FileNotFoundException e) {
 			throw new IllegalArgumentException("File not found " + filePath + " " + e.getMessage());
@@ -839,7 +842,7 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 			else
 				textBox.setText(a);
 		}
-		
+		selectedCellChanged();
 	}
 	
 	private void boxDataAccepted() throws IllegalArgumentException {
@@ -876,7 +879,7 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 	private void boxDataCanceled() throws IllegalArgumentException {
 		if (isCurrentWorkbook) {
 			JTable t = tables.get(activeObjectName);
-			if (t.getSelectedRow() < 0 || t.getSelectedColumn() < 0) {
+			if (t == null || t.getSelectedRow() < 0 || t.getSelectedColumn() < 0) {
 				textBox.setText("");
 				return;
 			}
