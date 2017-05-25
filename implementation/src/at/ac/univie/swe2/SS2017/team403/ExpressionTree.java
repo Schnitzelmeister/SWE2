@@ -1,5 +1,7 @@
 package at.ac.univie.swe2.SS2017.team403;
 
+
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -8,37 +10,69 @@ import java.util.regex.Pattern;
 import at.ac.univie.swe2.SS2017.team403.Cell;
 import at.ac.univie.swe2.SS2017.team403.Range;
 
+
 /**
  * 
- * The class will be used for an expression in a cell
+ *The class will used for the expression in a cell
  *
  */
 public class ExpressionTree {
-
+	
 	/**
 	 * 
 	 * The class Token is for the labeling
 	 *
 	 */
 	private enum TOKEN {
-		CELL, RANGE,
+        CELL,
+        RANGE,
 
-		EQUAL, NOT_EQUAL, NOT, BIGGER, BIGGER_EQUAL, SMALLER, SMALLER_EQUAL, AND, OR, IN, NOT_IN, LIKE, PLUS, MINUS, MULTIPLY, DIVIDE, BETWEEN, FUNCTION, POWER,
+        EQUAL,
+        NOT_EQUAL,
+        NOT,
+        BIGGER,
+        BIGGER_EQUAL,
+        SMALLER,
+        SMALLER_EQUAL,
+        AND,
+        OR,
+        IN,
+        NOT_IN,
+        LIKE,
+        PLUS,
+        MINUS,
+        MULTIPLY,
+        DIVIDE,
+        BETWEEN,
+        FUNCTION,
+        POWER,
 
-		NUMBER,
-		// INTEGER,
-		STRING,
-		// DATE,
-		TRUE, FALSE,
+        NUMBER,
+        //INTEGER,
+        STRING,
+        //DATE,
+        TRUE,
+        FALSE,
 
-		RIGHT_BRACKET, LEFT_BRACKET, UNDEF, DELIMITER, CONCATENATE, COMMA,
-		// REF,
-		// LIST,
-		ERROR, REMAINDER, PERIOD, EXPRESSION
+        RIGHT_BRACKET,
+        LEFT_BRACKET,
+        UNDEF,
+        DELIMITER,
+        CONCATENATE,
+        COMMA,
+        //REF,
+        //LIST,
+        ERROR,
+        REMAINDER,
+        PERIOD,
+        EXPRESSION
 	}
-
+	
 	private enum FUNCTION {
-		SUM, MEAN, COUNT, UNDEF
+		SUM,
+		MEAN,
+		COUNT,
+		UNDEF
 	}
 
 	private static class ExpressionParser {
@@ -53,19 +87,19 @@ public class ExpressionTree {
 
 		private static final String regExCellPattern = "(((\\w+)|('([\\w\\s]+)'))!)?" + "R((\\d+)|(\\[([+-]?\\d+)\\]))?"
 				+ "C((\\d+)|(\\[([+-]?\\d+)\\]))?";
-		// "(\\[[\\w\\-.
-		// ]+\\])?(([?\\w+]?'?\\w+'?)!)?[\\$]?[A-Z]+[\\$]?[0-9]+($|(?=[\\s\\.\\#\\+\\-\\*\\/\\=\\~\\>\\<\\!\\|\\(\\)\\,\\;]))";
+			// "(\\[[\\w\\-.
+				// ]+\\])?(([?\\w+]?'?\\w+'?)!)?[\\$]?[A-Z]+[\\$]?[0-9]+($|(?=[\\s\\.\\#\\+\\-\\*\\/\\=\\~\\>\\<\\!\\|\\(\\)\\,\\;]))";
 		private static final String regExRangePattern = "(((\\w+)|('([\\w\\s]+)'))!)?"
 				+ "R((\\d+)|(\\[([+-]?\\d+)\\]))?" + "C((\\d+)|(\\[([+-]?\\d+)\\]))?"
 				+ ":R((\\d+)|(\\[([+-]?\\d+)\\]))?" + "C((\\d+)|(\\[([+-]?\\d+)\\]))?"
 
 				+ "(;(((\\w+)|('([\\w\\s]+)'))!)?" + "R((\\d+)|(\\[([+-]?\\d+)\\]))?" + "C((\\d+)|(\\[([+-]?\\d+)\\]))?"
 				+ ":R((\\d+)|(\\[([+-]?\\d+)\\]))?" + "C((\\d+)|(\\[([+-]?\\d+)\\]))?)?";
-		// "(\\[[\\w\\-.
-		// ]+\\])?(([?\\w+]?'?\\w+'?)!)?[\\$]?[A-Z]+[\\$]?[0-9]+:[\\$]?[A-Z]+[\\$]?[0-9]+($|(?=[\\s\\.\\#\\+\\-\\*\\/\\=\\~\\>\\<\\!\\|\\(\\)\\,\\;]))";
+			// "(\\[[\\w\\-.
+				// ]+\\])?(([?\\w+]?'?\\w+'?)!)?[\\$]?[A-Z]+[\\$]?[0-9]+:[\\$]?[A-Z]+[\\$]?[0-9]+($|(?=[\\s\\.\\#\\+\\-\\*\\/\\=\\~\\>\\<\\!\\|\\(\\)\\,\\;]))";
 
 		private static final String regExBooleanPattern = "(TRUE|FALSE)";
-		// "\\b(TRUE|FALSE)\\b($|(?=[\\s\\.\\#\\+\\-\\*\\/\\=\\~\\>\\<\\!\\|\\(\\)\\,\\;]))";
+			// "\\b(TRUE|FALSE)\\b($|(?=[\\s\\.\\#\\+\\-\\*\\/\\=\\~\\>\\<\\!\\|\\(\\)\\,\\;]))";
 
 		private static final Pattern regExCell = Pattern.compile(regExCellPattern, Pattern.CASE_INSENSITIVE);
 		private static final Pattern regExRange = Pattern.compile(regExRangePattern, Pattern.CASE_INSENSITIVE);
@@ -128,104 +162,104 @@ public class ExpressionTree {
 				token = TOKEN.NUMBER;
 			} else if (token == TOKEN.UNDEF) {
 				switch (charFormula[charPosition]) {
-				case '"':
-					charPosition++;
-					token = TOKEN.STRING;
-					break;
-				case '.':
-					charPosition++;
-					token = TOKEN.NUMBER;
-					break;
-				// case '#': pos++; token = TOKEN.DATE; break;
-				case ',':
-					charPosition++;
-					token = TOKEN.DELIMITER;
-					break;
-				case '+':
-					charPosition++;
-					token = TOKEN.PLUS;
-					break;
-				case '-':
-					charPosition++;
-					token = TOKEN.MINUS;
-					break;
-				case '&':
-					if (charFormula[charPosition + 1] != '&') {
+					case '"':
 						charPosition++;
-						token = TOKEN.CONCATENATE;
-					}
-					break;
-				case '*':
-					charPosition++;
-					token = TOKEN.MULTIPLY;
-					break;
-				case '/':
-					charPosition++;
-					token = TOKEN.DIVIDE;
-					break;
-				case '=':
-					charPosition++;
-					token = TOKEN.EQUAL;
-					break;
-				case '(':
-					charPosition++;
-					token = TOKEN.LEFT_BRACKET;
-					break;
-				case ')':
-					charPosition++;
-					token = TOKEN.RIGHT_BRACKET;
-					break;
-				case '^':
-					charPosition++;
-					token = TOKEN.POWER;
-					break;
-				case '%':
-					charPosition++;
-					token = TOKEN.REMAINDER;
-					break;
-				case '~':
-					charPosition++;
-					token = TOKEN.NOT;
-					break;
-				case '>':
-					if (charPosition + 1 < formulaLength && charFormula[charPosition + 1] == '=') {
-						charPosition += 2;
-						token = TOKEN.BIGGER_EQUAL;
-					} else {
+						token = TOKEN.STRING;
+						break;
+					case '.':
 						charPosition++;
-						token = TOKEN.BIGGER;
-					}
-					break;
-				case '<':
-					if (charPosition + 1 < formulaLength && (charFormula[charPosition + 1] == '=')
-							|| (charFormula[charPosition + 1] == '>')) {
-						if (charFormula[charPosition + 1] != '>') {
-							charPosition += 2;
-							token = TOKEN.SMALLER_EQUAL;
+						token = TOKEN.NUMBER;
+						break;
+					// case '#': pos++; token = TOKEN.DATE; break;
+					case ',':
+						charPosition++;
+						token = TOKEN.DELIMITER;
+						break;
+					case '+':
+						charPosition++;
+						token = TOKEN.PLUS;
+						break;
+					case '-':
+						charPosition++;
+						token = TOKEN.MINUS;
+						break;
+					case '&':
+						if (charFormula[charPosition + 1] != '&') {
+							charPosition++;
+							token = TOKEN.CONCATENATE;
 						}
-					} else {
+						break;
+					case '*':
 						charPosition++;
-						token = TOKEN.SMALLER;
-					}
-					break;
+						token = TOKEN.MULTIPLY;
+						break;
+					case '/':
+						charPosition++;
+						token = TOKEN.DIVIDE;
+						break;
+					case '=':
+						charPosition++;
+						token = TOKEN.EQUAL;
+						break;
+					case '(':
+						charPosition++;
+						token = TOKEN.LEFT_BRACKET;
+						break;
+					case ')':
+						charPosition++;
+						token = TOKEN.RIGHT_BRACKET;
+						break;
+					case '^':
+						charPosition++;
+						token = TOKEN.POWER;
+						break;
+					case '%':
+						charPosition++;
+						token = TOKEN.REMAINDER;
+						break;
+					case '~':
+						charPosition++;
+						token = TOKEN.NOT;
+						break;
+					case '>':
+						if (charPosition + 1 < formulaLength && charFormula[charPosition + 1] == '=') {
+							charPosition += 2;
+							token = TOKEN.BIGGER_EQUAL;
+						} else {
+							charPosition++;
+							token = TOKEN.BIGGER;
+						}
+						break;
+					case '<':
+						if (charPosition + 1 < formulaLength && (charFormula[charPosition + 1] == '=')
+								|| (charFormula[charPosition + 1] == '>')) {
+							if (charFormula[charPosition + 1] != '>') {
+								charPosition += 2;
+								token = TOKEN.SMALLER_EQUAL;
+							}
+						} else {
+							charPosition++;
+							token = TOKEN.SMALLER;
+						}
+						break;
 				}
 
 				if (charPosition + 1 < formulaLength && token == TOKEN.UNDEF) {
 					switch (cellFormula.substring(charPosition, charPosition + 2)) {
-					case "||":
-						charPosition += 2;
-						token = TOKEN.OR;
-						break;
-					case "&&":
-						charPosition += 2;
-						token = TOKEN.AND;
-						break;
-					case "<>":
-					case "!=":
-						charPosition += 2;
-						token = TOKEN.NOT_EQUAL;
-						break;
-					}
+						case "||":
+							charPosition += 2;
+							token = TOKEN.OR;
+							break;
+						case "&&":
+							charPosition += 2;
+							token = TOKEN.AND;
+							break;
+						case "<>":
+						case "!=":
+							charPosition += 2;
+							token = TOKEN.NOT_EQUAL;
+							break;
+						}
 
 					if (token == TOKEN.UNDEF && charPosition + 8 < formulaLength
 							&& (cellFormula.substring(charPosition, charPosition + 8).toUpperCase() == "BETWEEN "
@@ -265,7 +299,7 @@ public class ExpressionTree {
 					charPosition += matcher.end();
 					int tmpPos = charPosition;
 					_readToken();
-
+					
 					if (token == TOKEN.LEFT_BRACKET) {
 						_readToken();
 						_readThis(TOKEN.RIGHT_BRACKET, "TRUE/FALSE-function, expected )");
@@ -277,16 +311,16 @@ public class ExpressionTree {
 
 			if (token == TOKEN.NUMBER || token == TOKEN.STRING) {
 				switch (token) {
-				case NUMBER: {
-					double d = _readNumber();
-					token = TOKEN.NUMBER;
-					data = d;
-					break;
-				}
-				case STRING: {
-					data = _readString();
-					break;
-				}
+					case NUMBER: {
+						double d = _readNumber();
+						token = TOKEN.NUMBER;
+						data = d;
+						break;
+					}
+					case STRING: {
+						data = _readString();
+						break;
+					}
 				}
 			}
 
@@ -334,24 +368,24 @@ public class ExpressionTree {
 		private FUNCTION _readFunctionToken() {
 			if (charPosition + 5 < formulaLength)
 				switch (cellFormula.substring(charPosition, charPosition + 5).toUpperCase()) {
-				case "COUNT":
-					charPosition += 5;
-					return FUNCTION.COUNT;
-				}
+					case "COUNT":
+						charPosition += 5;
+						return FUNCTION.COUNT;
+					}
 
 			if (charPosition + 4 < formulaLength)
 				switch (cellFormula.substring(charPosition, charPosition + 4).toUpperCase()) {
-				case "MEAN":
-					charPosition += 4;
-					return FUNCTION.MEAN;
-				}
+					case "MEAN":
+						charPosition += 4;
+						return FUNCTION.MEAN;
+					}
 
 			if (charPosition + 3 < formulaLength)
 				switch (cellFormula.substring(charPosition, charPosition + 3).toUpperCase()) {
-				case "SUM":
-					charPosition += 3;
-					return FUNCTION.SUM;
-				}
+					case "SUM":
+						charPosition += 3;
+						return FUNCTION.SUM;
+					}
 
 			return FUNCTION.UNDEF;
 		}
@@ -366,21 +400,24 @@ public class ExpressionTree {
 			_readToken();
 
 			switch (_func) {
-			case COUNT:
-			case SUM:
-			case MEAN:
-
-				_readThis(TOKEN.RANGE, "param for functions must be range");
-				ret.add(_readOr());
-				while (token != TOKEN.RIGHT_BRACKET) {
-					_readThis(TOKEN.DELIMITER, "must be , after function param");
-					_readToken();
-
-					_readThis(TOKEN.RANGE, "param must be range");
+				case COUNT:
+				case SUM:
+				case MEAN:
+	
+					_readThis(TOKEN.RANGE, "param for functions must be range");
 					ret.add(_readOr());
-				}
+					while (token != TOKEN.RIGHT_BRACKET) {
+						_readThis(TOKEN.DELIMITER, "must be , after function param");
+						_readToken();
+	
+						_readThis(TOKEN.RANGE, "param must be range");
+						ret.add(_readOr());
+					}
+	
+					break;
+				default:
+					throw new IllegalArgumentException("Undefined formula " + _func);
 
-				break;
 			}
 
 			_readThis(TOKEN.RIGHT_BRACKET, "must be ) after function params");
@@ -549,57 +586,59 @@ public class ExpressionTree {
 			ExpressionTree r = null;
 
 			switch (token) {
-			case MINUS:
-				_readToken();
-				r = new ExpressionTree(TOKEN.MINUS, _readTerm());
-				break;
-			case PLUS:
-				_readToken();
-				r = _readTerm();
-				break;
-			case LEFT_BRACKET:
-				_readToken();
-
-				r = _readOr();
-
-				if (token != TOKEN.RIGHT_BRACKET)
-					throw new IllegalArgumentException("unexpected element, must be )" + this.token.toString() + ","
-							+ this.charPosition + "," + this.cellFormula);
-
-				break;
-			case NUMBER:
-				r = new ExpressionTree((double) data);
-				_readToken();
-				break;
-			case STRING:
-				r = new ExpressionTree((String) data);
-				_readToken();
-				break;
-			case TRUE:
-				r = new ExpressionTree(true);
-				_readToken();
-				break;
-			case FALSE:
-				r = new ExpressionTree(false);
-				_readToken();
-				break;
-			case FUNCTION:
-				r = new ExpressionTree((FUNCTION) data);
-				r.expressions.addAll(_readFunction());
-				_readToken();
-				break;
-			case CELL:
-				r = new ExpressionTree(token, (Cell) data);
-				_readToken();
-				break;
-			case RANGE:
-				r = new ExpressionTree(token, (Range) data);
-				_readToken();
-				break;
-			default:
-				throw new IllegalArgumentException("unexpected element " + token.toString() + ": "
-						+ this.token.toString() + "," + this.charPosition + "," + this.cellFormula);
-			}
+				case MINUS:
+					_readToken();
+					r = new ExpressionTree(TOKEN.MINUS, _readTerm());
+					break;
+				case PLUS:
+					_readToken();
+					r = _readTerm();
+					break;
+				case LEFT_BRACKET:
+					_readToken();
+	
+					r = _readOr();
+	
+					if (token != TOKEN.RIGHT_BRACKET)
+						throw new IllegalArgumentException("unexpected element, must be )" + this.token.toString() + ","
+								+ this.charPosition + "," + this.cellFormula);
+					
+					_readToken();
+	
+					break;
+				case NUMBER:
+					r = new ExpressionTree((double) data);
+					_readToken();
+					break;
+				case STRING:
+					r = new ExpressionTree((String) data);
+					_readToken();
+					break;
+				case TRUE:
+					r = new ExpressionTree(true);
+					_readToken();
+					break;
+				case FALSE:
+					r = new ExpressionTree(false);
+					_readToken();
+					break;
+				case FUNCTION:
+					r = new ExpressionTree((FUNCTION) data);
+					r.expressions.addAll(_readFunction());
+					_readToken();
+					break;
+				case CELL:
+					r = new ExpressionTree(token, (Cell) data);
+					_readToken();
+					break;
+				case RANGE:
+					r = new ExpressionTree(token, (Range) data);
+					_readToken();
+					break;
+				default:
+					throw new IllegalArgumentException("unexpected element " + token.toString() + ": "
+							+ this.token.toString() + "," + this.charPosition + "," + this.cellFormula);
+				}
 
 			return r;
 		}
@@ -613,25 +652,25 @@ public class ExpressionTree {
 		this.token = token;
 		if (token != TOKEN.ERROR && token != TOKEN.EXPRESSION && token != TOKEN.UNDEF) {
 			switch (token) {
-			case CELL:
-				Cell c = (Cell) value;
-				data = c;
-				this.dataType = c.getCellDataType();
-				break;
-			case RANGE:
-				data = (Range) value;
-				this.dataType = CellInputDataType.RANGE;
-				break;
-			case NUMBER:
-				data = Double.valueOf(value.toString());
-				this.dataType = CellInputDataType.Number;
-				break;
-			case STRING:
-				data = value.toString();
-				this.dataType = CellInputDataType.String;
-				break;
-			default:
-				this.dataType = CellInputDataType.General;
+				case CELL:
+					Cell c = (Cell) value;
+					data = c;
+					this.dataType = c.getCellDataType();
+					break;
+				case RANGE:
+					data = (Range) value;
+					this.dataType = CellInputDataType.RANGE;
+					break;
+				case NUMBER:
+					data = Double.valueOf(value.toString());
+					this.dataType = CellInputDataType.Number;
+					break;
+				case STRING:
+					data = value.toString();
+					this.dataType = CellInputDataType.String;
+					break;
+				default:
+					this.dataType = CellInputDataType.General;
 			}
 		}
 	}
@@ -694,58 +733,58 @@ public class ExpressionTree {
 
 	public Object getValue() {
 		switch (this.token) {
-		case NUMBER:
-			return (double) this.data;
-
-		case PLUS:
-			if (this.expressions.size() == 1)
-				return this.expressions.get(0).getNumericValue();
-			else
-				return this.expressions.get(0).getNumericValue() + this.expressions.get(1).getNumericValue();
-
-		case MINUS:
-			if (this.expressions.size() == 1)
-				return -this.expressions.get(0).getNumericValue();
-			else
-				return this.expressions.get(0).getNumericValue() - this.expressions.get(1).getNumericValue();
-
-		case MULTIPLY:
-			return this.expressions.get(0).getNumericValue() * this.expressions.get(1).getNumericValue();
-
-		case DIVIDE:
-			double ex2 = this.expressions.get(1).getNumericValue();
-			if (ex2 == 0)
-				throw new IllegalArgumentException("divide by 0");
-			return this.expressions.get(0).getNumericValue() / ex2;
-
-		case POWER:
-			return Math.pow(this.expressions.get(0).getNumericValue(), this.expressions.get(1).getNumericValue());
-
-		case REMAINDER:
-			return this.expressions.get(0).getNumericValue() % this.expressions.get(1).getNumericValue();
-
-		case CELL:
-			return ((Cell) this.data).getCellValue();
-
-		case FUNCTION:
+			case NUMBER:
+				return (double) this.data;
+	
+			case PLUS:
+				if (this.expressions.size() == 1)
+					return this.expressions.get(0).getNumericValue();
+				else
+					return this.expressions.get(0).getNumericValue() + this.expressions.get(1).getNumericValue();
+	
+			case MINUS:
+				if (this.expressions.size() == 1)
+					return -this.expressions.get(0).getNumericValue();
+				else
+					return this.expressions.get(0).getNumericValue() - this.expressions.get(1).getNumericValue();
+	
+			case MULTIPLY:
+				return this.expressions.get(0).getNumericValue() * this.expressions.get(1).getNumericValue();
+	
+			case DIVIDE:
+				double ex2 = this.expressions.get(1).getNumericValue();
+				if (ex2 == 0)
+					throw new IllegalArgumentException("divide by 0");
+				return this.expressions.get(0).getNumericValue() / ex2;
+	
+			case POWER:
+				return Math.pow(this.expressions.get(0).getNumericValue(), this.expressions.get(1).getNumericValue());
+	
+			case REMAINDER:
+				return this.expressions.get(0).getNumericValue() % this.expressions.get(1).getNumericValue();
+	
+			case CELL:
+				return ((Cell) this.data).getCellValue();
+	
+			case FUNCTION:
 
 			FunctionRangeStrategy strategy;
 			switch ((FUNCTION) this.data) {
-			case SUM:
-				strategy = new FunctionSUM();
-				break;
-
-			case COUNT:
-				strategy = new FunctionCOUNT();
-				break;
-
-			case MEAN:
-				strategy = new FunctionMEAN();
-				break;
-
-			default:
-				strategy = null;
-				break;
+				case SUM:
+					strategy = new FunctionSUM();
+					break;
+	
+				case COUNT:
+					strategy = new FunctionCOUNT();
+					break;
+	
+				case MEAN:
+					strategy = new FunctionMEAN();
+					break;
+	
+				default:
+					strategy = null;
+					break;
 			}
 
 			return strategy.calculate((Range) this.expressions.get(0).data);

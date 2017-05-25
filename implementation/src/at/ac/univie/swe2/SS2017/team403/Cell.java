@@ -71,7 +71,7 @@ public class Cell implements Externalizable {
 			throw new IllegalArgumentException(formula + " Formula must begin with = symbol");
 		}
 
-		if (!this.parentWorksheet.getParentWorkbook().getAutoCalculate()) {
+		if (this.parentWorksheet.getParentWorkbook() == null || !this.parentWorksheet.getParentWorkbook().getAutoCalculate()) {
 			cellFormula = formula;
 			cellExpression = null;
 			return;
@@ -173,7 +173,7 @@ public class Cell implements Externalizable {
 		this.cellColumn = cell.cellColumn;
 		this.cellInputDataType = cell.cellInputDataType;
 		this.cellValue = cell.cellValue;
-		if (this.cellFormula != null)
+		if (cell.cellFormula != null)
 			this.setFormula(cell.cellFormula);
 	}
 
@@ -212,7 +212,7 @@ public class Cell implements Externalizable {
 	public void writeExternal(ObjectOutput out) throws IOException {
 		out.writeInt(cellRow);
 		out.writeInt(cellColumn);
-		out.writeObject(cellFormula); 
+		out.writeObject(cellFormula);
 		out.writeInt(cellInputDataType.getNumVal());
 		switch(cellInputDataType) {
 		case Boolean:
