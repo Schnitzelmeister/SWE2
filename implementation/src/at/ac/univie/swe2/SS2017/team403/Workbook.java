@@ -382,7 +382,7 @@ public class Workbook implements Externalizable {
 	}
 
 	/**
-	 * This method removes diagramss.
+	 * This method removes diagrams.
 	 * If the diagram doesn't exist, an exception is raised.
 	 * Finally all observers will be informed.
 	 * 
@@ -569,12 +569,14 @@ public class Workbook implements Externalizable {
 	
 	
 	//Externalizable
+	@Override
 	public void writeExternal(ObjectOutput out) throws IOException {
 		out.writeObject(this.worksheetCollection.values().toArray(new Worksheet[this.worksheetCollection.size()]));
 		out.writeObject(this.diagramCollection.values().toArray(new Diagram[this.diagramCollection.size()]));
 	}
 
 	//Externalizable
+	@Override
 	@SuppressWarnings("unchecked")
 	public void readExternal(ObjectInput in) throws ClassNotFoundException, IOException {
 		Worksheet[] tempSheets = (Worksheet[])in.readObject();
