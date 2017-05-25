@@ -6,49 +6,55 @@ import java.io.ObjectOutput;
 
 public class DiagramBar extends Diagram {
 	private static final long serialVersionUID = 1L;
-	
+
 	public DiagramBar(String name, Workbook wbk, DiagramChangedCallback diagramChangedCallback) {
 		super(name, wbk, diagramChangedCallback);
 	}
-	
+
 	DiagramBar(Diagram diagram, Workbook wbk, DiagramChangedCallback diagramChangedCallback) {
 		super(diagram.getName(), wbk, diagramChangedCallback);
-		values = ((DiagramBar)diagram).values;
+		values = ((DiagramBar) diagram).values;
 	}
-	
+
 	private Area values;
-	public Area getValues() { return values; }
-	public void setValues(Area values) {
-		this.values = values; 
-		this.parent.removeReferenceDependencies(this); 
-		if (this.parent.getAutoCalculate())
-			this.parent.addDependency(this, values); 
-		diagramChangedCallback.afterDiagramChanged(this.name); 
+
+	public Area getValues() {
+		return values;
 	}
-	
+
+	public void setValues(Area values) {
+		this.values = values;
+		this.parent.removeReferenceDependencies(this);
+		if (this.parent.getAutoCalculate())
+			this.parent.addDependency(this, values);
+		diagramChangedCallback.afterDiagramChanged(this.name);
+	}
+
 	@Override
 	public void calculate() {
 		this.parent.removeReferenceDependencies(this);
-		this.parent.addDependency(this, values); 
+		this.parent.addDependency(this, values);
 	}
-	
-	//Externalizable
+
+	// Externalizable
 	@Override
 	public void writeExternal(ObjectOutput out) throws IOException {
 		super.writeExternal(out);
 		out.writeObject(values);
 	}
 
-	//Externalizable
+	// Externalizable
 	@Override
 	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
 		super.readExternal(in);
-		values = (Area)in.readObject();
+		values = (Area) in.readObject();
 	}
 
 }
 
 class DiagramBarCreator extends DiagramCreator {
-    @Override
-    public Diagram factoryMethod(String name, Workbook wbk, DiagramChangedCallback diagramChangedCallback) { return new DiagramBar(name, wbk, diagramChangedCallback); }
+	@Override
+	public Diagram factoryMethod(String name, Workbook wbk, DiagramChangedCallback diagramChangedCallback) {
+		return new DiagramBar(name, wbk, diagramChangedCallback);
+	}
 }

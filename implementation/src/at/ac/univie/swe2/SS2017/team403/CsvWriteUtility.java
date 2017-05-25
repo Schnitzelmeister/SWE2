@@ -4,8 +4,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 /**
- * This class is used to write a worksheet into a csv-file. 
- * Each cell content (of a worksheet) is stored into a csv-file-cell.
+ * This class is used to write a worksheet into a csv-file. Each cell content
+ * (of a worksheet) is stored into a csv-file-cell.
  */
 public class CsvWriteUtility {
 
@@ -26,7 +26,7 @@ public class CsvWriteUtility {
 			writer.append(System.lineSeparator());
 			cellContents = new StringBuilder();
 		}
-		
+
 		writer.flush();
 		writer.close();
 	}

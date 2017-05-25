@@ -7,9 +7,9 @@ import java.io.ObjectOutput;
 import java.util.Comparator;
 
 /**
- * This class is used to handle all operations connected to a Cell.
- * A cell-object is part of a worksheet and contains either a cellValue 
- * which is also an object or a formula.
+ * This class is used to handle all operations connected to a Cell. A
+ * cell-object is part of a worksheet and contains either a cellValue which is
+ * also an object or a formula.
  * 
  */
 public class Cell implements Externalizable {
@@ -25,7 +25,8 @@ public class Cell implements Externalizable {
 	/**
 	 * Use setNumericValue to store a double-value in a Cell.
 	 * 
-	 * @param value  cell-input-double-value
+	 * @param value
+	 *            cell-input-double-value
 	 */
 	public void setNumericValue(double value) {
 		Application.getActiveWorkbook().removeReferenceDependencies(this);
@@ -40,7 +41,8 @@ public class Cell implements Externalizable {
 	/**
 	 * Use setTextValue to store a String-value in a Cell.
 	 * 
-	 * @param value   cell-input-value
+	 * @param value
+	 *            cell-input-value
 	 */
 	public void setTextValue(String value) {
 		Application.getActiveWorkbook().removeReferenceDependencies(this);
@@ -55,8 +57,11 @@ public class Cell implements Externalizable {
 	/**
 	 * Use setFormula to store a formula in a Cell.
 	 * 
-	 * @param formula  cell-input-formula-value
-	 * @throws IllegalArgumentException  Exception will be thrown if the formula doesn't begin with "="
+	 * @param formula
+	 *            cell-input-formula-value
+	 * @throws IllegalArgumentException
+	 *             Exception will be thrown if the formula doesn't begin with
+	 *             "="
 	 */
 	public void setFormula(String formula) throws IllegalArgumentException {
 		if (!formula.startsWith("=")) {
@@ -68,22 +73,25 @@ public class Cell implements Externalizable {
 			cellExpression = null;
 			return;
 		}
-		
+
 		String previous = this.cellFormula;
 		try {
 			cellFormula = formula;
 			cellExpression = ExpressionTree.parse(this, formula);
 			cellInputDataType = cellExpression.getDataType();
 			calculateCellExpression();
+		} catch (IllegalArgumentException e) {
+			this.cellFormula = previous;
+			cellExpression = null;
+			throw e;
 		}
-		catch (IllegalArgumentException e) { this.cellFormula = previous; cellExpression = null; throw e; }
-		
+
 		try {
 			parentWorksheet.getParentWorkbook().calculateReferenceDependencies(this);
 		} catch (IllegalArgumentException e) {
 			cellFormula = null;
 			cellExpression = null;
-	    	Application.getActiveWorkbook().removeReferenceDependencies(this);
+			Application.getActiveWorkbook().removeReferenceDependencies(this);
 			throw e;
 		}
 	}
@@ -109,7 +117,7 @@ public class Cell implements Externalizable {
 	/**
 	 * A cell contains a formula which is a reference of other cells.
 	 * 
-	 * @return  referenced cell
+	 * @return referenced cell
 	 */
 	public String getCellReferences() {
 		return "'" + parentWorksheet.getWorksheetName() + "'!R" + cellRow + "C" + cellColumn;
@@ -120,7 +128,7 @@ public class Cell implements Externalizable {
 	}
 
 	/**
-	 * @return 0d  double or double value
+	 * @return 0d double or double value
 	 */
 	public double getNumericValue() throws ClassCastException {
 		if (cellValue == null) {
@@ -128,18 +136,17 @@ public class Cell implements Externalizable {
 		}
 
 		if (cellInputDataType == CellInputDataType.Number)
-			return (double)cellValue;
-		
+			return (double) cellValue;
+
 		if (cellInputDataType == CellInputDataType.General) {
 			try {
 				return Double.parseDouble(cellValue.toString());
-			}
-			catch (NumberFormatException e) {
+			} catch (NumberFormatException e) {
 				return 0d;
 			}
 		}
-		
-    	throw new ClassCastException (this.getCellReferences() + " Incompatible DataType");
+
+		throw new ClassCastException(this.getCellReferences() + " Incompatible DataType");
 
 	}
 
@@ -155,8 +162,7 @@ public class Cell implements Externalizable {
 		this.cellRow = row;
 		this.cellColumn = column;
 	}
-	
-	
+
 	Cell(Cell cell, Worksheet parent) {
 		this.parentWorksheet = parent;
 		this.cellRow = cell.cellRow;
@@ -167,7 +173,6 @@ public class Cell implements Externalizable {
 			this.setFormula(cell.cellFormula);
 	}
 
-	
 	public Worksheet getParentWorksheet() {
 		return parentWorksheet;
 	}
@@ -196,20 +201,20 @@ public class Cell implements Externalizable {
 			}
 		}
 	}
-	
-	
-	//Externalizable
+
+	// Externalizable
+	@Override
 	public void writeExternal(ObjectOutput out) throws IOException {
 		out.writeInt(cellRow);
 		out.writeInt(cellColumn);
-		out.writeUTF(cellFormula); 
+		out.writeUTF(cellFormula);
 		out.writeInt(cellInputDataType.getNumVal());
-		switch(cellInputDataType) {
+		switch (cellInputDataType) {
 		case Boolean:
-			out.writeBoolean((boolean)cellValue);
+			out.writeBoolean((boolean) cellValue);
 			break;
 		case Number:
-			out.writeDouble((double)cellValue);
+			out.writeDouble((double) cellValue);
 			break;
 		default:
 			out.writeUTF(cellValue.toString());
@@ -217,13 +222,14 @@ public class Cell implements Externalizable {
 		}
 	}
 
-	//Externalizable
+	// Externalizable
+	@Override
 	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
 		cellRow = in.readInt();
 		cellColumn = in.readInt();
 		cellFormula = in.readUTF();
 		cellInputDataType = CellInputDataType.values()[in.readInt()];
-		switch(cellInputDataType) {
+		switch (cellInputDataType) {
 		case Boolean:
 			cellValue = in.readBoolean();
 			break;

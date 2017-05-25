@@ -14,10 +14,9 @@ import com.itextpdf.text.pdf.PdfWriter;
 import com.opencsv.CSVReader;
 
 /**
- * This class is used to convert a csv-file into a pdf-file. 
- * Each csv-cell is stored into a pdf-cell.
- * Every pdf-row contains only five cells. If the csv-row
- * is longer than five, there will be another pdf-row.
+ * This class is used to convert a csv-file into a pdf-file. Each csv-cell is
+ * stored into a pdf-cell. Every pdf-row contains only five cells. If the
+ * csv-row is longer than five, there will be another pdf-row.
  */
 public class PDFWriteUtility {
 

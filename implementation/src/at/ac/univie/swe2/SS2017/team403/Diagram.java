@@ -28,18 +28,17 @@ public abstract class Diagram implements Externalizable {
 	}
 
 	public abstract void calculate();
-	
+
 	public void setName(String name) throws IllegalArgumentException {
 		if (this.name.equals(name))
 			return;
-		//check if diagram with new name exists
+		// check if diagram with new name exists
 		if (parent.getDiagrams().containsKey(name))
 			throw new IllegalArgumentException("Diagram with name " + name + " already exists");
-		
-		//check if sheet with new name exists
+
+		// check if sheet with new name exists
 		if (parent.getWorksheets().containsKey(name))
 			throw new IllegalArgumentException("Sheet with name " + name + " already exists");
-
 
 		String oldName = this.name;
 		this.name = name;
@@ -49,20 +48,20 @@ public abstract class Diagram implements Externalizable {
 			diagramChangedCallback.afterDiagramRenamed(oldName, this);
 
 	}
-	
-	
-	
-	//Externalizable
+
+	// Externalizable
+	@Override
 	public void writeExternal(ObjectOutput out) throws IOException {
 		out.writeUTF(name);
 	}
 
-	//Externalizable
+	// Externalizable
+	@Override
 	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
 		name = in.readUTF();
 	}
 }
 
 abstract class DiagramCreator {
-    public abstract Diagram factoryMethod(String name, Workbook wbk, DiagramChangedCallback diagramChangedCallback);
+	public abstract Diagram factoryMethod(String name, Workbook wbk, DiagramChangedCallback diagramChangedCallback);
 }

@@ -13,7 +13,8 @@ class FunctionSUM implements FunctionRangeStrategy {
 
 		double ret = 0;
 
-		for (Iterator<Map.Entry<Area, Integer>> iter = range.getWorksheetAreas().entrySet().iterator(); iter.hasNext();) {
+		for (Iterator<Map.Entry<Area, Integer>> iter = range.getWorksheetAreas().entrySet().iterator(); iter
+				.hasNext();) {
 			Map.Entry<Area, Integer> e = iter.next();
 			Area a = e.getKey();
 
@@ -32,7 +33,8 @@ class FunctionSUM implements FunctionRangeStrategy {
 			ret += (tmp * e.getValue());
 		}
 
-		for (Iterator<Map.Entry<Cell, Integer>> iter = range.getWorksheetCells().entrySet().iterator(); iter.hasNext();) {
+		for (Iterator<Map.Entry<Cell, Integer>> iter = range.getWorksheetCells().entrySet().iterator(); iter
+				.hasNext();) {
 			Map.Entry<Cell, Integer> e = iter.next();
 			Cell c = e.getKey();
 			if (c != null && c.getCellValue() != null)
@@ -49,7 +51,8 @@ class FunctionMEAN implements FunctionRangeStrategy {
 		double ret = 0;
 		int count = 0;
 
-		for (Iterator<Map.Entry<Area, Integer>> iter = range.getWorksheetAreas().entrySet().iterator(); iter.hasNext();) {
+		for (Iterator<Map.Entry<Area, Integer>> iter = range.getWorksheetAreas().entrySet().iterator(); iter
+				.hasNext();) {
 			Map.Entry<Area, Integer> e = iter.next();
 			Area a = e.getKey();
 
@@ -72,7 +75,8 @@ class FunctionMEAN implements FunctionRangeStrategy {
 			ret += (tmp * e.getValue());
 		}
 
-		for (Iterator<Map.Entry<Cell, Integer>> iter = range.getWorksheetCells().entrySet().iterator(); iter.hasNext();) {
+		for (Iterator<Map.Entry<Cell, Integer>> iter = range.getWorksheetCells().entrySet().iterator(); iter
+				.hasNext();) {
 			Map.Entry<Cell, Integer> e = iter.next();
 			Cell c = e.getKey();
 			if (c != null && c.getCellValue() != null) {
@@ -91,7 +95,8 @@ class FunctionCOUNT implements FunctionRangeStrategy {
 	@Override
 	public double calculate(Range range) {
 		int ret = 0;
-		for (Iterator<Map.Entry<Area, Integer>> iter = range.getWorksheetAreas().entrySet().iterator(); iter.hasNext();) {
+		for (Iterator<Map.Entry<Area, Integer>> iter = range.getWorksheetAreas().entrySet().iterator(); iter
+				.hasNext();) {
 			Map.Entry<Area, Integer> e = iter.next();
 			Area a = e.getKey();
 
@@ -110,7 +115,8 @@ class FunctionCOUNT implements FunctionRangeStrategy {
 			ret += (tmp * e.getValue());
 		}
 
-		for (Iterator<Map.Entry<Cell, Integer>> iter = range.getWorksheetCells().entrySet().iterator(); iter.hasNext();) {
+		for (Iterator<Map.Entry<Cell, Integer>> iter = range.getWorksheetCells().entrySet().iterator(); iter
+				.hasNext();) {
 			Map.Entry<Cell, Integer> e = iter.next();
 			Cell c = e.getKey();
 			if (c != null && c.getCellValue() != null)
