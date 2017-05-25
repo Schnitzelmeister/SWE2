@@ -120,7 +120,7 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 	/**
 	 * Open proprietary Format File
 	 * @param filePath a string which contains the path to File
-	 * @throws IllegalArgumentException
+	 * @throws IllegalArgumentException to handle the Exceptions by opening a File 
 	 */
 	public void openFile(String filePath) throws IllegalArgumentException
 	{
@@ -146,8 +146,8 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 	/**
 	 * Save proprietary Format File
 	 * @param filePath a string which contains the path to File
-	 * @param overwrite
-	 * @throws IllegalArgumentException
+	 * @param overwrite a boolean value that is true if the file exists and the file will be overwrite.
+	 * @throws IllegalArgumentException throws if the filepath not acceptable
 	 */
 	public void saveFile(String filePath, boolean overwrite) throws IllegalArgumentException
 	{
@@ -191,13 +191,14 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 		PDFWriteUtility.convertCSVToPDF(filepath);
 	}
 
+	
 	/**
-	 * Open CSV format File
 	 * 
-	 * @param fileLocation a String that gives the location of a file
-	 * @param delimiter the char that used as delimiter in csv
-	 * @param quotation the quatiation
-	 * @throws IOException IOException by open a file
+	 * Open CSV format File
+	 * @param fileLocation fileLocation a String that gives the location of a file
+	 * @param delimiter delimiter the char that used as delimiter in csv
+	 * @param quotation quotation the quotation
+	 * @throws IllegalArgumentException if the location not true
 	 */
 	public void openCSV(String fileLocation, char delimiter, char quotation) throws IllegalArgumentException {
 		Worksheet sheet = null;

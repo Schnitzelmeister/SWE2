@@ -22,6 +22,13 @@ public class Range {
 	 * @param cellContext
 	 * @return
 	 */
+	/**
+	 * to get a range by giving the cell reference (for example: 'worksheet1!A1B1:A2B2;worksheet2!A1C1:A3C2'),an object of cell class and a Workbook object
+	 * @param cellReferences  cell reference (for example: 'worksheet1!A1B1:A2B2;worksheet2!A1C1:A3C2')
+	 * @param cellContext a object with cell reference
+	 * @param wbk is the object of the workbook  that contains the cell within the cell reference
+	 * @return an object of the Range class.
+	 */
 	static Range getRangeByAddress(String cellReferences, Cell cellContext, Workbook wbk) {
 		
 		Worksheet worksheet = null;

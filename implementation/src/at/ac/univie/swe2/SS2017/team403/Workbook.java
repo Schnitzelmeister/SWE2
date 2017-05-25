@@ -144,8 +144,8 @@ public class Workbook implements Externalizable {
 	 * could be removed and a new one could be added.
 	 * Finally all observers will be informed.
 	 * 
-	 * @param worksheetOldName -> old name of a worksheet
-	 * @param sheet -> worksheet that should be renamed
+	 * @param worksheetOldName old name of a worksheet
+	 * @param sheet  worksheet that should be renamed
 	 */
 	private void renameSheet(String worksheetOldName, Worksheet sheet) {
 		if (worksheetCollection.containsKey(worksheetOldName) && worksheetCollection.get(worksheetOldName) == sheet) {
@@ -270,15 +270,13 @@ public class Workbook implements Externalizable {
 		return diagramCollection.get(name);
 	}
 
+	
+	
 	/**
-	 * This method is used to add a diagram. 
-	 * If the diagram-name exists, an exception is raised.
-	 * Where this is not the case, a new diagram will be created and
-	 * observers will be informed.
-	 * 
-	 * @param name  diagram-name
-	 * @param cls  diagram-class
-	 * @return  returns a diagram
+	 * the method is used to add a new diagram and it has a name of diagram and an object of the DiagramCreater class as input
+	 * @param name a String that contains the name of a diagram 
+	 * @param creator a creator for diagramm
+	 * @return an object of Diagram.
 	 */
 	public Diagram addDiagram(String name, DiagramCreator creator) {
 		if (diagramCollection.containsKey(name)) {
@@ -346,8 +344,8 @@ public class Workbook implements Externalizable {
 	 * could be removed and a new one could be added.
 	 * Finally all observers will be informed.
 	 * 
-	 * @param diagramOldName -> old name of a diagram
-	 * @param diagram -> diagram that should be renamed
+	 * @param diagramOldName  old name of a diagram
+	 * @param diagram  diagram that should be renamed
 	 */
 	private void renameDiagram(String diagramOldName, Diagram diagram) {
 		if (diagramCollection.containsKey(diagram.getName())) {
@@ -371,7 +369,7 @@ public class Workbook implements Externalizable {
 	 * If the diagram exists, the diagram will be modified.
 	 * Finally all observers will be informed.
 	 * 
-	 * @param diagramName -> name of diagram
+	 * @param diagramName  name of diagram
 	 */
 	private void changeDiagram(String diagramName) {
 		if (diagramCollection.containsKey(diagramName)) {
@@ -410,7 +408,7 @@ public class Workbook implements Externalizable {
 	/**
 	 * This method removes all dependencies of different areas where a specific cell is involved.
 	 * 
-	 * @param cell -> cell with reference-dependencies  
+	 * @param cell  cell with reference-dependencies  
 	 */
 	void removeReferenceDependencies(Cell cell) {
 		if (dependenciesOfCell.containsKey(cell)) {
@@ -431,8 +429,8 @@ public class Workbook implements Externalizable {
 	 * If there isn't any dependency-field, it will be created.
 	 * If there aren't any dependent-field, it will be created.
 	 * 
-	 * @param cell -> selected cell
-	 * @param precedent -> cell-dependency
+	 * @param cell  selected cell
+	 * @param precedent  cell-dependency
 	 */
 	void addDependency(Cell cell, Area precedent) {
 		if (!dependenciesOfCell.containsKey(cell)) {
