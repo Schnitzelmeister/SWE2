@@ -21,10 +21,16 @@ public class DiagramBar extends Diagram {
 	public void setValues(Area values) {
 		this.values = values; 
 		this.parent.removeReferenceDependencies(this); 
-		this.parent.addDependency(this, values); 
+		if (this.parent.getAutoCalculate())
+			this.parent.addDependency(this, values); 
 		diagramChangedCallback.afterDiagramChanged(this.name); 
 	}
 	
+	@Override
+	public void calculate() {
+		this.parent.removeReferenceDependencies(this);
+		this.parent.addDependency(this, values); 
+	}
 	
 	//Externalizable
 	@Override

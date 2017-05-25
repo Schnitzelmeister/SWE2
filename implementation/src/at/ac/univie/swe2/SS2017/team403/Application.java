@@ -5,16 +5,22 @@ import com.opencsv.CSVReader;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.List;
 import java.util.TreeMap;
-
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -27,7 +33,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.JViewport;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
@@ -35,9 +40,6 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
-import javax.swing.text.AttributeSet;
 import javax.swing.JMenuItem;
 import javax.swing.JMenu;
 
@@ -86,17 +88,85 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 		return activeWorkbook;
 	}
 
+	private TreeMap<String, DiagramInvalidateStrategy> diagrams = new TreeMap<String, DiagramInvalidateStrategy>();
+	private TreeMap<String, JTable> tables = new TreeMap<String, JTable>();
+	private boolean isCurrentWorkbook = true;
+	private String activeObjectName;
+	
+	// gui variables declaration
+	private JLabel labelBox;
+	private JTextArea textBox;
+
+	private javax.swing.JMenu editMenu;
+	private javax.swing.JMenuItem exitMenuItem;
+	private javax.swing.JMenu fileMenu;
+	private javax.swing.JTabbedPane jTabbedPanel;
+	private javax.swing.JMenuBar menuBar;
+	private javax.swing.JMenuItem openMenuItem;
+	private javax.swing.JMenuItem openNewTab;
+	private javax.swing.JMenuItem saveAsMenuItem;
+	private javax.swing.JMenuItem newMenuItem;
+
+	private String fileActualName = null;
+	private JMenuItem closeCurrentTab;
+	private JMenuItem renameTabMenuItem;
+	private JMenu mnCharts;
+	private JMenuItem createLinechartMenu;
+	private JMenuItem createBarchartMenu;
+	private JMenuItem removeDiagram;
+	private JMenuItem renameDiagram;
+
+	
 	/**
 	 * Open proprietary Format File
 	 * @param filePath a string which contains the path to File
-	 * @throws IOException IOException throws I0Exception 
+	 * @throws IllegalArgumentException
 	 */
-	public void openFile(String filefilePathName) throws IOException
+	public void openFile(String filePath) throws IllegalArgumentException
 	{
-		//activeWorkbook
+		try {
+			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filePath));
+			activeWorkbook = (Workbook)ois.readObject();
+			ois.close();
+			fileActualName = filePath;
+		}
+		catch (FileNotFoundException e) {
+			throw new IllegalArgumentException("File not found " + filePath);
+		}
+	    catch(ClassNotFoundException e) {
+			throw new IllegalArgumentException("Illegal DataSource " + filePath);
+		}
+		catch (IOException e) {
+			throw new IllegalArgumentException("IO Exception in DataSource " + filePath);
+		}
+
 		loadModel();
 	}
-	
+
+	/**
+	 * Save proprietary Format File
+	 * @param filePath a string which contains the path to File
+	 * @param overwrite
+	 * @throws IllegalArgumentException
+	 */
+	public void saveFile(String filePath, boolean overwrite) throws IllegalArgumentException
+	{
+		File f = new File(filePath);
+		if(!overwrite && f.exists() && !f.isDirectory())
+			throw new IllegalArgumentException("File exists " + filePath);
+
+		try {
+			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filePath));
+			oos.writeObject(activeWorkbook);
+			oos.flush();
+			oos.close();
+			fileActualName = filePath;
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new IllegalArgumentException("IO Serialization Exception occured");
+		}
+	}
+
 	/**
 	 * Write Csv Format File
 	 * @param workSheetName a String which contains the name of worksheet
@@ -129,23 +199,28 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 	 * @param quotation the quatiation
 	 * @throws IOException IOException by open a file
 	 */
-	public void openCSV(String fileLocation, char delimiter, char quotation) throws IOException {
-		CSVReader reader = new CSVReader(new FileReader(fileLocation), delimiter, quotation);
-		List<String[]> csvValues = reader.readAll();
-		String worksheetName = "Worksheet " + Application.getActiveWorkbook().generateNewId();
-		Worksheet sheet = Application.getActiveWorkbook().addSheet(worksheetName);
-		int r = 0;
-		for (String[] ar : csvValues) {
-			++r;
-			for (int c = 0; c < ar.length; ++c) {
-				if (isNumber(ar[c]))
-					sheet.getCell(r, c + 1).setNumericValue(Double.valueOf(ar[c]));
-				else
-					sheet.getCell(r, c + 1).setTextValue(ar[c]);
+	public void openCSV(String fileLocation, char delimiter, char quotation) throws IllegalArgumentException {
+		try {
+			CSVReader reader = new CSVReader(new FileReader(fileLocation), delimiter, quotation);
+			List<String[]> csvValues = reader.readAll();
+			String worksheetName = "Worksheet " + Application.getActiveWorkbook().generateNewId();
+			Worksheet sheet = Application.getActiveWorkbook().addSheet(worksheetName);
+			int r = 0;
+			for (String[] ar : csvValues) {
+				++r;
+				for (int c = 0; c < ar.length; ++c) {
+					if (isNumber(ar[c]))
+						sheet.getCell(r, c + 1).setNumericValue(Double.valueOf(ar[c]));
+					else
+						sheet.getCell(r, c + 1).setTextValue(ar[c]);
+				}
 			}
+			reader.close();
 		}
-		reader.close();
-
+		catch (IOException e) {
+			throw new IllegalArgumentException("failed to open " + fileLocation);			
+		}
+		
 		loadModel();
 	}
 
@@ -171,7 +246,6 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
         });
         box.add(jButtonOK);
         
-        
         JButton jButtonCancel = new JButton("Cancel");
         jButtonCancel.addActionListener(new ActionListener()
         {
@@ -182,56 +256,56 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
         box.add(jButtonCancel);
         
         textBox.addKeyListener(new BoxKeyListener(jButtonOK, jButtonCancel));
-
-        
 		
-		jTabbedPane1 = new javax.swing.JTabbedPane();
-		jTabbedPane1.setTabPlacement(JTabbedPane.BOTTOM);
-		jScrollPane1 = new javax.swing.JScrollPane();
-		jTable1 = new javax.swing.JTable();
+		jTabbedPanel = new javax.swing.JTabbedPane();
+		jTabbedPanel.setTabPlacement(JTabbedPane.BOTTOM);
 		menuBar = new javax.swing.JMenuBar();
 		fileMenu = new javax.swing.JMenu();
 		openMenuItem = new javax.swing.JMenuItem();
-		saveMenuItem = new javax.swing.JMenuItem();
+		newMenuItem = new javax.swing.JMenuItem();
 		saveAsMenuItem = new javax.swing.JMenuItem();
 		exitMenuItem = new javax.swing.JMenuItem();
 		editMenu = new javax.swing.JMenu();
 		openNewTab = new javax.swing.JMenuItem();
 		setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-		Integer numberOfWorksheets = activeWorkbook.getWorksheets().size() + 1;
-		Worksheet worksheet = activeWorkbook.addSheet("Worksheet " + numberOfWorksheets);
-		jTable1.setModel(new CustomTableModel(worksheet, jTable1, jScrollPane1));
-		jTable1.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
-		jTable1.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-		jTable1.setGridColor(new java.awt.Color(0, 0, 0));
-		jScrollPane1.setViewportView(jTable1);
-		jTabbedPane1.addTab(worksheet.getWorksheetName(), jScrollPane1);
 		fileMenu.setText("File");
+		
 		openMenuItem.setText("Open");
 		openMenuItem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				openMenuItemActionPerformed(evt);
+				openFileActionPerformem(evt);
 			}
 		});
 		fileMenu.add(openMenuItem);
-		saveMenuItem.setText("Save");
-		saveMenuItem.addActionListener(new java.awt.event.ActionListener() {
+		newMenuItem.setText("New");
+		newMenuItem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				saveMenuItemActionPerformed(evt);
+				int dialogResult = JOptionPane.showConfirmDialog (null, "Do you want to create new Workbook ?", "Warning", JOptionPane.YES_NO_OPTION);
+				if(dialogResult == JOptionPane.YES_OPTION){
+					fileActualName = null;
+					Application.activeWorkbook = new Workbook();
+					Application.activeWorkbook.addSheet("Sheet 1");
+					Application.activeWorkbook.addSheet("Sheet 2");
+					Application.activeWorkbook.addSheet("Sheet 3");
+					loadModel();
+				}
 			}
 		});
-		fileMenu.add(saveMenuItem);
+		fileMenu.add(newMenuItem);
 		saveAsMenuItem.setText("Save As ...");
 		saveAsMenuItem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				saveAsMenuItemActionPerformed(evt);
+				saveActionPerformed(evt);
 			}
 		});
 		fileMenu.add(saveAsMenuItem);
 		exitMenuItem.setText("Exit");
 		exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				exitMenuItemActionPerformed(evt);
+				int dialogResult = JOptionPane.showConfirmDialog (null, "Do you want to quit ?", "Warning", JOptionPane.YES_NO_OPTION);
+				if(dialogResult == JOptionPane.YES_OPTION){
+					System.exit(0);
+				}
 			}
 		});
 		fileMenu.add(exitMenuItem);
@@ -240,54 +314,99 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 		openNewTab.setText("Add New Worksheet");
 		openNewTab.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				openNewTabActionPerformed(evt);
+				String name = getNewName(getDefaultSheetName(), "Please choose a worksheet name", "Worksheet name:");
+				if (name != null)
+					getActiveWorkbook().addSheet(name);
 			}
 		});
 		editMenu.add(openNewTab);
 		closeCurrentTab = new JMenuItem("Remove Worksheet");
-		/*closeCurrentTab.addActionListener(new java.awt.event.ActionListener() {
+		closeCurrentTab.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				closeTab();
+				if (!isCurrentWorkbook)
+					return;
+				
+				int dialogResult = JOptionPane.showConfirmDialog (null, "Would You Like to Remove current Worksheet '" + activeObjectName + "'?", "Warning", JOptionPane.YES_NO_OPTION);
+				if(dialogResult == JOptionPane.YES_OPTION){
+					getActiveWorkbook().removeSheet(activeObjectName);
+				}
 			}
 		});
-		*/
+		
 		editMenu.add(closeCurrentTab);
 		renameTabMenuItem = new JMenuItem("Rename Worksheet");
 		editMenu.add(renameTabMenuItem);
-		/*renameTabMenuItem.addActionListener(new java.awt.event.ActionListener() {
+		
+		renameTabMenuItem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				renameTabActionPerformed(evt);
+				if (!isCurrentWorkbook)
+					return ;
+				String name = getNewName(activeObjectName, "Please choose new worksheet name", "Worksheet name:");
+				if (name != null)
+					getActiveWorkbook().getWorksheet(activeObjectName).setWorksheetName(name);
 			}
-		});*/
+		});
 		menuBar.add(editMenu);
 		mnCharts = new JMenu("Charts");
 		menuBar.add(mnCharts);
 		createLinechartMenu = new JMenuItem("Create Linechart");
 		mnCharts.add(createLinechartMenu);
+		
 		createLinechartMenu.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				createLineChartActionPerformed(evt);
+				String name = getNewName(getDefaultChartName(), "Please choose a chart name", "Chart name:");
+				if (name != null) {
+					DiagramCreator creator = new DiagramLineCreator();
+					Application.getActiveWorkbook().addDiagram(name, creator);
+				}
 			}
 		});
 		createBarchartMenu = new JMenuItem("Create Barchart");
-		mnCharts.add(createBarchartMenu);
 		
+		createBarchartMenu.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				String name = getNewName(getDefaultChartName(), "Please choose a chart name", "Chart name:");
+				if (name != null) {
+					DiagramCreator creator = new DiagramBarCreator();
+					Application.getActiveWorkbook().addDiagram(name, creator);
+				}
+			}
+		});
+		
+		mnCharts.add(createBarchartMenu);
 		renameDiagram = new JMenuItem("Rename Diagram");
 		mnCharts.add(renameDiagram);
+		renameDiagram.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				if (isCurrentWorkbook)
+					return ;
+
+				String name = getNewName(activeObjectName, "Please choose new chart name", "Chart name:");
+				if (name != null)
+					getActiveWorkbook().getDiagram(activeObjectName).setName(name);
+			}
+		});
 		
 		removeDiagram = new JMenuItem("Remove Diagram");
 		mnCharts.add(removeDiagram);
-		createBarchartMenu.addActionListener(new java.awt.event.ActionListener() {
+		removeDiagram.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				createBarchartMenuActionPerformed(evt);
+				if (isCurrentWorkbook)
+					return;
+				
+				int dialogResult = JOptionPane.showConfirmDialog (null, "Would You Like to Remove current Chart '" + activeObjectName + "'?", "Warning", JOptionPane.YES_NO_OPTION);
+				if(dialogResult == JOptionPane.YES_OPTION){
+					getActiveWorkbook().removeDiagram(activeObjectName);
+				}
 			}
 		});
+
 		setJMenuBar(menuBar);
 		
 		
 		pane.add(box, BorderLayout.PAGE_START);
-		pane.add(jTabbedPane1, BorderLayout.CENTER);
-		jTabbedPane1.addChangeListener(new ChangeListener() {
+		pane.add(jTabbedPanel, BorderLayout.CENTER);
+		jTabbedPanel.addChangeListener(new ChangeListener() {
 	        public void stateChanged(ChangeEvent e) {
 	        	tabChanged(e);
 	        }
@@ -295,87 +414,77 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 		
 		pack();
 		setLocationRelativeTo(null);
-
 	}
 
-	private void createLineChartActionPerformed(java.awt.event.ActionEvent evt) {
-		// TODO open new tab and place linechart on tab
-		//Application.getActiveWorkbook().addDiagram("name", DiagramLine.class);
+	private String getDefaultSheetName() {
+		return _getDefaultName("Sheet ");
 	}
 
-	private void createBarchartMenuActionPerformed(java.awt.event.ActionEvent evt) {
-		// TODO open new tab and place linechart on tab
+	private String getDefaultChartName() {
+		return _getDefaultName("Chart ");
 	}
-
-	private void exitMenuItemActionPerformed(java.awt.event.ActionEvent evt) {
-		System.exit(0);
-	}
-
-	private void renameTabActionPerformed(java.awt.event.ActionEvent evt) {
-		/*try {
-			JTable currentTable = returnTableForCurrentTab();
-			CustomTableModel model = (CustomTableModel) currentTable.getModel();
-			String oldName = model.getWorksheetName();
-
-			JTextField inputFieldnewName = new JTextField();
-
-			Object[] inputFields = { "New name: ", inputFieldnewName };
-			int option = JOptionPane.showConfirmDialog(this, inputFields, "Please choose a tab name",
-					JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
-
-			if (option == JOptionPane.CANCEL_OPTION)
-				return;
-
-			if (option == JOptionPane.OK_OPTION) {
-				String nameToString = inputFieldnewName.getText();
-				if (nameToString.length() < 1 || nameToString.length() > 20)
-					throw new IllegalArgumentException("Invalid value for tab name");
-				afterWorksheetRenamed(oldName, nameToString);
-				return;
-			}
-		} catch (IllegalArgumentException i) {
-			JOptionPane.showMessageDialog(this, i.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+	
+	private String _getDefaultName(String prefix) {
+		for (int i = 1; i < Integer.MAX_VALUE; i++) {
+			String ret = prefix + i;
+			if (!getActiveWorkbook().getWorksheets().containsKey(ret) && !getActiveWorkbook().getDiagrams().containsKey(ret))
+				return ret;
 		}
-*/
+		return null;
+	}
+	
+	private String getNewName(String defaultName, String msg, String nameName) {
+		JTextField inputFieldnewName = new JTextField();
+		inputFieldnewName.setText(defaultName);
+		
+		Object[] inputFields = { nameName, inputFieldnewName };
+		int option = JOptionPane.showConfirmDialog(this, inputFields, msg,
+				JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+
+		if (option == JOptionPane.OK_OPTION) {
+			return inputFieldnewName.getText();
+		}
+		return null;
 	}
 
-	private void openNewTabActionPerformed(java.awt.event.ActionEvent evt) {
-		String worksheetName = "Worksheet " + (Application.getActiveWorkbook().generateNewId() - 1);
-		Application.getActiveWorkbook().addSheet(worksheetName);
-		afterWorksheetAdded(worksheetName);
-	}
 
-	private void openMenuItemActionPerformed(java.awt.event.ActionEvent evt) {
+	private String getOpenFileName() {
 		try {
 			JFileChooser chooser = new JFileChooser();
 			Component parent = null;
-			FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV File", "csv");
+			FileNameExtensionFilter filter = new FileNameExtensionFilter("Supported File Extensions (CSV, WBK)", "csv", "wbk");
 			chooser.setFileFilter(filter);
 			int returnVal = chooser.showOpenDialog(parent);
 
-			if (returnVal == JFileChooser.APPROVE_OPTION) {
-				String filePath = chooser.getSelectedFile().getAbsolutePath();
-				System.out.println("The absolute filepath is: " + chooser.getSelectedFile().getAbsolutePath());
-				showMultipleInputMessageDialog(filePath);
-			} else {
-				System.out.println("The user pressed the CANCEL or X Button");
-			}
-		} catch (IOException o) {
-			System.out.println("Exception occured: File could not be found. ");
-			JOptionPane.showMessageDialog(this, "Die Datei konnte nicht gefunden werden ", "Fehler",
-					JOptionPane.ERROR_MESSAGE);
-		} catch (IllegalArgumentException i) {
-			System.out.println("showMultipleInputMessageDialog threw IllegalArgumentException ");
+			if (returnVal == JFileChooser.APPROVE_OPTION)
+				return chooser.getSelectedFile().getAbsolutePath();
+		}
+		catch (IllegalArgumentException i) {
 			JOptionPane.showMessageDialog(this, i.getMessage(), "Fehler", JOptionPane.ERROR_MESSAGE);
 		}
+		
+		return null;
+	}
+	
+	private void openFileActionPerformem(java.awt.event.ActionEvent evt) throws IllegalArgumentException {
+		String fName = getOpenFileName();
+		if (fName == null)
+			return;
+		
+		if (fName.toUpperCase().endsWith(".CSV"))
+			this.showMultipleInputMessageDialog(fName);
+		else if (fName.toUpperCase().endsWith(".WBK"))
+			this.openFile(fName);
+		else
+			throw new IllegalArgumentException("Unsupported file format " + fName);
 	}
 
-	private void showMultipleInputMessageDialog(String absolutePath) throws IOException, IllegalArgumentException {
+	private void showMultipleInputMessageDialog(String fName) {
 
+		final String absolutePath = fName;
 		// JOption Pane code
 		final JCheckBox checkBoxForSemiColon = new JCheckBox();
 		final JCheckBox checkBoxForComma = new JCheckBox();
-		final JCheckBox checkBoxForQuotation = new JCheckBox();
 		final JCheckBox checkBoxForAlternativeDelimiter = new JCheckBox();
 		final JCheckBox checkBoxForDefaultQuote = new JCheckBox();
 		final JCheckBox checkBoxForAlternativeQuote = new JCheckBox();
@@ -522,113 +631,41 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 		throw new IllegalArgumentException("Missing input");
 	}
 
-	private void saveAsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {
+	private void saveActionPerformed(java.awt.event.ActionEvent evt) {
 		JFileChooser chooser = new JFileChooser();
 		Component parent = null;
-		FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV (durch Trennzeichen getrennt) (*.csv)",
+		FileNameExtensionFilter filter = new FileNameExtensionFilter("WBK (*.wbk)",
+				"wbk");
+		FileNameExtensionFilter filter2 = new FileNameExtensionFilter("CSV (durch Trennzeichen getrennt) (*.csv)",
 				"csv");
-		FileNameExtensionFilter filter2 = new FileNameExtensionFilter("PDF (*.pdf)", "pdf");
+		FileNameExtensionFilter filter3 = new FileNameExtensionFilter("PDF (*.pdf)", "pdf");
 		chooser.setFileFilter(filter);
 		chooser.addChoosableFileFilter(filter2);
+		chooser.addChoosableFileFilter(filter3);
 		int returnVal = chooser.showSaveDialog(parent);
 
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 
 			try {
-				if (chooser.getFileFilter().getDescription().contains("CSV")) {
-					writeCSV(jTabbedPane1.getTitleAt(jTabbedPane1.getSelectedIndex()),
-							choosedAbsolutFile = chooser.getSelectedFile().getAbsolutePath());
+				if (chooser.getFileFilter().getDescription().contains("WBK")) {
+					saveFile(fileActualName = chooser.getSelectedFile().getAbsolutePath(), true);
+				} else if (chooser.getFileFilter().getDescription().contains("CSV")) {
+					writeCSV(activeObjectName,
+							chooser.getSelectedFile().getAbsolutePath());
 				} else if (chooser.getFileFilter().getDescription().contains("PDF")) {
-					writePDF(jTabbedPane1.getTitleAt(jTabbedPane1.getSelectedIndex()),
-							choosedAbsolutFile = chooser.getSelectedFile().getAbsolutePath());
+					writePDF(activeObjectName,
+							chooser.getSelectedFile().getAbsolutePath());
 				}
 			} catch (IOException | DocumentException e1) {
 				System.out.println("Fehler beim internen Auslesen!");
 				e1.printStackTrace();
 			}
 
-			chooser.getSelectedFile().getName();
-			System.out.println("Die Datei wurde unter: " + choosedAbsolutFile + " gespeichert!");
+			//chooser.getSelectedFile().getName();
+			//System.out.println("Die Datei wurde unter: " + choosedAbsolutFile + " gespeichert!");
 		} else {
-			System.out.println("Das Fenster wurde geschlossen!");
+			//System.out.println("Das Fenster wurde geschlossen!");
 		}
-	}
-
-	private void saveMenuItemActionPerformed(java.awt.event.ActionEvent evt) {
-		if (choosedAbsolutFile != null) {
-			try {
-				writeCSV(jTabbedPane1.getTitleAt(jTabbedPane1.getSelectedIndex()), choosedAbsolutFile);
-			} catch (IOException e) {
-				System.out.println("Fehler beim internen Auslesen!");
-				e.printStackTrace();
-			}
-			System.out.println("Die Datei wurde unter: " + choosedAbsolutFile + " gespeichert!");
-		} else {
-			JFileChooser chooser = new JFileChooser();
-			Component parent = null;
-			FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV (durch Trennzeichen getrennt) (*.csv)",
-					"csv");
-			FileNameExtensionFilter filter2 = new FileNameExtensionFilter("PDF (*.pdf)", "pdf");
-			chooser.setFileFilter(filter);
-			chooser.addChoosableFileFilter(filter2);
-			int returnVal = chooser.showSaveDialog(parent);
-
-			if (returnVal == JFileChooser.APPROVE_OPTION) {
-
-				try {
-					if (chooser.getFileFilter().getDescription().contains("CSV")) {
-						writeCSV(jTabbedPane1.getTitleAt(jTabbedPane1.getSelectedIndex()),
-								choosedAbsolutFile = chooser.getSelectedFile().getAbsolutePath());
-					} else if (chooser.getFileFilter().getDescription().contains("PDF")) {
-						writePDF(jTabbedPane1.getTitleAt(jTabbedPane1.getSelectedIndex()),
-								choosedAbsolutFile = chooser.getSelectedFile().getAbsolutePath());
-					}
-				} catch (IOException e1) {
-					System.out.println("Fehler beim internen Auslesen!");
-					e1.printStackTrace();
-				} catch (DocumentException e) {
-					e.printStackTrace();
-				}
-
-				chooser.getSelectedFile().getName();
-				System.out.println("Die Datei wurde unter: " + choosedAbsolutFile + " gespeichert!");
-			} else {
-				System.out.println("Das Fenster wurde geschlossen!");
-			}
-		}
-	}
-
-	private void jScrollPane1MouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
-		/*int verticalExtent = jScrollPane1.getVerticalScrollBar().getModel().getExtent();
-		int horizontalExtent = jScrollPane1.getHorizontalScrollBar().getModel().getExtent();
-
-		if ((jScrollPane1.getVerticalScrollBar().getValue() + verticalExtent) == jScrollPane1.getVerticalScrollBar()
-				.getMaximum()) {
-			sizeRows++;
-			TableModel model = (CustomTableModel) jTable1.getModel();
-			// model.setRowCount(++sizeRows); //TODO
-		}
-		if ((jScrollPane1.getHorizontalScrollBar().getValue() + horizontalExtent) == jScrollPane1
-				.getHorizontalScrollBar().getMaximum()) {
-			sizeColumns++;
-			TableModel model = (CustomTableModel) jTable1.getModel();
-			// model.setColumnCount(++sizeColumns); //TODO
-		}*/
-	}
-
-	public void closeTab() {
-		/*
-		Component selected = jTabbedPane1.getSelectedComponent();
-		JViewport viewport = ((JScrollPane) selected).getViewport();
-		JTable mytable = (JTable) viewport.getView();
-		TableModel model = mytable.getModel();
-		CustomTableModel custommodel = (CustomTableModel) model;
-		String sheetName = custommodel.getWorksheetName();
-
-		if (selected != null)
-			jTabbedPane1.remove(selected);
-
-		afterWorksheetRemoved(sheetName);*/
 	}
 
 	/**
@@ -667,7 +704,7 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 					//open file
 					if (args[0].toUpperCase().endsWith(".wbk")) {
 						try { gui.openFile(args[0]); }
-						catch(IOException e) {
+						catch(IllegalArgumentException e) {
 							e.printStackTrace();
 							JOptionPane.showMessageDialog(null, e.getMessage());
 						}
@@ -675,19 +712,13 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 					}
 					//open csv
 					else if (args.length > 2) {
-						try { gui.openCSV(args[0], args[1].charAt(0), args[2].charAt(0)); }
-						catch(IOException e) {
-							e.printStackTrace();
-							JOptionPane.showMessageDialog(null, e.getMessage());
-						}
+						gui.openCSV(args[0], args[1].charAt(0), args[2].charAt(0));
 						createDefaultWorkbook = false;
 					}
 				}
 				
 				if (createDefaultWorkbook) {
 					//create default workbook
-					System.out.println("create default workbook");
-
 					Application.activeWorkbook = new Workbook();
 					Application.activeWorkbook.addSheet("Sheet 1");
 					Application.activeWorkbook.addSheet("Sheet 2");
@@ -696,12 +727,15 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 				
 				gui.loadModel();
 								
+				gui.setSize(new Dimension(1000, 500));
+				gui.setLocationRelativeTo(null);
+
 				gui.setVisible(true);
 			}
 		});
 	}
 
-	public boolean isNumber(String str) {
+	private boolean isNumber(String str) {
 		try {
 			Double.parseDouble(str);
 		} catch (NumberFormatException nfe) {
@@ -709,40 +743,6 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 		}
 		return true;
 	}
-
-	// Variables declaration
-	private JLabel labelBox;
-	private JTextArea textBox;
-
-
-	private javax.swing.JMenuItem aboutMenuItem;
-	private javax.swing.JMenuItem contentsMenuItem;
-	private javax.swing.JMenuItem copyMenuItem;
-	private javax.swing.JMenuItem cutMenuItem;
-	private javax.swing.JMenuItem deleteMenuItem;
-	private javax.swing.JMenu editMenu;
-	private javax.swing.JMenuItem exitMenuItem;
-	private javax.swing.JMenu fileMenu;
-	private javax.swing.JMenu helpMenu;
-	private javax.swing.JScrollPane jScrollPane1;
-	private javax.swing.JTabbedPane jTabbedPane1;
-	private javax.swing.JTable jTable1;
-	private javax.swing.JMenuBar menuBar;
-	private javax.swing.JMenuItem openMenuItem;
-	private javax.swing.JMenuItem openNewTab;
-	private javax.swing.JMenuItem saveAsMenuItem;
-	private javax.swing.JMenuItem saveMenuItem;
-
-	private String choosedAbsolutFile = null;
-	private Integer sizeRows = 80;
-	private Integer sizeColumns = 30;
-	private JMenuItem closeCurrentTab;
-	private JMenuItem renameTabMenuItem;
-	private JMenu mnCharts;
-	private JMenuItem createLinechartMenu;
-	private JMenuItem createBarchartMenu;
-	private JMenuItem removeDiagram;
-	private JMenuItem renameDiagram;
 	
 	@Override
 	public void afterWorksheetAdded(String worksheetName) {
@@ -760,7 +760,7 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 	@Override
 	public void afterWorksheetRemoved(String worksheetName) {
 		tables.remove(worksheetName);
-		jTabbedPane1.remove(jTabbedPane1.indexOfTab(worksheetName));
+		jTabbedPanel.remove(jTabbedPanel.indexOfTab(worksheetName));
 	}
 
 	/*
@@ -776,7 +776,7 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 	public void afterWorksheetRenamed(String worksheetOldName, String worksheetNewName) {
 		tables.put(worksheetNewName, tables.get(worksheetOldName));
 		tables.remove(worksheetOldName);
-		jTabbedPane1.setTitleAt(jTabbedPane1.indexOfTab(worksheetOldName), worksheetNewName);
+		jTabbedPanel.setTitleAt(jTabbedPanel.indexOfTab(worksheetOldName), worksheetNewName);
 	}
 
 	@Override
@@ -793,14 +793,14 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 	@Override
 	public void afterDiagramRemoved(String diagramName) {
 		diagrams.remove(diagramName);
-		jTabbedPane1.remove(jTabbedPane1.indexOfTab(diagramName));
+		jTabbedPanel.remove(jTabbedPanel.indexOfTab(diagramName));
 	}
 
 	@Override
 	public void afterDiagramRenamed(String diagramOldName, String diagramNewName) {
 		diagrams.put(diagramNewName, diagrams.get(diagramOldName));
 		diagrams.remove(diagramOldName);
-		jTabbedPane1.setTitleAt(jTabbedPane1.indexOfTab(diagramOldName), diagramNewName);
+		jTabbedPanel.setTitleAt(jTabbedPanel.indexOfTab(diagramOldName), diagramNewName);
 	}
 
 	@Override
@@ -808,21 +808,14 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 		diagrams.get(diagramName).Invalidate();
 	}
 
-	
-	
-	private TreeMap<String, DiagramInvalidateStrategy> diagrams = new TreeMap<String, DiagramInvalidateStrategy>();
-	private TreeMap<String, JTable> tables = new TreeMap<String, JTable>();
-	private boolean isCurrentWorkbook = true;
-	private String activeObjectName;
-
 	private void selectedCellChanged() {
 		boxDataCanceled();
 	}
 
 	private void tabChanged(ChangeEvent e) throws IllegalArgumentException {
-		if (jTabbedPane1.getSelectedIndex() == -1)
+		if (jTabbedPanel.getSelectedIndex() == -1)
 			return;
-		activeObjectName = jTabbedPane1.getTitleAt(jTabbedPane1.getSelectedIndex());
+		activeObjectName = jTabbedPanel.getTitleAt(jTabbedPanel.getSelectedIndex());
 		isCurrentWorkbook = (Application.getActiveWorkbook().getWorksheets().containsKey(activeObjectName));
 		
 		if (isCurrentWorkbook) {
@@ -924,7 +917,7 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 		//observe Application
 		Application.activeWorkbook.removeListener(this);
 
-		jTabbedPane1.removeAll();
+		jTabbedPanel.removeAll();
 		
 		for (Worksheet w : Application.getActiveWorkbook().getWorksheets().values()) {
 			System.out.println(w.getWorksheetName());
@@ -934,7 +927,7 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 		for (Diagram d : Application.getActiveWorkbook().getDiagrams().values())
 			loadDiagram(d);
 		
-		jTabbedPane1.setSelectedIndex(0);
+		jTabbedPanel.setSelectedIndex(0);
 		
 		//observe Application
 		Application.activeWorkbook.addListener(this);
@@ -943,8 +936,8 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 	
 	private void loadWorksheet(Worksheet worksheet) {
 
-		if ( jTabbedPane1.indexOfTab(worksheet.getWorksheetName()) != -1 )
-			jTabbedPane1.remove(jTabbedPane1.indexOfTab(worksheet.getWorksheetName()));
+		if ( jTabbedPanel.indexOfTab(worksheet.getWorksheetName()) != -1 )
+			jTabbedPanel.remove(jTabbedPanel.indexOfTab(worksheet.getWorksheetName()));
 		
 		JScrollPane jPane = new JScrollPane();
 		JTable table = new JTable();
@@ -963,7 +956,7 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 		table.setShowHorizontalLines(true);
 		table.setShowVerticalLines(true);
 		jPane.setViewportView(table);
-		jTabbedPane1.addTab(worksheet.getWorksheetName(), jPane);
+		jTabbedPanel.addTab(worksheet.getWorksheetName(), jPane);
 		tables.put(worksheet.getWorksheetName(), table);
 
 		ListSelectionListener l = new ListSelectionListener() {
@@ -1010,11 +1003,11 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 	}
 
 	private void loadDiagram(Diagram diagram) throws IllegalArgumentException {
-		if ( jTabbedPane1.indexOfTab(diagram.getName()) != -1 )
-			jTabbedPane1.remove(jTabbedPane1.indexOfTab(diagram.getName()));
+		if ( jTabbedPanel.indexOfTab(diagram.getName()) != -1 )
+			jTabbedPanel.remove(jTabbedPanel.indexOfTab(diagram.getName()));
 
 		JPanel container = new JPanel();
-		jTabbedPane1.addTab(diagram.getName(), container);
+		jTabbedPanel.addTab(diagram.getName(), container);
 		DiagramInvalidateStrategy strategy;
 
 		if (diagram instanceof DiagramBar)

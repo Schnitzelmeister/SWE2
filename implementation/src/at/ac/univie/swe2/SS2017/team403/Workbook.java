@@ -554,6 +554,8 @@ public class Workbook implements Serializable {
 	public void calculate() {
 		for (Worksheet w : this.worksheetCollection.values())
 			w.calculate();
+		for (Diagram d : this.diagramCollection.values())
+			d.calculate();
 	}
 	
 	
