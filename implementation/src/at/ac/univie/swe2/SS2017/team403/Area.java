@@ -1,17 +1,15 @@
 package at.ac.univie.swe2.SS2017.team403;
 
-import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.Comparator;
 
 /**
- * This class is used to handle all operations connected to Area. An Area can be
- * either one cell or more cells.
+ * This class is used to handle all operations connected to Area.
+ * An Area can be either one cell or more cells. 
  */
-public class Area implements Externalizable {
-
+public class Area {
 	private transient Worksheet parentWorksheet;
 
 	public Worksheet getParent() {
@@ -20,6 +18,7 @@ public class Area implements Externalizable {
 
 	private int firstRow, lastRow, firstColumn, lastColumn;
 
+	
 	/**
 	 * 
 	 * @return an int that gives the number of the first row
@@ -56,10 +55,8 @@ public class Area implements Externalizable {
 	 * This constructor is used to set a range which contains different cells.
 	 * We need only two cells to build a rectangle to define the area.
 	 * 
-	 * @param cellTopLeft
-	 *            the top left cell of an area
-	 * @param cellBottomRight
-	 *            the bottom right cell of an area
+	 * @param cellTopLeft the top left cell of an area
+	 * @param cellBottomRight the bottom right cell of an area
 	 */
 	public Area(Cell cellTopLeft, Cell cellBottomRight) {
 		parentWorksheet = cellTopLeft.getParentWorksheet();
@@ -73,8 +70,7 @@ public class Area implements Externalizable {
 	/**
 	 * This constructor is used to set a specific cell.
 	 * 
-	 * @param cell
-	 *            a cell which is only one cell of an area
+	 * @param cell a cell which is only one cell of an area
 	 */
 	public Area(Cell cell) {
 		parentWorksheet = cell.getParentWorksheet();
@@ -87,12 +83,9 @@ public class Area implements Externalizable {
 	/**
 	 * This constructor is used to set a referenced area of a cell.
 	 * 
-	 * @param cellReferences
-	 *            references of the selected cell
-	 * @param worksheet
-	 *            selected worksheet
-	 * @param cellContext
-	 *            selected cell
+	 * @param cellReferences  references of the selected cell
+	 * @param worksheet  selected worksheet
+	 * @param cellContext  selected cell
 	 */
 	public Area(String cellReferences, Worksheet worksheet, Cell cellContext) {
 		parentWorksheet = worksheet;
@@ -105,26 +98,23 @@ public class Area implements Externalizable {
 		lastColumn = cellBottomRight.getCellColumn();
 		correctCoordinates();
 	}
-
-	private void correctCoordinates() {
-		if (lastRow < firstRow) {
-			int tmp = lastRow;
-			lastRow = firstRow;
-			firstRow = tmp;
-		}
-
-		if (lastColumn < firstColumn) {
-			int tmp = lastColumn;
-			lastColumn = firstColumn;
-			firstColumn = tmp;
-		}
-	}
+	
+    private void correctCoordinates()
+    {
+    	if (lastRow < firstRow) {
+    		int tmp = lastRow; lastRow = firstRow; firstRow =tmp;
+    	}
+    	
+    	if (lastColumn < firstColumn) {
+    		int tmp = lastColumn; lastColumn = firstColumn; firstColumn =tmp;
+    	}		
+    }
 
 	/**
-	 * A cell contains multiple referenced cells as a string. Here you get the
-	 * cell content as a String.
+	 * A cell contains multiple referenced cells as a string.
+	 * Here you get the cell content as a String. 
 	 * 
-	 * @return referenced area as a String
+	 * @return  referenced area as a String
 	 */
 	public String getCellReferences() {
 		return "'" + parentWorksheet.getWorksheetName() + "'!R" + firstRow + "C" + firstColumn + ":" + "R" + lastRow
@@ -157,22 +147,5 @@ public class Area implements Externalizable {
 				return var;
 			}
 		}
-	}
-
-	// Externalizable
-	@Override
-	public void writeExternal(ObjectOutput out) throws IOException {
-		out.writeUTF(getCellReferences());
-	}
-
-	// Externalizable
-	@Override
-	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-		Area area = Range.getRangeByAddress(in.readUTF(), null).getWorksheetAreas().firstKey();
-		this.parentWorksheet = area.parentWorksheet;
-		this.firstRow = area.firstRow;
-		this.firstColumn = area.firstColumn;
-		this.lastRow = area.lastRow;
-		this.lastColumn = area.lastColumn;
 	}
 }
