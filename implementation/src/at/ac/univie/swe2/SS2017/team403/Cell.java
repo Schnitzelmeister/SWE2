@@ -73,7 +73,7 @@ public class Cell implements Externalizable {
 		try {
 			cellFormula = formula;
 			cellExpression = ExpressionTree.parse(this, formula);
-			cellInputDataType = cellExpression.getExpressionDataType();
+			cellInputDataType = cellExpression.getDataType();
 			calculateCellExpression();
 		}
 		catch (IllegalArgumentException e) { this.cellFormula = previous; cellExpression = null; throw e; }
