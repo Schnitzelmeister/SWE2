@@ -12,19 +12,19 @@ public class CsvWriteUtility {
 	public static void convertWorkSheetToCsv(Worksheet worksheet, FileWriter writer) throws IOException {
 		Integer numberOfColumns = worksheet.getMaxUsedArea().getLastColumn();
 		Integer numberOfRows = worksheet.getMaxUsedArea().getLastRow();
-		StringBuilder cellContents = new StringBuilder();
+		StringBuilder cellContents;
 
-		for (int i = 0; i < numberOfRows; ++i) {
-			for (int j = 0; j < numberOfColumns; ++j) {
-				if (!worksheet.getCell(i, j).toString().isEmpty()) {
-					cellContents.append((worksheet.getCell(i, j).toString()));
-				}
-				cellContents.append(",");
+		for (int i = 1; i <= numberOfRows; ++i) {
+			cellContents = new StringBuilder();
+			for (int j = 1; j <= numberOfColumns; ++j) {
+				cellContents.append((worksheet.getCell(i, j).getTextValue()));
+				if (j != numberOfColumns)
+					cellContents.append(",");
 			}
 
 			writer.append(cellContents.toString());
 			writer.append(System.lineSeparator());
-			cellContents = new StringBuilder();
+			
 		}
 
 		writer.flush();

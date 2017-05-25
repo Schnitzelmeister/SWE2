@@ -52,7 +52,14 @@ public class Worksheet implements Externalizable {
 		this.worksheetRenameCallback = worksheetRenameCallback;
 		
 		for (Cell c : worksheet.worksheetCells.values())
+		{
 			this.worksheetCells.put(getUniqueCellKey(c.getCellRow(), c.getCellColumn()), new Cell(c, this));
+			if (c.getCellRow() > furthestRowUsed)
+				furthestRowUsed = c.getCellRow();
+
+			if (c.getCellColumn() > furthestColumnUsed)
+				furthestColumnUsed = c.getCellColumn();
+		}
 	}
 
 	int getId() {
@@ -123,7 +130,7 @@ public class Worksheet implements Externalizable {
 			if (row > furthestRowUsed) {
 				furthestRowUsed = row;
 			}
-			if (row > furthestColumnUsed) {
+			if (column > furthestColumnUsed) {
 				furthestColumnUsed = column;
 			}
 		}
@@ -195,12 +202,14 @@ public class Worksheet implements Externalizable {
 	}
 
 	//Externalizable
+	@Override
 	public void writeExternal(ObjectOutput out) throws IOException {
 		out.writeUTF(worksheetName);
 		out.writeObject(this.worksheetCells.values().toArray(new Cell[this.worksheetCells.size()]));;
 	}
 
 	//Externalizable
+	@Override
 	@SuppressWarnings("unchecked")
 	public void readExternal(ObjectInput in) throws ClassNotFoundException, IOException {
 		worksheetName = in.readUTF();
