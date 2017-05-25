@@ -23,7 +23,7 @@ public class Worksheet implements Externalizable {
 	private TreeMap<Long, Cell> worksheetCells;
 	private String worksheetName;
 	private transient Workbook parentWorkbook;
-	private transient WorksheetRenameCallback worksheetRenameCallback;
+	private  WorksheetRenameCallback worksheetRenameCallback;
 	private transient int furthestRowUsed = 1;
 	private transient int furthestColumnUsed = 1;
 
@@ -31,9 +31,9 @@ public class Worksheet implements Externalizable {
 	/**
 	 * This constructor is used to set a worksheet. 
 	 * 
-	 * @param name -> worksheetName
-	 * @param workbook -> this workbook contains the worksheet
-	 * @param worksheetRenameCallback -> is part of the observer pattern
+	 * @param name  worksheetName
+	 * @param workbook  this workbook contains the worksheet
+	 * @param worksheetRenameCallback  is part of the observer pattern
 	 * 
 	 */
 	public Worksheet(String name, Workbook workbook, WorksheetRenameCallback worksheetRenameCallback) {
