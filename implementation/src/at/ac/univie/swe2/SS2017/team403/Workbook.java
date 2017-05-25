@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -20,9 +21,19 @@ import java.lang.reflect.InvocationTargetException;
  * We use transient variables which shouldn't be serialized e.g. id or listener-list.
  * listner-list contains all observer.
  */
-public class Workbook implements Serializable {
-	private static final long serialVersionUID = 1L;
-
+public class Workbook implements Externalizable {
+	public Workbook() {
+		workbookId = new AtomicInteger(0);
+		listeners = new ArrayList<WorkbookListener>();
+		worksheetCollection = new TreeMap<String, Worksheet>();
+		diagramCollection = new TreeMap<String, Diagram>();
+		dependenciesOfArea = new TreeMap<Area, TreeSet<Cell>>(
+					new Area.AreaComparator());
+		dependenciesOfCell = new TreeMap<Cell, TreeSet<Area>>(
+					new Cell.CellComparator());
+		diagramDependencies = new TreeMap<Area, ArrayList<Diagram> >(new Area.AreaComparator());
+	}
+	
 	private transient boolean autoCalculate = true;
 	public boolean getAutoCalculate() {
 		return autoCalculate;
@@ -32,14 +43,14 @@ public class Workbook implements Serializable {
 		this.autoCalculate = autoCalculate;
 	}
 
-	private transient AtomicInteger workbookId = new AtomicInteger(0);
+	private transient AtomicInteger workbookId;
 
 	int generateNewId() {
 		return workbookId.incrementAndGet();
 	}
 
 	
-	private transient List<WorkbookListener> listeners = new ArrayList<WorkbookListener>();
+	private transient List<WorkbookListener> listeners;
 
 	public void addListener(WorkbookListener listener) {
 		listeners.add(listener);
@@ -53,14 +64,14 @@ public class Workbook implements Serializable {
 		if (listeners.size() <= 0)
 			return;
 		
-		for (int i = listeners.size() - 1; i <= 0; --i) {
+		for (int i = listeners.size() - 1; i < 0; --i) {
 			if (listeners.get(i) == listener)
 				listeners.remove(i);
 		}
 	}
 
 	
-	private TreeMap<String, Worksheet> worksheetCollection = new TreeMap<String, Worksheet>();
+	private TreeMap<String, Worksheet> worksheetCollection;
 
 	public TreeMap<String, Worksheet> getWorksheets() {
 		return worksheetCollection;
@@ -248,7 +259,7 @@ public class Workbook implements Serializable {
 	}
 
 	
-	private TreeMap<String, Diagram> diagramCollection = new TreeMap<String, Diagram>();
+	private TreeMap<String, Diagram> diagramCollection;
 
 	public TreeMap<String, Diagram> getDiagrams()
 	{
@@ -391,12 +402,10 @@ public class Workbook implements Serializable {
 
 	
 	/** dependencies/dependents for Formula-Calculation */
-	private transient TreeMap<Area, TreeSet<Cell>> dependenciesOfArea = new TreeMap<Area, TreeSet<Cell>>(
-			new Area.AreaComparator());
-	private transient TreeMap<Cell, TreeSet<Area>> dependenciesOfCell = new TreeMap<Cell, TreeSet<Area>>(
-			new Cell.CellComparator());
+	private transient TreeMap<Area, TreeSet<Cell>> dependenciesOfArea;
+	private transient TreeMap<Cell, TreeSet<Area>> dependenciesOfCell;
 
-	private transient TreeMap<Area, ArrayList<Diagram> > diagramDependencies = new TreeMap<Area, ArrayList<Diagram> >(new Area.AreaComparator());
+	private transient TreeMap<Area, ArrayList<Diagram> > diagramDependencies;
 
 	/**
 	 * This method removes all dependencies of different areas where a specific cell is involved.
@@ -561,21 +570,28 @@ public class Workbook implements Serializable {
 	
 	//Externalizable
 	public void writeExternal(ObjectOutput out) throws IOException {
-		out.writeObject(this.worksheetCollection);
-		out.writeObject(this.diagramCollection);
+		out.writeObject(this.worksheetCollection.values().toArray(new Worksheet[this.worksheetCollection.size()]));
+		out.writeObject(this.diagramCollection.values().toArray(new Diagram[this.diagramCollection.size()]));
 	}
 
 	//Externalizable
 	@SuppressWarnings("unchecked")
-	public void readExternal(ObjectInput in) throws IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException, IOException {
-		TreeMap<String, Worksheet> tempSheets = (TreeMap<String, Worksheet>)in.readObject();
+	public void readExternal(ObjectInput in) throws ClassNotFoundException, IOException {
+		Worksheet[] tempSheets = (Worksheet[])in.readObject();
 		this.setAutoCalculate(false);
-		for(Worksheet w : tempSheets.values())
-			this.addSheet(w);
-
-		TreeMap<String, Diagram> tempDiagrams = (TreeMap<String, Diagram>)in.readObject();
-		for(Diagram d : tempDiagrams.values())
-			this.addDiagram(d);
+		
+		for(Worksheet w : tempSheets)
+			addSheet(w);
+			
+		Diagram[] tempDiagrams = (Diagram[] )in.readObject();
+		for(Diagram d : tempDiagrams)
+			try {
+				addDiagram(d);
+			} catch (IllegalArgumentException | InstantiationException | IllegalAccessException
+					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
+				//Failed to deserialise object
+				e.printStackTrace();
+			}
 		this.setAutoCalculate(true);
 		this.calculate();
 	}

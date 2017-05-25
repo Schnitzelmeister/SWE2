@@ -5,7 +5,9 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 public class DiagramLine extends Diagram {
-	private static final long serialVersionUID = 1L;
+	public DiagramLine() {
+		values = null;
+	}
 	
 	public DiagramLine(String name, Workbook wbk, DiagramChangedCallback diagramChangedCallback) {
 		super(name, wbk, diagramChangedCallback);
@@ -17,20 +19,21 @@ public class DiagramLine extends Diagram {
 		values = ((DiagramLine)diagram).values;
 	}
 	
-	private Area values;
-	public Area getValues() { return values; }
-	public void setValues(Area values) {
+	private String values;
+	public String getValues() { return values; }
+	public void setValues(String values) {
 		this.values = values; 
-		this.parent.removeReferenceDependencies(this);
+		this.parent.removeReferenceDependencies(this); 
 		if (this.parent.getAutoCalculate())
-			this.parent.addDependency(this, values); 
+			calculate(); 
 		diagramChangedCallback.afterDiagramChanged(this.name); 
 	}
 
 	@Override
 	public void calculate() {
 		this.parent.removeReferenceDependencies(this);
-		this.parent.addDependency(this, values); 
+		if (values != null)
+			this.parent.addDependency(this, Range.getRangeByAddress(values, null, this.parent).getWorksheetAreas().firstKey()); 
 	}
 
 	//Externalizable
@@ -44,7 +47,7 @@ public class DiagramLine extends Diagram {
 	@Override
 	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
 		super.readExternal(in);
-		values = (Area)in.readObject();
+		values = (String)in.readObject();
 	}
 }
 

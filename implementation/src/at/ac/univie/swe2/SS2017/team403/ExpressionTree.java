@@ -145,7 +145,7 @@ public class ExpressionTree {
 				if (matcher.find() && (matcher.start() == 0)) {
 					token = TOKEN.RANGE;
 					charPosition += matcher.end();
-					data = Range.getRangeByAddress(matcher.group(0), cell);
+					data = Range.getRangeByAddress(matcher.group(0), cell, Application.getActiveWorkbook());
 				}
 			}
 
@@ -154,7 +154,7 @@ public class ExpressionTree {
 				if (matcher.find() && (matcher.start() == 0)) {
 					token = TOKEN.CELL;
 					charPosition += matcher.end();
-					data = Range.getRangeByAddress(matcher.group(0), cell).getWorksheetCells().firstKey();
+					data = Range.getRangeByAddress(matcher.group(0), cell, Application.getActiveWorkbook()).getWorksheetCells().firstKey();
 				}
 			}
 

@@ -13,14 +13,20 @@ import java.util.Comparator;
  * 
  */
 public class Cell implements Externalizable {
-
+	public Cell() {
+		cellInputDataType = CellInputDataType.General;
+		cellExpression = null;
+		cellValue = null;
+		cellFormula = null;	
+	}
+	
 	private transient Worksheet parentWorksheet;
 	private int cellRow, cellColumn;
 
-	private CellInputDataType cellInputDataType = CellInputDataType.General;
-	private Object cellValue = null;
-	private String cellFormula = null;
-	private ExpressionTree cellExpression = null;
+	private CellInputDataType cellInputDataType;
+	private Object cellValue;
+	private String cellFormula;
+	private ExpressionTree cellExpression;
 
 	/**
 	 * Use setNumericValue to store a double-value in a Cell.
@@ -28,13 +34,14 @@ public class Cell implements Externalizable {
 	 * @param value  cell-input-double-value
 	 */
 	public void setNumericValue(double value) {
-		Application.getActiveWorkbook().removeReferenceDependencies(this);
+		this.parentWorksheet.getParentWorkbook().removeReferenceDependencies(this);
 
 		this.cellExpression = null;
 		this.cellFormula = null;
 		this.cellValue = value;
 		this.cellInputDataType = CellInputDataType.Number;
-		parentWorksheet.getParentWorkbook().calculateReferenceDependencies(this);
+		if (this.parentWorksheet.getParentWorkbook().getAutoCalculate())
+			this.parentWorksheet.getParentWorkbook().calculateReferenceDependencies(this);
 	}
 
 	/**
@@ -43,13 +50,14 @@ public class Cell implements Externalizable {
 	 * @param value   cell-input-value
 	 */
 	public void setTextValue(String value) {
-		Application.getActiveWorkbook().removeReferenceDependencies(this);
+		this.parentWorksheet.getParentWorkbook().removeReferenceDependencies(this);
 
 		this.cellExpression = null;
 		this.cellFormula = null;
 		this.cellValue = value;
 		this.cellInputDataType = CellInputDataType.String;
-		parentWorksheet.getParentWorkbook().calculateReferenceDependencies(this);
+		if (this.parentWorksheet.getParentWorkbook().getAutoCalculate())
+			this.parentWorksheet.getParentWorkbook().calculateReferenceDependencies(this);
 	}
 
 	/**
@@ -83,7 +91,7 @@ public class Cell implements Externalizable {
 		} catch (IllegalArgumentException e) {
 			cellFormula = null;
 			cellExpression = null;
-	    	Application.getActiveWorkbook().removeReferenceDependencies(this);
+			this.parentWorksheet.getParentWorkbook().removeReferenceDependencies(this);
 			throw e;
 		}
 	}
@@ -151,6 +159,7 @@ public class Cell implements Externalizable {
 	}
 
 	public Cell(Worksheet parent, int row, int column) {
+		this();
 		this.parentWorksheet = parent;
 		this.cellRow = row;
 		this.cellColumn = column;
@@ -158,6 +167,7 @@ public class Cell implements Externalizable {
 	
 	
 	Cell(Cell cell, Worksheet parent) {
+		this();
 		this.parentWorksheet = parent;
 		this.cellRow = cell.cellRow;
 		this.cellColumn = cell.cellColumn;
@@ -202,7 +212,7 @@ public class Cell implements Externalizable {
 	public void writeExternal(ObjectOutput out) throws IOException {
 		out.writeInt(cellRow);
 		out.writeInt(cellColumn);
-		out.writeUTF(cellFormula); 
+		out.writeObject(cellFormula); 
 		out.writeInt(cellInputDataType.getNumVal());
 		switch(cellInputDataType) {
 		case Boolean:
@@ -212,7 +222,7 @@ public class Cell implements Externalizable {
 			out.writeDouble((double)cellValue);
 			break;
 		default:
-			out.writeUTF(cellValue.toString());
+			out.writeObject(cellValue);
 			break;
 		}
 	}
@@ -221,7 +231,7 @@ public class Cell implements Externalizable {
 	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
 		cellRow = in.readInt();
 		cellColumn = in.readInt();
-		cellFormula = in.readUTF();
+		cellFormula = (String)in.readObject();
 		cellInputDataType = CellInputDataType.values()[in.readInt()];
 		switch(cellInputDataType) {
 		case Boolean:
@@ -231,7 +241,7 @@ public class Cell implements Externalizable {
 			cellValue = in.readDouble();
 			break;
 		default:
-			cellValue = in.readUTF();
+			cellValue = in.readObject();
 			break;
 		}
 	}

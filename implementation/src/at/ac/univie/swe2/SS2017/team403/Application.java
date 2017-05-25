@@ -131,13 +131,13 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 			fileActualName = filePath;
 		}
 		catch (FileNotFoundException e) {
-			throw new IllegalArgumentException("File not found " + filePath);
+			throw new IllegalArgumentException("File not found " + filePath + " " + e.getMessage());
 		}
 	    catch(ClassNotFoundException e) {
-			throw new IllegalArgumentException("Illegal DataSource " + filePath);
+			throw new IllegalArgumentException("Illegal DataSource " + filePath + " " + e.getMessage());
 		}
 		catch (IOException e) {
-			throw new IllegalArgumentException("IO Exception in DataSource " + filePath);
+			throw new IllegalArgumentException("IO Exception in DataSource " + filePath + " " + e.getMessage());
 		}
 
 		loadModel();
@@ -163,7 +163,7 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 			fileActualName = filePath;
 		} catch (IOException e) {
 			e.printStackTrace();
-			throw new IllegalArgumentException("IO Serialization Exception occured");
+			//throw new IllegalArgumentException("IO Serialization Exception occured");
 		}
 	}
 
@@ -200,17 +200,18 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 	 * @throws IOException IOException by open a file
 	 */
 	public void openCSV(String fileLocation, char delimiter, char quotation) throws IllegalArgumentException {
+		Worksheet sheet = null;
 		try {
 			CSVReader reader = new CSVReader(new FileReader(fileLocation), delimiter, quotation);
 			List<String[]> csvValues = reader.readAll();
-			String worksheetName = "Worksheet " + Application.getActiveWorkbook().generateNewId();
-			Worksheet sheet = Application.getActiveWorkbook().addSheet(worksheetName);
+			sheet = Application.getActiveWorkbook().addSheet(getDefaultSheetName());
 			int r = 0;
 			for (String[] ar : csvValues) {
 				++r;
 				for (int c = 0; c < ar.length; ++c) {
-					if (isNumber(ar[c]))
-						sheet.getCell(r, c + 1).setNumericValue(Double.valueOf(ar[c]));
+					String v = ar[c].replace(',', '.');
+					if (isNumber(v))
+						sheet.getCell(r, c + 1).setNumericValue(Double.valueOf(v));
 					else
 						sheet.getCell(r, c + 1).setTextValue(ar[c]);
 				}
@@ -221,7 +222,7 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 			throw new IllegalArgumentException("failed to open " + fileLocation);			
 		}
 		
-		loadModel();
+		loadWorksheet(sheet);
 	}
 
 	/**
@@ -280,7 +281,7 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 		newMenuItem.setText("New");
 		newMenuItem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				int dialogResult = JOptionPane.showConfirmDialog (null, "Do you want to create new Workbook ?", "Warning", JOptionPane.YES_NO_OPTION);
+				int dialogResult = JOptionPane.showConfirmDialog (null, "All unsaved data will be lost. Do you want to create new Workbook ?", "Warning", JOptionPane.YES_NO_OPTION);
 				if(dialogResult == JOptionPane.YES_OPTION){
 					fileActualName = null;
 					Application.activeWorkbook = new Workbook();
@@ -302,7 +303,7 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 		exitMenuItem.setText("Exit");
 		exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				int dialogResult = JOptionPane.showConfirmDialog (null, "Do you want to quit ?", "Warning", JOptionPane.YES_NO_OPTION);
+				int dialogResult = JOptionPane.showConfirmDialog (null, "All unsaved data will be lost. Do you want to close the application ?", "Warning", JOptionPane.YES_NO_OPTION);
 				if(dialogResult == JOptionPane.YES_OPTION){
 					System.exit(0);
 				}
@@ -801,6 +802,7 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 		diagrams.put(diagramNewName, diagrams.get(diagramOldName));
 		diagrams.remove(diagramOldName);
 		jTabbedPanel.setTitleAt(jTabbedPanel.indexOfTab(diagramOldName), diagramNewName);
+		diagrams.get(diagramNewName).Invalidate();
 	}
 
 	@Override
@@ -824,7 +826,7 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 		else {
 			labelBox.setText("Diagram area:");
 			Diagram d = Application.getActiveWorkbook().getDiagram(activeObjectName);
-			Area a = null;
+			String a = null;
 			if (d instanceof DiagramBar)
 				a = ((DiagramBar)d).getValues();
 			else if (d instanceof DiagramLine)
@@ -835,13 +837,14 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 			if (a == null)
 				textBox.setText("");
 			else
-				textBox.setText(a.getCellReferences());
+				textBox.setText(a);
 		}
 		
 	}
 	
 	private void boxDataAccepted() throws IllegalArgumentException {
 		try {
+			textBox.setText(textBox.getText().trim());
 			if (isCurrentWorkbook) {
 				JTable t = tables.get(activeObjectName);
 				Cell cell = Application.getActiveWorkbook().getWorksheet(activeObjectName).getCell(t.getSelectedRow() + 1, t.getSelectedColumn() + 1);
@@ -857,9 +860,9 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 			else {
 				Diagram d = Application.getActiveWorkbook().getDiagram(activeObjectName);
 				if (d instanceof DiagramBar)
-					((DiagramBar)d).setValues(Range.getRangeByAddress(textBox.getText(), null).getWorksheetAreas().firstKey());
+					((DiagramBar)d).setValues(textBox.getText());
 				else if (d instanceof DiagramLine)
-					((DiagramLine)d).setValues(Range.getRangeByAddress(textBox.getText(), null).getWorksheetAreas().firstKey());
+					((DiagramLine)d).setValues(textBox.getText());
 				else
 					throw new IllegalArgumentException("Unknown DiagramClass " + d.getClass().getName());
 			}
@@ -892,7 +895,7 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 		}
 		else {
 			Diagram d = Application.getActiveWorkbook().getDiagram(activeObjectName);
-			Area a = null;
+			String a = null;
 			if (d instanceof DiagramBar)
 				a = ((DiagramBar)d).getValues();
 			else if (d instanceof DiagramLine)
@@ -903,7 +906,7 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 			if (a == null)
 				textBox.setText("");
 			else
-				textBox.setText(a.getCellReferences());
+				textBox.setText(a);
 		}
 
 	}
@@ -919,10 +922,8 @@ public class Application extends javax.swing.JFrame implements WorkbookListener 
 
 		jTabbedPanel.removeAll();
 		
-		for (Worksheet w : Application.getActiveWorkbook().getWorksheets().values()) {
-			System.out.println(w.getWorksheetName());
+		for (Worksheet w : Application.getActiveWorkbook().getWorksheets().values())
 			loadWorksheet(w);
-		}
 
 		for (Diagram d : Application.getActiveWorkbook().getDiagrams().values())
 			loadDiagram(d);

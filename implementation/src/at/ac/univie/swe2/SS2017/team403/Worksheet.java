@@ -14,15 +14,20 @@ import java.util.TreeMap;
  * 
  */
 public class Worksheet implements Externalizable {
-
+	public Worksheet() {
+		worksheetCells = new TreeMap<Long, Cell>();
+		worksheetRenameCallback = null;
+	}
+	
 	private transient int worksheetId;
-	private TreeMap<Long, Cell> worksheetCells = new TreeMap<Long, Cell>();
+	private TreeMap<Long, Cell> worksheetCells;
 	private String worksheetName;
-	private Workbook parentWorkbook;
-	private WorksheetRenameCallback worksheetRenameCallback = null;
-	private int furthestRowUsed = 1;
-	private int furthestColumnUsed = 1;
+	private transient Workbook parentWorkbook;
+	private transient WorksheetRenameCallback worksheetRenameCallback;
+	private transient int furthestRowUsed = 1;
+	private transient int furthestColumnUsed = 1;
 
+	
 	/**
 	 * This constructor is used to set a worksheet. 
 	 * 
@@ -32,6 +37,7 @@ public class Worksheet implements Externalizable {
 	 * 
 	 */
 	public Worksheet(String name, Workbook workbook, WorksheetRenameCallback worksheetRenameCallback) {
+		this();
 		this.worksheetId = workbook.generateNewId();
 		this.worksheetName = name;
 		this.parentWorkbook = workbook;
@@ -39,6 +45,7 @@ public class Worksheet implements Externalizable {
 	}
 	
 	Worksheet(Worksheet worksheet, Workbook workbook, WorksheetRenameCallback worksheetRenameCallback) {
+		this();
 		this.worksheetId = workbook.generateNewId();
 		this.worksheetName = worksheet.getWorksheetName();
 		this.parentWorkbook = workbook;
@@ -189,13 +196,17 @@ public class Worksheet implements Externalizable {
 
 	//Externalizable
 	public void writeExternal(ObjectOutput out) throws IOException {
-		out.writeObject(this.worksheetCells);
+		out.writeUTF(worksheetName);
+		out.writeObject(this.worksheetCells.values().toArray(new Cell[this.worksheetCells.size()]));;
 	}
 
 	//Externalizable
 	@SuppressWarnings("unchecked")
 	public void readExternal(ObjectInput in) throws ClassNotFoundException, IOException {
-		this.worksheetCells = (TreeMap<Long, Cell>)in.readObject();
+		worksheetName = in.readUTF();
+		Cell[] tempCells = (Cell[])in.readObject();
+		for (Cell c : tempCells)
+			this.worksheetCells.put(getUniqueCellKey(c.getCellRow(), c.getCellColumn()), new Cell(c, this));
 	}
 
 }

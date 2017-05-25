@@ -22,7 +22,7 @@ public class Range {
 	 * @param cellContext
 	 * @return
 	 */
-	static Range getRangeByAddress(String cellReferences, Cell cellContext) {
+	static Range getRangeByAddress(String cellReferences, Cell cellContext, Workbook wbk) {
 		
 		Worksheet worksheet = null;
 		if (cellContext != null)
@@ -38,10 +38,10 @@ public class Range {
 				if (wshtName.substring(0, 1).equals("'")) {
 					wshtName = wshtName.substring(1, wshtName.length() - 1);					
 				}
-				if (!Application.getActiveWorkbook().getWorksheets().containsKey(wshtName)) {
-					throw new IllegalArgumentException("Worksheet " + wshtName + " doesn't exists");					
+				if (!wbk.getWorksheets().containsKey(wshtName)) {
+					throw new IllegalArgumentException("Worksheet " + wshtName + " doesn't exists, " + cellReferences);					
 				}
-				worksheet = Application.getActiveWorkbook().getWorksheet(wshtName);
+				worksheet = wbk.getWorksheet(wshtName);
 				singleCellReference = singleCellReference.substring(singleCellReference.indexOf('!') + 1);
 			}
 

@@ -23,7 +23,9 @@ class LineDiagramInvalidateStrategy implements DiagramInvalidateStrategy {
 	public void Initialize(Diagram diagram, JPanel container) {
 		
 		this.diagram = (DiagramLine)diagram;
-		Area dataArea = this.diagram.getValues();
+		Area dataArea = null;
+		if (this.diagram.getValues() != null)
+			dataArea = Range.getRangeByAddress(this.diagram.getValues(), null, diagram.parent).getWorksheetAreas().firstKey();
 		
 		DefaultXYDataset ds = new DefaultXYDataset();
 		if (dataArea != null) {
@@ -54,7 +56,9 @@ class LineDiagramInvalidateStrategy implements DiagramInvalidateStrategy {
 	}
 	
 	public void Invalidate() {
-		Area dataArea = this.diagram.getValues();
+		Area dataArea = null;
+		if (this.diagram.getValues() != null)
+			dataArea = Range.getRangeByAddress(this.diagram.getValues(), null, diagram.parent).getWorksheetAreas().firstKey();
 
 		DefaultXYDataset ds = new DefaultXYDataset();
 		if (dataArea != null) {
@@ -76,6 +80,7 @@ class LineDiagramInvalidateStrategy implements DiagramInvalidateStrategy {
 			}
 		}
 		
+		chart.setTitle(diagram.getName());
 		chart.getXYPlot().setDataset(ds);
 	}
 
@@ -89,7 +94,9 @@ class BarDiagramInvalidateStrategy implements DiagramInvalidateStrategy {
 	public void Initialize(Diagram diagram, JPanel container) {
 		
 		this.diagram = (DiagramBar)diagram;
-		Area dataArea = this.diagram.getValues();
+		Area dataArea = null;
+		if (this.diagram.getValues() != null)
+			dataArea = Range.getRangeByAddress(this.diagram.getValues(), null, diagram.parent).getWorksheetAreas().firstKey();
 		
 		DefaultCategoryDataset ds = new DefaultCategoryDataset();
 		if (dataArea != null) {
@@ -110,7 +117,9 @@ class BarDiagramInvalidateStrategy implements DiagramInvalidateStrategy {
 	}
 	
 	public void Invalidate() {
-		Area dataArea = this.diagram.getValues();
+		Area dataArea = null;
+		if (this.diagram.getValues() != null)
+			dataArea = Range.getRangeByAddress(this.diagram.getValues(), null, diagram.parent).getWorksheetAreas().firstKey();
 
 		DefaultCategoryDataset ds = new DefaultCategoryDataset();
 		if (dataArea != null) {
@@ -120,7 +129,8 @@ class BarDiagramInvalidateStrategy implements DiagramInvalidateStrategy {
 				}
 			}
 		}
-		
+
+		chart.setTitle(diagram.getName());
 		chart.getCategoryPlot().setDataset(ds);
 	}
 

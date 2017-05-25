@@ -11,13 +11,16 @@ import java.io.ObjectOutput;
  *
  */
 public abstract class Diagram implements Externalizable {
-	private static final long serialVersionUID = 1L;
+	public Diagram() {
+		diagramChangedCallback = null;
+	}
 
 	protected String name;
 	protected Workbook parent;
-	protected DiagramChangedCallback diagramChangedCallback = null;
+	protected DiagramChangedCallback diagramChangedCallback;
 
 	Diagram(String name, Workbook wbk, DiagramChangedCallback diagramChangedCallback) {
+		this();
 		this.name = name;
 		this.parent = wbk;
 		this.diagramChangedCallback = diagramChangedCallback;
