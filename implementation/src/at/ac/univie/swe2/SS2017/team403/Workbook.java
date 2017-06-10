@@ -484,7 +484,7 @@ public class Workbook implements Externalizable {
 
 		// get dependencies
 		try {
-			_calculateDependencies(cell);
+			_calculateDependencies(cell, cell);
 		} catch (IllegalArgumentException e) {
 			throw new IllegalArgumentException(
 					e.getMessage() + ", source cell " + cell.getCellReferences());
@@ -505,7 +505,7 @@ public class Workbook implements Externalizable {
 		recalcDiagrams.clear();
 	}
 
-	private void _calculateDependencies(Cell cell) throws IllegalArgumentException {
+	private void _calculateDependencies(Cell cell, Cell origin) throws IllegalArgumentException {
 		for (Iterator<Map.Entry<Area, TreeSet<Cell>>> idep = dependenciesOfArea.entrySet().iterator(); idep.hasNext();) {
 			Map.Entry<Area, TreeSet<Cell>> e = idep.next();
 
@@ -523,14 +523,16 @@ public class Workbook implements Externalizable {
 			for (Cell c : e.getValue()) {
 
 				// calculate dependencies
-				c.calculateCellExpression();
+				if (!dynamicCells.contains(c))
+					c.calculateCellExpression();
+				
 				// cellular cell check
-				if (dynamicCells.contains(c))
+				if (c == origin)
 					throw new IllegalArgumentException("Circular reference " + c.getCellReferences());
 				dynamicCells.add(c);
 
-				_calculateDependencies(c);
-
+				if (!dynamicCells.contains(c))
+					_calculateDependencies(c, origin);
 			}
 		}
 		
