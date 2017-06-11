@@ -1,6 +1,7 @@
 package at.ac.univie.swe2.SS2017.team403;
 
 import java.io.File;
+import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -11,8 +12,25 @@ import org.w3c.dom.NodeList;
 
 import at.ac.univie.swe2.SS2017.team403.model.Billing;
 import at.ac.univie.swe2.SS2017.team403.model.Customer;
+import at.ac.univie.swe2.SS2017.team403.model.Payment;
 
 public class BackOfficeSystem implements Billing {
+	private List<CustomerListener> listeners;
+	
+	public void addListener(CustomerListener listener) {
+		listeners.add(listener);
+	}
+
+	public void removeListener(CustomerListener listener) {
+		if (listeners.size() <= 0)
+			return;
+		
+		for (int i = listeners.size() - 1; i < 0; --i) {
+			if (listeners.get(i) == listener)
+				listeners.remove(i);
+		}
+	}
+	
 	private String apiKey;
 	private String apiEmail;
 	private boolean productive;
@@ -79,19 +97,47 @@ public class BackOfficeSystem implements Billing {
 	
 	public void addCustomer(Customer customer) throws IllegalArgumentException {
 		dataStorage.getCustomerStorage().addCustomer(customer);
+		
+		for (CustomerListener l : listeners)
+			l.afterCustomerAdded(customer);
 	}
 
 	@Override
-	public void billing() {
-		for (Customer customer : this.getCustomers())
-			customer.billing();
+	public boolean billing() {
+		return this.billing(null);
+	}
+	
+	@Override
+	public boolean billing(Payment[] payments) {
+		boolean changed = false;
+		for (Customer customer : this.getCustomers()) {
+			boolean billed = customer.billing(payments);
+			if (!billed) {
+				changed = true;
+			
+				for (CustomerListener l : listeners)
+					l.afterCustomerChanged(customer);
+			}
+		}
+
+		return changed;
 	}
 
 	public static void main(String args[]) {
 		BackOfficeSystem system = new BackOfficeSystem("config.xml");
 		
-		for (Customer customer : system.getCustomers())
+		system.addCustomer( new Customer("5", "555", "Muster Muster", "muster@gmail.com", "56789012") );
+		
+		for (Customer customer : system.getCustomers()) {
 			System.out.println(customer.getLastName());
+			if (customer.getLastName().equals("Ornetsmueller Raphael")) {
+				CustomerReportSMSNotifier decorator = new CustomerReportSMSNotifier(customer);
+				decorator.send();
+			}
+			else {
+				customer.send();
+			}
+		}
 	}
 
 }

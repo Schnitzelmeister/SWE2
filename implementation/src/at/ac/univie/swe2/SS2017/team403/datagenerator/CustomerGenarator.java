@@ -16,10 +16,10 @@ public class CustomerGenarator implements CustomerStorage {
 	public CustomerGenarator(TestDataStorageFactory factory) {
 		this.factory = factory;
 		storage = new ArrayList<Customer>();
-		storage.add( new Customer(factory, "1","111","Zinatulin Ayrat") );
-		storage.add( new Customer(factory, "2","222","Pektas Tarik") );
-		storage.add( new Customer(factory, "3","333","Ornetsmueller Raphael") );
-		storage.add( new Customer(factory, "4","444","Zvonek Jakub") );
+		storage.add( new Customer(factory, "1","111","Zinatulin Ayrat", "ayrat@gmail.com", "12345678") );
+		storage.add( new Customer(factory, "2","222","Pektas Tarik", "tarik@gmail.com", "23456789") );
+		storage.add( new Customer(factory, "3","333","Ornetsmueller Raphael", "raphael@gmail.com", "34567890") );
+		storage.add( new Customer(factory, "4","444","Zvonek Jakub", "jakub@gmail.com", "45678901") );
 	}
 
 	@Override

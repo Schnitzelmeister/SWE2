@@ -30,7 +30,22 @@ public class Subscription implements Billing {
 		return state;
 	}
 	
-	public void billing() {
+	@Override
+	public boolean billing() {
+		return billing(null);
+	}
+
+	@Override
+	public boolean billing(Payment[] payments) {
+		// TODO Auto-generated method stub
 		
+		//process Payments
+		if (payments != null) {
+			
+		}
+		
+		//generate new invoices
+		
+		return false;
 	}
 }
