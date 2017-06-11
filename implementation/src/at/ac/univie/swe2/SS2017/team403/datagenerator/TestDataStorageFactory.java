@@ -1,15 +1,15 @@
 package at.ac.univie.swe2.SS2017.team403.datagenerator;
 
-import at.ac.univie.swe2.SS2017.team403.AbstractDataStorageFactory;
-import at.ac.univie.swe2.SS2017.team403.CustomerStorage;
-import at.ac.univie.swe2.SS2017.team403.InvoiceStorage;
-import at.ac.univie.swe2.SS2017.team403.PlanStorage;
-import at.ac.univie.swe2.SS2017.team403.ProductStorage;
-import at.ac.univie.swe2.SS2017.team403.SubscriptionStorage;
+import at.ac.univie.swe2.SS2017.team403.model.AbstractDataStorageFactory;
+import at.ac.univie.swe2.SS2017.team403.model.CustomerStorage;
+import at.ac.univie.swe2.SS2017.team403.model.InvoiceStorage;
+import at.ac.univie.swe2.SS2017.team403.model.PlanStorage;
+import at.ac.univie.swe2.SS2017.team403.model.ProductStorage;
+import at.ac.univie.swe2.SS2017.team403.model.SubscriptionStorage;
 
 public class TestDataStorageFactory implements AbstractDataStorageFactory {
 
-	private CustomerGenarator customerGenarator = new CustomerGenarator();
+	private CustomerGenarator customerGenarator = new CustomerGenarator(this);
 	
 	@Override
 	public CustomerStorage CreateCustomerStorage() {

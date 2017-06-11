@@ -1,15 +1,21 @@
 package at.ac.univie.swe2.SS2017.team403.model;
 
-import java.util.List;
-
-public class Customer {
+public class Customer implements Billing {
+	private AbstractDataStorageFactory factory = null;
 	private String localId;
 	private String remoteId;
 	private String lastName;
-	private List<Subscription> subscriptions;
 	
+	public void setFactory(AbstractDataStorageFactory factory) {
+		this.factory = factory;
+	}
+
 	public String getLocalId() {
 		return localId;
+	}
+	
+	public void setLocalId(String localId) {
+		this.localId = localId;
 	}
 
 	//a remote identifer in FastBill
@@ -17,17 +23,36 @@ public class Customer {
 		return remoteId;
 	}
 
+	public void setRemoteId(String remoteId) {
+		this.remoteId = remoteId;
+	}
+
 	public String getLastName() {
 		return lastName;
 	}
 	
-	public List<Subscription> getSubscriptions() {
-		return subscriptions;
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
+	public Subscription[] getSubscriptions() {
+		return factory.CreateSubscriptionStorage().getSubscriptionsByCustomer(this);
 	}
 	
-	public Customer(String localId, String remoteId, String lastName) {
+	public void billing() {
+		for(Subscription subscription : getSubscriptions())
+			subscription.billing();
+	}
+	
+	public Customer(AbstractDataStorageFactory factory, String localId, String remoteId, String lastName) {
+		this.factory = factory;
 		this.localId = localId;
 		this.remoteId = remoteId;
 		this.lastName = lastName;
 	}
-}
+
+	public Customer(String localId, String remoteId, String lastName) {
+		this.localId = localId;
+		this.remoteId = remoteId;
+		this.lastName = lastName;
+	}}

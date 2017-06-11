@@ -1,7 +1,6 @@
 package at.ac.univie.swe2.SS2017.team403;
 
 import java.io.File;
-import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -10,16 +9,15 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import at.ac.univie.swe2.SS2017.team403.datagenerator.TestDataStorageFactory;
-import at.ac.univie.swe2.SS2017.team403.fastbill.FastBillDataStorageFactory;
+import at.ac.univie.swe2.SS2017.team403.model.Billing;
 import at.ac.univie.swe2.SS2017.team403.model.Customer;
 
-public class BackOfficeSystem {
+public class BackOfficeSystem implements Billing {
 	private String apiKey;
 	private String apiEmail;
 	private boolean productive;
 	
-	private AbstractDataStorageFactory factory;
+	private DataStorageProxy dataStorage;
 	
 	public String getAPIKey() {
 		return apiKey;
@@ -41,7 +39,7 @@ public class BackOfficeSystem {
 		//read xml
 		try {
 			File fXmlFile = new File(xmlFileName);
-			System.out.println("xmlFileName :" + fXmlFile.getAbsolutePath());
+			System.out.println("configXMLFileName: " + fXmlFile.getAbsolutePath());
 
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -59,36 +57,41 @@ public class BackOfficeSystem {
 					case "Mode": productive = (nNode.getTextContent().equals("productive")); break;
 				}
 			}
+			
+			dataStorage = new DataStorageProxy(productive);
 		}
 		catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		
-		if (productive) {
-			factory = new FastBillDataStorageFactory();
-		}
-		else {
-			factory = new TestDataStorageFactory();
-		}
 	}
 	
-	public List<Customer> getCustomers() {
-		return factory.CreateCustomerStorage().getCustomers();
+	public Customer[] getCustomers() {
+		return dataStorage.getCustomerStorage().getCustomers();
 	}
 	
 	public Customer getCustomerByLocalId(String localId) throws IllegalArgumentException {
-		return factory.CreateCustomerStorage().getCustomerByLocalId(localId);
+		return dataStorage.getCustomerStorage().getCustomerByLocalId(localId);
 	}
 
 	public Customer getCustomerByRemoteId(String remoteId) throws IllegalArgumentException {
-		return factory.CreateCustomerStorage().getCustomerByRemoteId(remoteId);
+		return dataStorage.getCustomerStorage().getCustomerByRemoteId(remoteId);
 	}
 	
+	public void addCustomer(Customer customer) throws IllegalArgumentException {
+		dataStorage.getCustomerStorage().addCustomer(customer);
+	}
+
+	@Override
+	public void billing() {
+		for (Customer customer : this.getCustomers())
+			customer.billing();
+	}
+
 	public static void main(String args[]) {
 		BackOfficeSystem system = new BackOfficeSystem("config.xml");
 		
 		for (Customer customer : system.getCustomers())
 			System.out.println(customer.getLastName());
 	}
+
 }

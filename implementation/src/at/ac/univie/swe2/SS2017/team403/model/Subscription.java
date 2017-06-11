@@ -3,7 +3,7 @@ package at.ac.univie.swe2.SS2017.team403.model;
 import java.util.Date;
 import java.util.List;
 
-public class Subscription {
+public class Subscription implements Billing {
 	private String name;
 	private Plan plan;
 	private Date validTill;
@@ -28,5 +28,9 @@ public class Subscription {
 	
 	public SubscriptionStateEnum getState() {
 		return state;
+	}
+	
+	public void billing() {
+		
 	}
 }
