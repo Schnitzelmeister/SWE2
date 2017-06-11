@@ -112,8 +112,7 @@ public class BackOfficeSystem implements Billing {
 	public boolean billing(Payment[] payments) {
 		boolean changed = false;
 		for (Customer customer : this.getCustomers()) {
-			boolean billed = customer.billing(payments);
-			if (!billed) {
+			if (customer.billing(payments)) {
 				changed = true;
 			
 				for (CustomerListener l : listeners)

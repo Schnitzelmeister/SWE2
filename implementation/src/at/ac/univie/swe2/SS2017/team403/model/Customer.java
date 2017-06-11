@@ -66,9 +66,8 @@ public class Customer implements Billing, CustomerReportNotifier {
 	public boolean billing(Payment[] payments) {
 		boolean changed = false;
 		for(Subscription subscription : getSubscriptions()) {
-			boolean billed = subscription.billing(payments);
-			if (!changed)
-				changed = billed;
+			if (subscription.billing(payments))
+				changed = true;
 		}
 		
 		return changed;
