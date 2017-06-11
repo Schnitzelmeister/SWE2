@@ -13,4 +13,16 @@ public class FastBillCustomerStorage implements CustomerStorage {
 		return null;
 	}
 
+	@Override
+	public Customer getCustomerByLocalId(String localId) throws IllegalArgumentException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Customer getCustomerByRemoteId(String remoteId) throws IllegalArgumentException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

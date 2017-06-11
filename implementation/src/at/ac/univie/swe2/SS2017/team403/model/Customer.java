@@ -24,4 +24,10 @@ public class Customer {
 	public List<Subscription> getSubscriptions() {
 		return subscriptions;
 	}
+	
+	public Customer(String localId, String remoteId, String lastName) {
+		this.localId = localId;
+		this.remoteId = remoteId;
+		this.lastName = lastName;
+	}
 }

@@ -9,10 +9,11 @@ import at.ac.univie.swe2.SS2017.team403.SubscriptionStorage;
 
 public class TestDataStorageFactory implements AbstractDataStorageFactory {
 
+	private CustomerGenarator customerGenarator = new CustomerGenarator();
+	
 	@Override
 	public CustomerStorage CreateCustomerStorage() {
-		// TODO Auto-generated method stub
-		return null;
+		return customerGenarator;
 	}
 
 	@Override
