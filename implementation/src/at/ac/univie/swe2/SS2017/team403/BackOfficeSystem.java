@@ -1,6 +1,7 @@
 package at.ac.univie.swe2.SS2017.team403;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -15,7 +16,7 @@ import at.ac.univie.swe2.SS2017.team403.model.Customer;
 import at.ac.univie.swe2.SS2017.team403.model.Payment;
 
 public class BackOfficeSystem implements Billing {
-	private List<CustomerListener> listeners;
+	private List<CustomerListener> listeners = new ArrayList<CustomerListener>();
 	
 	public void addListener(CustomerListener listener) {
 		listeners.add(listener);
