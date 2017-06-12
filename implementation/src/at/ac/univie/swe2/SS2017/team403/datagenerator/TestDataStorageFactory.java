@@ -10,6 +10,10 @@ import at.ac.univie.swe2.SS2017.team403.model.SubscriptionStorage;
 public class TestDataStorageFactory implements AbstractDataStorageFactory {
 
 	private CustomerGenarator customerGenarator = new CustomerGenarator(this);
+	private InvoiceGenerator invoiceGenerator = new InvoiceGenerator(this);
+	private PlanGenerator planGenerator = new PlanGenerator(this);
+	private ProductGenerator productGenerator = new ProductGenerator(this);
+	private SubscriptionGenerator subscriptionGenerator = new SubscriptionGenerator(this);
 	
 	@Override
 	public CustomerStorage CreateCustomerStorage() {
@@ -18,26 +22,22 @@ public class TestDataStorageFactory implements AbstractDataStorageFactory {
 
 	@Override
 	public InvoiceStorage CreateInvoiceStorage() {
-		// TODO Auto-generated method stub
-		return null;
+		return invoiceGenerator;
 	}
 
 	@Override
 	public PlanStorage CreatePlanStorage() {
-		// TODO Auto-generated method stub
-		return null;
+		return planGenerator;
 	}
 
 	@Override
 	public ProductStorage CreateProductStorage() {
-		// TODO Auto-generated method stub
-		return null;
+		return productGenerator;
 	}
 
 	@Override
 	public SubscriptionStorage CreateSubscriptionStorage() {
-		// TODO Auto-generated method stub
-		return null;
+		return subscriptionGenerator;
 	}
 
 }
