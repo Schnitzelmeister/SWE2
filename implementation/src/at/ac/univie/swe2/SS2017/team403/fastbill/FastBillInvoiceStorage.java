@@ -11,4 +11,16 @@ public class FastBillInvoiceStorage  implements InvoiceStorage {
 		return null;
 	}
 
+	@Override
+	public Invoice[] getInvoicesByRemoteId(String remoteId) throws IllegalArgumentException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Invoice[] getLatestInvoiceByRemoteId(String remoteId) throws IllegalArgumentException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
