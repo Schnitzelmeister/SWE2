@@ -1,5 +1,6 @@
 package at.ac.univie.swe2.SS2017.team403.datagenerator;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import at.ac.univie.swe2.SS2017.team403.model.Product;
@@ -11,6 +12,10 @@ public class ProductGenerator implements ProductStorage {
 	
 	public ProductGenerator(TestDataStorageFactory factory){
 		this.factory = factory;
+		productStorage = new ArrayList<Product>();
+		productStorage.add( new Product(factory,"Produkt1") );
+		productStorage.add( new Product(factory,"Produkt2") );
+		productStorage.add( new Product(factory,"Produkt3") );
 	}
 	
 	@Override

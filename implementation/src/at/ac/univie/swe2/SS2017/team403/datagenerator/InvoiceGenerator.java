@@ -1,5 +1,6 @@
 package at.ac.univie.swe2.SS2017.team403.datagenerator;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import at.ac.univie.swe2.SS2017.team403.model.Invoice;
@@ -11,7 +12,11 @@ public class InvoiceGenerator implements InvoiceStorage {
 	
 	public InvoiceGenerator(TestDataStorageFactory factory){
 		this.factory = factory;
-		// TODO Auto-generated method stub
+		invoiceStorage = new ArrayList<Invoice>();
+		invoiceStorage.add( new Invoice(factory,"1") );
+		invoiceStorage.add( new Invoice(factory,"2") );
+		invoiceStorage.add( new Invoice(factory,"3") );
+		invoiceStorage.add( new Invoice(factory,"4") );
 	}
 	
 	@Override
@@ -32,7 +37,7 @@ public class InvoiceGenerator implements InvoiceStorage {
 	}
 
 	@Override
-	public Invoice[] getPaymentPendingInvoices() throws IllegalArgumentException {
+	public Invoice[] getSubscriptionExpiredInvoices() throws IllegalArgumentException {
 		// TODO Auto-generated method stub
 		return null;
 	}
