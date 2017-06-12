@@ -23,4 +23,10 @@ public class FastBillInvoiceStorage  implements InvoiceStorage {
 		return null;
 	}
 
+	@Override
+	public Invoice[] getSubscriptionExpiredInvoices() throws IllegalArgumentException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

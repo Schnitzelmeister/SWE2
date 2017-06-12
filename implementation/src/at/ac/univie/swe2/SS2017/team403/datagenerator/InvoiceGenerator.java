@@ -30,6 +30,12 @@ public class InvoiceGenerator implements InvoiceStorage {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public Invoice[] getPaymentPendingInvoices() throws IllegalArgumentException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 
 }

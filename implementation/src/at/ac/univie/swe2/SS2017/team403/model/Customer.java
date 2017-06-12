@@ -1,5 +1,7 @@
 package at.ac.univie.swe2.SS2017.team403.model;
 
+import at.ac.univie.swe2.SS2017.team403.datagenerator.AbstractDataStorageFactory;
+
 public class Customer implements Billing, CustomerReportNotifier {
 	private AbstractDataStorageFactory factory = null;
 	private String localId;

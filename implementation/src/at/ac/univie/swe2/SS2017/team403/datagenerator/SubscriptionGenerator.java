@@ -25,4 +25,10 @@ public class SubscriptionGenerator implements SubscriptionStorage {
 		return null;
 	}
 
+	@Override
+	public Subscription[] getSubScriptionByRemoteId(String remoteId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
