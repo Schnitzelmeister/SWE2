@@ -11,6 +11,10 @@ public class Product {
 		this.name = name;
 	}
 	
+	public Product(String name){
+		this.name = name;
+	}
+	
 	public void setFactory(AbstractDataStorageFactory factory) {
 		this.factory = factory;
 	}

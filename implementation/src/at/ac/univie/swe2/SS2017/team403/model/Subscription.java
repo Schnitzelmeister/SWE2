@@ -23,6 +23,15 @@ public class Subscription implements Billing {
 		this.state = state;
 	}
 	
+	public Subscription(String name, Plan plan, Date validTill, List<Invoice> invoices, 
+			SubscriptionStateEnum state){
+		this.name = name;
+		this.plan = plan;
+		this.validTill = validTill;
+		this.invoices = invoices;
+		this.state = state;
+	}
+	
 	public void setFactory(AbstractDataStorageFactory factory) {
 		this.factory = factory;
 	}

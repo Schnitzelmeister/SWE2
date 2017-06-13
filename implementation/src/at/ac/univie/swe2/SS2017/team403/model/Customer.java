@@ -10,6 +10,23 @@ public class Customer implements Billing, CustomerReportNotifier {
 	private String email;
 	private String phone;
 	
+	public Customer(AbstractDataStorageFactory factory, String localId, String remoteId, String lastName, String email, String phone) {
+		this.factory = factory;
+		this.localId = localId;
+		this.remoteId = remoteId;
+		this.lastName = lastName;
+		this.email = email;
+		this.phone = phone;
+	}
+
+	public Customer(String localId, String remoteId, String lastName, String email, String phone) {
+		this.localId = localId;
+		this.remoteId = remoteId;
+		this.lastName = lastName;
+		this.email = email;
+		this.phone = phone;
+	}
+	
 	public void setFactory(AbstractDataStorageFactory factory) {
 		this.factory = factory;
 	}
@@ -73,23 +90,6 @@ public class Customer implements Billing, CustomerReportNotifier {
 		}
 		
 		return changed;
-	}
-	
-	public Customer(AbstractDataStorageFactory factory, String localId, String remoteId, String lastName, String email, String phone) {
-		this.factory = factory;
-		this.localId = localId;
-		this.remoteId = remoteId;
-		this.lastName = lastName;
-		this.email = email;
-		this.phone = phone;
-	}
-
-	public Customer(String localId, String remoteId, String lastName, String email, String phone) {
-		this.localId = localId;
-		this.remoteId = remoteId;
-		this.lastName = lastName;
-		this.email = email;
-		this.phone = phone;
 	}
 
 	@Override

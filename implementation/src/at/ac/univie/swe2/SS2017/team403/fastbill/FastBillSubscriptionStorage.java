@@ -24,4 +24,10 @@ public class FastBillSubscriptionStorage implements SubscriptionStorage {
 		return null;
 	}
 
+	@Override
+	public void addSubscription(Subscription subscription) throws IllegalArgumentException {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

@@ -22,4 +22,10 @@ public class ProductGenerator implements ProductStorage {
 	public Product[] getProducts() {
 		return productStorage.toArray( new Product[productStorage.size()] );
 	}
+
+	@Override
+	public void addProduct(Product product) throws IllegalArgumentException {
+		// TODO Auto-generated method stub
+		
+	}
 }

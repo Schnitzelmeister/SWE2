@@ -40,4 +40,10 @@ public class PlanGenerator implements PlanStorage {
 		return null;
 	}
 
+	@Override
+	public void addPlan(Plan plan) throws IllegalArgumentException {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

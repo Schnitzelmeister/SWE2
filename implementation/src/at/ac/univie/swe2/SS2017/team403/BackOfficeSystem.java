@@ -13,9 +13,14 @@ import org.w3c.dom.NodeList;
 
 import at.ac.univie.swe2.SS2017.team403.model.Billing;
 import at.ac.univie.swe2.SS2017.team403.model.Customer;
+import at.ac.univie.swe2.SS2017.team403.model.Invoice;
 import at.ac.univie.swe2.SS2017.team403.model.Payment;
+import at.ac.univie.swe2.SS2017.team403.model.Plan;
+import at.ac.univie.swe2.SS2017.team403.model.Product;
+import at.ac.univie.swe2.SS2017.team403.model.Subscription;
 
 public class BackOfficeSystem implements Billing {
+	
 	private List<CustomerListener> listeners = new ArrayList<CustomerListener>();
 	
 	public void addListener(CustomerListener listener) {
@@ -71,9 +76,12 @@ public class BackOfficeSystem implements Billing {
 			for (int temp = 0; temp < nList.getLength(); temp++) {
 				Node nNode = nList.item(temp);
 				switch (nNode.getNodeName()) {
-					case "APIKey": apiKey = nNode.getTextContent(); break;
-					case "APIEmail": apiEmail = nNode.getTextContent(); break;
-					case "Mode": productive = (nNode.getTextContent().equals("productive")); break;
+					case "APIKey": apiKey = nNode.getTextContent(); 
+					break;
+					case "APIEmail": apiEmail = nNode.getTextContent(); 
+					break;
+					case "Mode": productive = (nNode.getTextContent().equals("productive")); 
+					break;
 				}
 			}
 			
@@ -101,6 +109,22 @@ public class BackOfficeSystem implements Billing {
 		
 		for (CustomerListener l : listeners)
 			l.afterCustomerAdded(customer);
+	}
+	
+	public void addInvoice(Invoice invoice) throws IllegalArgumentException {
+		dataStorage.getInvoiceStorage().addInvoice(invoice);
+	}
+	
+	public void addPlan(Plan plan) throws IllegalArgumentException {
+		dataStorage.getPlanStorage().addPlan(plan);
+	}
+	
+	public void addProduct(Product product) throws IllegalArgumentException {
+		dataStorage.getProductStorage().addProduct(product);
+	}
+	
+	public void addSubscription(Subscription subscription) throws IllegalArgumentException {
+		dataStorage.getSubscriptionStorage().addSubscription(subscription);
 	}
 
 	@Override

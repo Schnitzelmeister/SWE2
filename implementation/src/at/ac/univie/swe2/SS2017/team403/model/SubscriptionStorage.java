@@ -7,4 +7,5 @@ public interface SubscriptionStorage {
 	public Subscription[] getSubscriptions();
 	public Subscription[] getSubscriptionsByCustomer(Customer customer);
 	public Subscription[] getSubScriptionByRemoteId(String remoteId);
+	public void addSubscription(Subscription subscription) throws IllegalArgumentException;
 }

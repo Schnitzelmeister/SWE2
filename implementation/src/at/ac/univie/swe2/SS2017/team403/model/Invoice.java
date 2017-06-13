@@ -11,6 +11,10 @@ public class Invoice {
 		this.localId = localId;
 	}
 	
+	public Invoice(String localId){
+		this.localId = localId;
+	}
+	
 	public void setFactory(AbstractDataStorageFactory factory) {
 		this.factory = factory;
 	}

@@ -18,6 +18,13 @@ public class Plan {
 		this.product = product;
 	}
 	
+	public Plan(String remoteId, String name, Double rate, Product product){
+		this.remoteId = remoteId;
+		this.name = name;
+		this.rate = rate;
+		this.product = product;
+	}
+	
 	public void setFactory(AbstractDataStorageFactory factory) {
 		this.factory = factory;
 	}

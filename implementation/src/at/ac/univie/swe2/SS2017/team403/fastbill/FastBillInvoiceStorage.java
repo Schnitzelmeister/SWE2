@@ -29,4 +29,10 @@ public class FastBillInvoiceStorage  implements InvoiceStorage {
 		return null;
 	}
 
+	@Override
+	public void addInvoice(Invoice invoice) throws IllegalArgumentException {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
