@@ -119,12 +119,24 @@ public class BackOfficeSystem implements Billing {
 		dataStorage.getPlanStorage().addPlan(plan);
 	}
 	
+	public Plan[] getPlans() {
+		return dataStorage.getPlanStorage().getPlans();
+	}
+	
 	public void addProduct(Product product) throws IllegalArgumentException {
 		dataStorage.getProductStorage().addProduct(product);
 	}
 	
+	public Product[] getProducts() {
+		return dataStorage.getProductStorage().getProducts();
+	}
+	
 	public void addSubscription(Subscription subscription) throws IllegalArgumentException {
 		dataStorage.getSubscriptionStorage().addSubscription(subscription);
+	}
+	
+	public Subscription[] getSubscriptions() {
+		return dataStorage.getSubscriptionStorage().getSubscriptions();
 	}
 
 	@Override
@@ -150,7 +162,14 @@ public class BackOfficeSystem implements Billing {
 	public static void main(String args[]) {
 		BackOfficeSystem system = new BackOfficeSystem("config.xml");
 		
-		system.addCustomer( new Customer("5", "555", "Muster Muster", "muster@gmail.com", "56789012") );
+		system.addCustomer(new Customer("5", "555", "Muster Muster", "muster@gmail.com", "56789012"));
+		
+		system.addProduct(new Product("Produkt1"));
+		system.addPlan( new Plan("1111", "Deluxe", 11.11,new Product("Produkt1")));
+		
+		for(Plan plans : system.getPlans()){
+			System.out.println(plans.getName()+" "+plans.getProduct().getName());
+		}
 		
 		for (Customer customer : system.getCustomers()) {
 			System.out.println(customer.getLastName());

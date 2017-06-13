@@ -15,12 +15,11 @@ public class PlanGenerator implements PlanStorage {
 	public PlanGenerator(TestDataStorageFactory factory){
 		this.factory = factory;
 		planStorage = new ArrayList<Plan>();
-		planStorage.add( new Plan(factory,"111", "", 11.11, new Product(factory,"Produkt1")) );
-		planStorage.add( new Plan(factory,"222", "", 22.22, new Product(factory,"Produkt2")) );
-		planStorage.add( new Plan(factory,"333", "", 33.33, new Product(factory,"Produkt3")) );
-		planStorage.add( new Plan(factory,"444", "", 44.44, new Product(factory,"Produkt3")) );
-		planStorage.add( new Plan(factory,"111", "", 55.55, new Product(factory,"Produkt2")) );
-		planStorage.add( new Plan(factory,"222", "", 66.66, new Product(factory,"Produkt1")) );
+		planStorage.add( new Plan(factory,"2222", "Premium", 22.22, new Product(factory,"Produkt2")) );
+		planStorage.add( new Plan(factory,"3333", "Basic", 33.33, new Product(factory,"Produkt3")) );
+		planStorage.add( new Plan(factory,"4444", "Deluxe", 44.44, new Product(factory,"Produkt3")) );
+		planStorage.add( new Plan(factory,"5555", "Basic", 55.55, new Product(factory,"Produkt2")) );
+		planStorage.add( new Plan(factory,"6666", "Premium", 66.66, new Product(factory,"Produkt1")) );
 	}
 	
 	@Override
@@ -42,7 +41,12 @@ public class PlanGenerator implements PlanStorage {
 
 	@Override
 	public void addPlan(Plan plan) throws IllegalArgumentException {
-		// TODO Auto-generated method stub
+		for (Plan p : planStorage)
+			if (p.getName().equals(plan.getName()) && p.getProduct().getName().equals(plan.getProduct().getName()))
+				throw new IllegalArgumentException("The Plan "+ p.getName()+" already exists!");
+		
+		plan.setFactory(factory);
+		planStorage.add(plan);
 		
 	}
 

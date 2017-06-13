@@ -16,9 +16,9 @@ public class SubscriptionGenerator implements SubscriptionStorage {
 	public SubscriptionGenerator(TestDataStorageFactory factory){
 		this.factory = factory;
 		subscriptionStorage = new ArrayList<Subscription>();
-		subscriptionStorage.add( new Subscription(factory,"Subscription1",new Plan(factory,"111", "", 11.11,new Product(factory,"Produkt1")),null,null,null));
-		subscriptionStorage.add( new Subscription(factory,"Subscription2",new Plan(factory,"222", "", 22.22, new Product(factory,"Produkt2")),null,null,null));
-		subscriptionStorage.add( new Subscription(factory,"Subscription3",new Plan(factory,"333", "", 33.33, new Product(factory,"Produkt3")),null,null,null));
+		subscriptionStorage.add( new Subscription(factory,"Subscription1",new Plan(factory,"1111", "", 11.11,new Product(factory,"Produkt1")),null,null,null));
+		subscriptionStorage.add( new Subscription(factory,"Subscription2",new Plan(factory,"2222", "Premium", 22.22, new Product(factory,"Produkt2")),null,null,null));
+		subscriptionStorage.add( new Subscription(factory,"Subscription3",new Plan(factory,"3333", "Basic", 33.33, new Product(factory,"Produkt3")),null,null,null));
 	}
 
 	@Override
@@ -39,8 +39,7 @@ public class SubscriptionGenerator implements SubscriptionStorage {
 	}
 
 	@Override
-	public void addSubscription(Subscription subscription) throws IllegalArgumentException {
-		// TODO Auto-generated method stub
+	public void addSubscription(Subscription subscription) throws IllegalArgumentException {;
 		
 	}
 
