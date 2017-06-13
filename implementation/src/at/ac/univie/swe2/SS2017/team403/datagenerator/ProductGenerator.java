@@ -13,8 +13,8 @@ public class ProductGenerator implements ProductStorage {
 	public ProductGenerator(TestDataStorageFactory factory){
 		this.factory = factory;
 		productStorage = new ArrayList<Product>();
-		productStorage.add( new Product(factory,"Produkt2") );
-		productStorage.add( new Product(factory,"Produkt3") );
+		productStorage.add( new Product(factory,"Produkt2","productId2") );
+		productStorage.add( new Product(factory,"Produkt3","productId3") );
 	}
 	
 	@Override
@@ -24,10 +24,11 @@ public class ProductGenerator implements ProductStorage {
 
 	@Override
 	public void addProduct(Product product) throws IllegalArgumentException {
-		for (Product p : productStorage)
-			if (p.getName().equals(product.getName()))
+		for (Product p : productStorage) {
+			if (p.getProductId().equals(product.getProductId())) {
 				throw new IllegalArgumentException("The Product "+ p.getName()+" already exists!");
-		
+			}
+		}	
 		product.setFactory(factory);
 		productStorage.add(product);	
 	}

@@ -9,20 +9,23 @@ public class Plan {
 	private String name;
 	private double rate;
 	private Product product;
+	private String planId;
 	
-	public Plan(AbstractDataStorageFactory factory, String remoteId, String name, Double rate, Product product){
+	public Plan(AbstractDataStorageFactory factory, String remoteId, String name, Double rate, Product product, String planId){
 		this.factory = factory;
 		this.remoteId = remoteId;
 		this.name = name;
 		this.rate = rate;
 		this.product = product;
+		this.planId = planId;
 	}
 	
-	public Plan(String remoteId, String name, Double rate, Product product){
+	public Plan(String remoteId, String name, Double rate, Product product, String planId){
 		this.remoteId = remoteId;
 		this.name = name;
 		this.rate = rate;
 		this.product = product;
+		this.planId = planId;
 	}
 	
 	public void setFactory(AbstractDataStorageFactory factory) {
@@ -47,6 +50,10 @@ public class Plan {
 	//list of Products in this Plan
 	public Product getProduct() {
 		return product;
+	}
+	
+	public String getPlanId() {
+		return planId;
 	}
 	
 	@Override

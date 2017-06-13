@@ -5,18 +5,21 @@ import java.util.List;
 
 import at.ac.univie.swe2.SS2017.team403.model.Invoice;
 import at.ac.univie.swe2.SS2017.team403.model.InvoiceStorage;
+import at.ac.univie.swe2.SS2017.team403.model.Subscription;
 
 public class InvoiceGenerator implements InvoiceStorage {
 	TestDataStorageFactory factory;
 	List<Invoice> invoiceStorage;
+	String invoiceId;
+	String localId;
 	
 	public InvoiceGenerator(TestDataStorageFactory factory){
 		this.factory = factory;
 		invoiceStorage = new ArrayList<Invoice>();
-		invoiceStorage.add( new Invoice(factory,"1") );
-		invoiceStorage.add( new Invoice(factory,"2") );
-		invoiceStorage.add( new Invoice(factory,"3") );
-		invoiceStorage.add( new Invoice(factory,"4") );
+		invoiceStorage.add( new Invoice(factory,"1","123") );
+		invoiceStorage.add( new Invoice(factory,"2","234") );
+		invoiceStorage.add( new Invoice(factory,"3","345") );
+		invoiceStorage.add( new Invoice(factory,"4","456") );
 	}
 	
 	@Override
@@ -44,8 +47,12 @@ public class InvoiceGenerator implements InvoiceStorage {
 
 	@Override
 	public void addInvoice(Invoice invoice) throws IllegalArgumentException {
-		// TODO Auto-generated method stub
-		
+		for (Invoice i :invoiceStorage)
+			if (i.getInvoiceId().equals(invoice.getInvoiceId())){
+				throw new IllegalArgumentException("Invoice "+ i.getInvoiceId()+" already exists!");				
+			}
+		invoice.setFactory(factory);
+		invoiceStorage.add(invoice);		
 	}
 	
 

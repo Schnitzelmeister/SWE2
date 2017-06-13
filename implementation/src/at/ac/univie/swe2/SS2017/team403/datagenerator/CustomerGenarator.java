@@ -29,28 +29,31 @@ public class CustomerGenarator implements CustomerStorage {
 
 	@Override
 	public Customer getCustomerByLocalId(String localId) {
-		for (Customer c : storage)
-			if (c.getLocalId().equals(localId))
+		for (Customer c : storage) {
+			if (c.getLocalId().equals(localId)) {
 				return c;
-		
+			}
+		}
 		throw new IllegalArgumentException("The User with localId=" + localId + " does not exist");
 	}
 
 	@Override
 	public Customer getCustomerByRemoteId(String remoteId) {
-		for (Customer c : storage)
-			if (c.getLocalId().equals(remoteId))
+		for (Customer c : storage){
+			if (c.getLocalId().equals(remoteId)){
 				return c;
-		
+			}	
+		}
 		throw new IllegalArgumentException("The User with remoteId=" + remoteId + " does not exist");
 	}
 
 	@Override
 	public void addCustomer(Customer customer) throws IllegalArgumentException {
-		for (Customer c : storage)
-			if (c.getLocalId().equals(customer.getLocalId()) || c.getRemoteId().equals(customer.getRemoteId()))
+		for (Customer c : storage) {
+			if (c.getLocalId().equals(customer.getLocalId()) || c.getRemoteId().equals(customer.getRemoteId())) {
 				throw new IllegalArgumentException("The User with localId=" + customer.getLocalId() + " and remoteId=" + customer.getRemoteId() + " exist");
-		
+			}
+		}
 		customer.setFactory(factory);
 		storage.add(customer);
 	}
@@ -71,9 +74,11 @@ public class CustomerGenarator implements CustomerStorage {
 		
 		@Override
 		public Customer next() {
-			if(this.hasNext())
+			if(this.hasNext()) {
 				return storage.get(index++);
-			return null;
+			} else {
+				return null;
+			}
 		}
 	}
 
@@ -97,8 +102,9 @@ public class CustomerGenarator implements CustomerStorage {
 					}
 				}
 				
-				if (hasDebt)
+				if (hasDebt){
 					debtStorage.add(customer);
+				}
 			}
 		}
 		
@@ -115,17 +121,20 @@ public class CustomerGenarator implements CustomerStorage {
 		
 		@Override
 		public Customer next() {
-			if(this.hasNext())
+			if(this.hasNext()){
 				return debtStorage.get(index++);
-			return null;
+			} else {
+				return null;
+			}
 		}
 	}
 
 	@Override
 	public Iterator<Customer> getCustomersIterator(boolean onlyWithDebt) {
-		if (onlyWithDebt)
+		if (onlyWithDebt) {
 			return new DebtCustomerIterator();
-		else
+		} else {
 			return new AllCustomerIterator();
+		}
 	}
 }

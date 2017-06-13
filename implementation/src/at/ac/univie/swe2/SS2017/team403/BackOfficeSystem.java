@@ -115,6 +115,10 @@ public class BackOfficeSystem implements Billing {
 		dataStorage.getInvoiceStorage().addInvoice(invoice);
 	}
 	
+	public Invoice[] getInvoices(){
+		return dataStorage.getInvoiceStorage().getInvoices();
+	}
+	
 	public void addPlan(Plan plan) throws IllegalArgumentException {
 		dataStorage.getPlanStorage().addPlan(plan);
 	}
@@ -164,11 +168,19 @@ public class BackOfficeSystem implements Billing {
 		
 		system.addCustomer(new Customer("5", "555", "Muster Muster", "muster@gmail.com", "56789012"));
 		
-		system.addProduct(new Product("Produkt1"));
-		system.addPlan( new Plan("1111", "Deluxe", 11.11,new Product("Produkt1")));
+		system.addProduct(new Product("Produkt1", "productId1"));
+		system.addPlan( new Plan("1111", "Deluxe", 11.11,new Product("Produkt1","productId1"),"planId1"));
 		
 		for(Plan plans : system.getPlans()){
-			System.out.println(plans.getName()+" "+plans.getProduct().getName());
+			System.out.println(plans.getProduct().getName()+" offers "+plans.getName()+"-Account");
+		}
+		
+		for(Subscription subscriptions : system.getSubscriptions()){
+			System.out.println(subscriptions.getName()+" subscribed by "+system.getCustomerByLocalId(subscriptions.getLocalId()).getLastName());
+		}
+		
+		for(Invoice invoices: system.getInvoices()){
+			System.out.println(system.getCustomerByLocalId(invoices.getId()).getLastName()+"'s invoice");
 		}
 		
 		for (Customer customer : system.getCustomers()) {

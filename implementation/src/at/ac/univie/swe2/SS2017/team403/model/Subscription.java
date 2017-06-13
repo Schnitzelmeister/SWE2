@@ -1,6 +1,5 @@
 package at.ac.univie.swe2.SS2017.team403.model;
 
-import java.util.Date;
 import java.util.List;
 
 import at.ac.univie.swe2.SS2017.team403.datagenerator.AbstractDataStorageFactory;
@@ -9,27 +8,32 @@ public class Subscription implements Billing {
 	private AbstractDataStorageFactory factory = null;
 	private String name;
 	private Plan plan;
-	private Date validTill;
+	private long validTill;
 	private List<Invoice> invoices;
 	private SubscriptionStateEnum state;
+	private String localId;
+	private String subscriptionId;
 	
-	public Subscription(AbstractDataStorageFactory factory, String name, Plan plan, Date validTill, List<Invoice> invoices, 
-			SubscriptionStateEnum state){
+	public Subscription(AbstractDataStorageFactory factory, String name, Plan plan, long validTill, List<Invoice> invoices, 
+			SubscriptionStateEnum state, String localId, String subscriptionId){
 		this.factory = factory;
 		this.name = name;
 		this.plan = plan;
 		this.validTill = validTill;
 		this.invoices = invoices;
 		this.state = state;
+		this.localId = localId;
 	}
 	
-	public Subscription(String name, Plan plan, Date validTill, List<Invoice> invoices, 
-			SubscriptionStateEnum state){
+	public Subscription(String name, Plan plan, long validTill, List<Invoice> invoices, 
+			SubscriptionStateEnum state, String localId, String subscriptionId){
 		this.name = name;
 		this.plan = plan;
 		this.validTill = validTill;
 		this.invoices = invoices;
 		this.state = state;
+		this.localId = localId;
+		this.subscriptionId = subscriptionId;
 	}
 	
 	public void setFactory(AbstractDataStorageFactory factory) {
@@ -44,7 +48,7 @@ public class Subscription implements Billing {
 		return plan;
 	}
 	
-	public Date getValidTill() {
+	public long getValidTill() {
 		return validTill;
 	}
 	
@@ -54,6 +58,14 @@ public class Subscription implements Billing {
 	
 	public SubscriptionStateEnum getState() {
 		return state;
+	}
+	
+	public String getLocalId(){
+		return localId;
+	}
+	
+	public String getSubscriptionId() {
+		return subscriptionId;
 	}
 	
 	@Override
@@ -74,4 +86,6 @@ public class Subscription implements Billing {
 		
 		return false;
 	}
+
+
 }
