@@ -13,6 +13,7 @@ import org.w3c.dom.NodeList;
 
 import at.ac.univie.swe2.SS2017.team403.model.Billing;
 import at.ac.univie.swe2.SS2017.team403.model.Customer;
+import at.ac.univie.swe2.SS2017.team403.model.CustomerReportNotifier;
 import at.ac.univie.swe2.SS2017.team403.model.Invoice;
 import at.ac.univie.swe2.SS2017.team403.model.Payment;
 import at.ac.univie.swe2.SS2017.team403.model.Plan;
@@ -21,12 +22,19 @@ import at.ac.univie.swe2.SS2017.team403.model.Subscription;
 
 public class BackOfficeSystem implements Billing {
 	
+	public static final String FastBillWSURL = "https://my.fastbill.com/api/1.0/api.php";
+	
 	private List<CustomerListener> listeners = new ArrayList<CustomerListener>();
 	
 	public void addListener(CustomerListener listener) {
 		listeners.add(listener);
 	}
 
+	private static BackOfficeSystem sys = new BackOfficeSystem();
+	public static BackOfficeSystem getSystem() {
+		return sys;
+	}
+	
 	public void removeListener(CustomerListener listener) {
 		if (listeners.size() <= 0)
 			return;
@@ -59,7 +67,7 @@ public class BackOfficeSystem implements Billing {
 		return !productive;
 	}
 	
-	public BackOfficeSystem(String xmlFileName) {
+	public static void initialize(String xmlFileName) {
 		//read xml
 		try {
 			File fXmlFile = new File(xmlFileName);
@@ -76,23 +84,24 @@ public class BackOfficeSystem implements Billing {
 			for (int temp = 0; temp < nList.getLength(); temp++) {
 				Node nNode = nList.item(temp);
 				switch (nNode.getNodeName()) {
-					case "APIKey": apiKey = nNode.getTextContent(); 
+					case "APIKey": sys.apiKey = nNode.getTextContent(); 
 					break;
-					case "APIEmail": apiEmail = nNode.getTextContent(); 
+					case "APIEmail": sys.apiEmail = nNode.getTextContent(); 
 					break;
-					case "Mode": productive = (nNode.getTextContent().equals("productive")); 
+					case "Mode": sys.productive = (nNode.getTextContent().equals("productive")); 
 					break;
 				}
 			}
 			
-			dataStorage = new DataStorageProxy(productive);
+			sys.dataStorage = new DataStorageProxy(sys.productive);
 		}
 		catch (Exception e) {
 			e.printStackTrace();
+			throw new IllegalArgumentException(e.getMessage());
 		}
 	}
 	
-	public Customer[] getCustomers() {
+	public Customer[] getCustomers() throws IllegalArgumentException {
 		return dataStorage.getCustomerStorage().getCustomers();
 	}
 	
@@ -164,10 +173,10 @@ public class BackOfficeSystem implements Billing {
 	}
 
 	public static void main(String args[]) {
-		BackOfficeSystem system = new BackOfficeSystem("config.xml");
-		
-		system.addCustomer(new Customer("5", "555", "Muster Muster", "muster@gmail.com", "56789012"));
-		
+		BackOfficeSystem.initialize("config.xml");
+		BackOfficeSystem system = BackOfficeSystem.getSystem();
+		system.addCustomer(new Customer("5", "555", "Mustermann", "Muster", "muster@gmail.com", ""));
+		/*
 		system.addProduct(new Product("Produkt1", "productId1"));
 		system.addPlan( new Plan("1111", "Deluxe", 11.11,new Product("Produkt1","productId1"),"planId1"));
 		
@@ -181,17 +190,18 @@ public class BackOfficeSystem implements Billing {
 		
 		for(Invoice invoices: system.getInvoices()){
 			System.out.println(system.getCustomerByLocalId(invoices.getId()).getLastName()+"'s invoice");
-		}
+		}*/
 		
 		for (Customer customer : system.getCustomers()) {
-			System.out.println(customer.getLastName());
-			if (customer.getLastName().equals("Ornetsmueller Raphael")) {
-				CustomerReportSMSNotifier decorator = new CustomerReportSMSNotifier(customer);
-				decorator.send();
+			System.out.println(customer);
+			
+			CustomerReportNotifier notifier = customer;
+
+			if (customer.getPhone() != null && customer.getPhone().length() > 0 ) {
+				notifier = new CustomerReportSMSNotifier(customer);
 			}
-			else {
-				customer.send();
-			}
+			
+			notifier.send();
 		}
 	}
 

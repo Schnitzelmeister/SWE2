@@ -7,22 +7,25 @@ public class Customer implements Billing, CustomerReportNotifier {
 	private String localId;
 	private String remoteId;
 	private String lastName;
+	private String firstName;
 	private String email;
 	private String phone;
 	
-	public Customer(AbstractDataStorageFactory factory, String localId, String remoteId, String lastName, String email, String phone) {
+	public Customer(AbstractDataStorageFactory factory, String localId, String remoteId, String lastName, String firstName, String email, String phone) {
 		this.factory = factory;
 		this.localId = localId;
 		this.remoteId = remoteId;
 		this.lastName = lastName;
+		this.firstName = firstName;
 		this.email = email;
 		this.phone = phone;
 	}
 
-	public Customer(String localId, String remoteId, String lastName, String email, String phone) {
+	public Customer(String localId, String remoteId, String lastName, String firstName, String email, String phone) {
 		this.localId = localId;
 		this.remoteId = remoteId;
 		this.lastName = lastName;
+		this.firstName = firstName;
 		this.email = email;
 		this.phone = phone;
 	}
@@ -54,6 +57,14 @@ public class Customer implements Billing, CustomerReportNotifier {
 	
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
+	}
+
+	public String getFirstName() {
+		return firstName;
+	}
+	
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
 	}
 
 	public String getEmail() {
@@ -96,4 +107,10 @@ public class Customer implements Billing, CustomerReportNotifier {
 	public void send() {
 		//send email
 		System.out.println("send Email to " + this.email);
-	}}
+	}
+
+	@Override
+	public String toString() {
+		return this.lastName + " " + this.firstName + " (localId=" + this.localId + ", remoteId=" + this.remoteId + ")";
+	}
+}

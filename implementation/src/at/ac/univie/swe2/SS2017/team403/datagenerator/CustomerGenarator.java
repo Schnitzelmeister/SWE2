@@ -10,20 +10,20 @@ import at.ac.univie.swe2.SS2017.team403.model.Iterator;
 import at.ac.univie.swe2.SS2017.team403.model.Subscription;
 
 public class CustomerGenarator implements CustomerStorage {
-	TestDataStorageFactory factory;
-	List<Customer> storage;
+	private TestDataStorageFactory factory;
+	private List<Customer> storage;
 	
 	public CustomerGenarator(TestDataStorageFactory factory) {
 		this.factory = factory;
 		storage = new ArrayList<Customer>();
-		storage.add( new Customer(factory, "1","111","Zinatulin Ayrat", "ayrat@gmail.com", "12345678") );
-		storage.add( new Customer(factory, "2","222","Pektas Tarik", "tarik@gmail.com", "23456789") );
-		storage.add( new Customer(factory, "3","333","Ornetsmueller Raphael", "raphael@gmail.com", "34567890") );
-		storage.add( new Customer(factory, "4","444","Zvonek Jakub", "jakub@gmail.com", "45678901") );
+		storage.add( new Customer(factory, "1","111","Zinatulin", "Ayrat", "ayrat@gmail.com", "12345678") );
+		storage.add( new Customer(factory, "2","222","Pektas", "Tarik", "tarik@gmail.com", "23456789") );
+		storage.add( new Customer(factory, "3","333","Ornetsmueller", "Raphael", "raphael@gmail.com", "34567890") );
+		storage.add( new Customer(factory, "4","444","Zvonek", "Jakub", "jakub@gmail.com", "45678901") );
 	}
 
 	@Override
-	public Customer[] getCustomers() {
+	public Customer[] getCustomers() throws IllegalArgumentException {
 		return storage.toArray( new Customer[storage.size()] );
 	}
 
@@ -48,7 +48,7 @@ public class CustomerGenarator implements CustomerStorage {
 	}
 
 	@Override
-	public void addCustomer(Customer customer) throws IllegalArgumentException {
+	public String addCustomer(Customer customer) throws IllegalArgumentException {
 		for (Customer c : storage) {
 			if (c.getLocalId().equals(customer.getLocalId()) || c.getRemoteId().equals(customer.getRemoteId())) {
 				throw new IllegalArgumentException("The User with localId=" + customer.getLocalId() + " and remoteId=" + customer.getRemoteId() + " exist");
@@ -56,6 +56,7 @@ public class CustomerGenarator implements CustomerStorage {
 		}
 		customer.setFactory(factory);
 		storage.add(customer);
+		return customer.getLocalId();
 	}
 
 	//inner class, which are used for Iterator Pattern
