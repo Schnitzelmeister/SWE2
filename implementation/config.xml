@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <settings>
-    <APIKey>2581196eddabc13c1b8d3fb81355ffebioGGBOkSTaljnnDlJRuEtM678zR5Y1bM</APIKey>
-    <APIEmail>RaphiOrni@hotmail.com</APIEmail>
-    
+    <APIKey>8797bb55f25b76bf6912e20b7f252664ukBtlpkhW261pH3yctQIXbvmjJQ1geWx</APIKey>
+    <APIEmail>bat0@inbox.ru</APIEmail>
 <!-- productive test -->
-    <Mode>test</Mode>
+    <Mode>productive</Mode>
 </settings>

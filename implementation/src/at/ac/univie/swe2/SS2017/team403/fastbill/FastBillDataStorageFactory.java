@@ -1,6 +1,7 @@
 package at.ac.univie.swe2.SS2017.team403.fastbill;
 
 import at.ac.univie.swe2.SS2017.team403.datagenerator.AbstractDataStorageFactory;
+import at.ac.univie.swe2.SS2017.team403.datagenerator.CustomerGenarator;
 import at.ac.univie.swe2.SS2017.team403.model.CustomerStorage;
 import at.ac.univie.swe2.SS2017.team403.model.InvoiceStorage;
 import at.ac.univie.swe2.SS2017.team403.model.PlanStorage;
@@ -9,10 +10,11 @@ import at.ac.univie.swe2.SS2017.team403.model.SubscriptionStorage;
 
 public class FastBillDataStorageFactory implements AbstractDataStorageFactory {
 
+	private FastBillCustomerStorage customerStorage = new FastBillCustomerStorage(this);
+
 	@Override
 	public CustomerStorage CreateCustomerStorage() {
-		// TODO Auto-generated method stub
-		return null;
+		return customerStorage;
 	}
 
 	@Override
