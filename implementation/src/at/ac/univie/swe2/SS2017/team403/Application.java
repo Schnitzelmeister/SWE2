@@ -12,6 +12,9 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
+
+import at.ac.univie.swe2.SS2017.team403.model.Customer;
+
 import javax.swing.JRadioButton;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
@@ -35,7 +38,6 @@ public class Application {
 	private JTextField textField_2;
 	private JTextField textField_3;
 	private JTextField textField_4;
-	private JTextField textField_5;
 	private JTextField textField_6;
 
 	/**
@@ -146,15 +148,31 @@ public class Application {
 		panel.add(textField_4);
 		
 		JButton btnNewButton_1 = new JButton("Neuen Kunden erstellen");
+		btnNewButton_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				 
+				BackOfficeSystem sys = null;// BackOfficeSystem.getSystem();;
+				sys.addCustomer(new Customer("","","","","") );
+				
+			}
+		});
 		btnNewButton_1.setBounds(474, 282, 146, 23);
 		panel.add(btnNewButton_1);
 		
+		JPanel panel_3 = new JPanel();
+		tabbedPane_2.addTab("Rechnungen ausstellen", null, panel_3, null);
+		panel_3.setLayout(null);
+		
+		JButton btnRechnungenAusstellen = new JButton("Rechnungen ausstellen");
+		btnRechnungenAusstellen.setBounds(437, 282, 183, 23);
+		panel_3.add(btnRechnungenAusstellen);
+		
 		JPanel panel_1 = new JPanel();
-		tabbedPane_2.addTab("Rechnung ausstellen", null, panel_1, null);
+		tabbedPane_2.addTab("Subscription hinzufuegen", null, panel_1, null);
 		panel_1.setLayout(null);
 		
-		JButton btnRechnungAusstellen = new JButton("Rechnung ausstellen");
-		btnRechnungAusstellen.setBounds(489, 282, 131, 23);
+		JButton btnRechnungAusstellen = new JButton("Subscription ausstellen");
+		btnRechnungAusstellen.setBounds(466, 282, 154, 23);
 		panel_1.add(btnRechnungAusstellen);
 		
 		JLabel label = new JLabel("Kunden aus\u00E4hlen:");
@@ -175,34 +193,24 @@ public class Application {
 		spinner.setBounds(139, 46, 123, 20);
 		panel_1.add(spinner);
 		
-		JLabel lblMenge = new JLabel("Menge");
-		lblMenge.setFont(new Font("Tahoma", Font.PLAIN, 12));
-		lblMenge.setBounds(10, 77, 123, 22);
-		panel_1.add(lblMenge);
-		
-		JSpinner spinner_1 = new JSpinner();
-		spinner_1.setBounds(139, 79, 123, 20);
-		panel_1.add(spinner_1);
-		
-		JLabel lblArtikelnummer = new JLabel("Artikelnummer:");
+		JLabel lblArtikelnummer = new JLabel("Plan/Produkt");
 		lblArtikelnummer.setFont(new Font("Tahoma", Font.PLAIN, 12));
-		lblArtikelnummer.setBounds(10, 110, 123, 22);
+		lblArtikelnummer.setBounds(10, 77, 123, 22);
 		panel_1.add(lblArtikelnummer);
-		
-		textField_5 = new JTextField();
-		textField_5.setBounds(139, 110, 123, 22);
-		panel_1.add(textField_5);
-		textField_5.setColumns(10);
 		
 		JLabel lblEinzelpreis = new JLabel("Einzelpreis:");
 		lblEinzelpreis.setFont(new Font("Tahoma", Font.PLAIN, 12));
-		lblEinzelpreis.setBounds(10, 143, 123, 22);
+		lblEinzelpreis.setBounds(10, 110, 123, 22);
 		panel_1.add(lblEinzelpreis);
 		
 		textField_6 = new JTextField();
 		textField_6.setColumns(10);
-		textField_6.setBounds(139, 143, 123, 22);
+		textField_6.setBounds(139, 111, 123, 22);
 		panel_1.add(textField_6);
+		
+		Choice choice_2 = new Choice();
+		choice_2.setBounds(139, 79, 123, 20);
+		panel_1.add(choice_2);
 		
 		JPanel panel_2 = new JPanel();
 		tabbedPane_2.addTab("Offene Rechnungen", null, panel_2, null);
@@ -230,6 +238,14 @@ public class Application {
 		lblListeOffenerRechnungen.setBounds(250, 11, 185, 22);
 		panel_2.add(lblListeOffenerRechnungen);
 		
+		JPanel panel_4 = new JPanel();
+		tabbedPane_2.addTab("Alle Kunden", null, panel_4, null);
+		panel_4.setLayout(null);
+		
+		JList list_3 = new JList();
+		list_3.setBounds(10, 311, 610, -299);
+		panel_4.add(list_3);
+		
 		JPanel productsPanel = new JPanel();
 		tabbedPane.addTab("Produkte", null, productsPanel, null);
 		productsPanel.setLayout(null);
@@ -238,64 +254,10 @@ public class Application {
 		tabbedPane_1.setBounds(10, 11, 635, 344);
 		productsPanel.add(tabbedPane_1);
 		
-		JPanel product1 = new JPanel();
-		tabbedPane_1.addTab("Basic", null, product1, null);
-		product1.setLayout(null);
-		
-		JRadioButton rdbtnNewRadioButton = new JRadioButton("Monatsabbonnoment (10 Euro)");
-		rdbtnNewRadioButton.setBounds(6, 8, 185, 23);
-		product1.add(rdbtnNewRadioButton);
-		
-		JRadioButton rdbtnPlan = new JRadioButton("Jahresabbonnoment (100 Euro)");
-		rdbtnPlan.setBounds(6, 33, 185, 23);
-		product1.add(rdbtnPlan);
-		
-		JButton btnAuswahlBesttigen = new JButton("Auswahl best\u00E4tigen");
-		btnAuswahlBesttigen.setBounds(493, 282, 127, 23);
-		product1.add(btnAuswahlBesttigen);
-		
-		JPanel product2 = new JPanel();
-		tabbedPane_1.addTab("Standard", null, product2, null);
-		product2.setLayout(null);
-		
-		JRadioButton rdbtnPlan_1 = new JRadioButton("Monatsabbonnoment (10 Euro)");
-		rdbtnPlan_1.setBounds(6, 7, 175, 23);
-		product2.add(rdbtnPlan_1);
-		
-		JRadioButton rdbtnPlan_2 = new JRadioButton("Jahresabbonnoment (100 Euro)");
-		rdbtnPlan_2.setBounds(6, 33, 188, 23);
-		product2.add(rdbtnPlan_2);
-		
-		JButton btnAuswahlBesttigen_1 = new JButton("Auswahl best\u00E4tigen");
-		btnAuswahlBesttigen_1.setBounds(493, 282, 127, 23);
-		product2.add(btnAuswahlBesttigen_1);
-		
-		JPanel product3 = new JPanel();
-		tabbedPane_1.addTab("Premium", null, product3, null);
-		product3.setLayout(null);
-		
-		JRadioButton rdbtnPlan_3 = new JRadioButton("Monatsabbonnoment (10 Euro)");
-		rdbtnPlan_3.setBounds(6, 7, 175, 23);
-		product3.add(rdbtnPlan_3);
-		
-		JRadioButton rdbtnPlan_4 = new JRadioButton("Jahresabbonnoment (100 Euro)");
-		rdbtnPlan_4.setBounds(6, 33, 190, 23);
-		product3.add(rdbtnPlan_4);
-		
-		JButton btnNewButton = new JButton("Auswahl best\u00E4tigen");
-		btnNewButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-			}
-		});
-		btnNewButton.setBounds(493, 282, 127, 23);
-		product3.add(btnNewButton);
-		
-		JPanel lifecycle = new JPanel();
-		tabbedPane_1.addTab("Verlauf", null, lifecycle, null);
-		lifecycle.setLayout(null);
-		
 		JList list = new JList();
-		list.setBounds(10, 307, 610, -295);
-		lifecycle.add(list);
+		tabbedPane_1.addTab("Produkte", null, list, null);
+		
+		JList list_2 = new JList();
+		tabbedPane_1.addTab("Pl\u00E4ne", null, list_2, null);
 	}
 }
