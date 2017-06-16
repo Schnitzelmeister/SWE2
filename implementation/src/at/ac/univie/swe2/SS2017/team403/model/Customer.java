@@ -9,22 +9,25 @@ public class Customer implements Billing, CustomerReportNotifier {
 	private String lastName;
 	private String email;
 	private String phone;
+	private String organization; // Required according to Fastbill API
 	
-	public Customer(AbstractDataStorageFactory factory, String localId, String remoteId, String lastName, String email, String phone) {
+	public Customer(AbstractDataStorageFactory factory, String localId, String remoteId, String lastName, String email, String phone, String organization) {
 		this.factory = factory;
 		this.localId = localId;
 		this.remoteId = remoteId;
 		this.lastName = lastName;
 		this.email = email;
 		this.phone = phone;
+		this.organization = organization;
 	}
 
-	public Customer(String localId, String remoteId, String lastName, String email, String phone) {
+	public Customer(String localId, String remoteId, String lastName, String email, String phone, String organization) {
 		this.localId = localId;
 		this.remoteId = remoteId;
 		this.lastName = lastName;
 		this.email = email;
 		this.phone = phone;
+		this.organization = organization;
 	}
 	
 	public void setFactory(AbstractDataStorageFactory factory) {
@@ -70,6 +73,14 @@ public class Customer implements Billing, CustomerReportNotifier {
 	
 	public void setPhone(String phone) {
 		this.phone = phone;
+	}
+	
+	public void setOrganization(String organization){
+		this.organization = organization;
+	}
+	
+	public String getOrganization(){
+		return organization;
 	}
 	
 	public Subscription[] getSubscriptions() {
