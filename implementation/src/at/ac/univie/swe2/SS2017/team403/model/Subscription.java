@@ -3,7 +3,12 @@ package at.ac.univie.swe2.SS2017.team403.model;
 import java.util.List;
 
 import at.ac.univie.swe2.SS2017.team403.datagenerator.AbstractDataStorageFactory;
-
+/**
+ * 
+ * this class contains the information about a subscription.
+ * 
+ *
+ */
 public class Subscription implements Billing {
 	private AbstractDataStorageFactory factory = null;
 	private String name;
@@ -35,7 +40,10 @@ public class Subscription implements Billing {
 		this.localId = localId;
 		this.subscriptionId = subscriptionId;
 	}
-	
+	/**
+	 * the method for setting the factory of this specific subscription
+	 * @param factory a factory 
+	 */
 	public void setFactory(AbstractDataStorageFactory factory) {
 		this.factory = factory;
 	}

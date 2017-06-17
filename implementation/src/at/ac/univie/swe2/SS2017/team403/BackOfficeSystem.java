@@ -19,7 +19,11 @@ import at.ac.univie.swe2.SS2017.team403.model.Payment;
 import at.ac.univie.swe2.SS2017.team403.model.Plan;
 import at.ac.univie.swe2.SS2017.team403.model.Product;
 import at.ac.univie.swe2.SS2017.team403.model.Subscription;
-
+/**
+ * 
+ * The class BackOfficeSystem 
+ *
+ */
 public class BackOfficeSystem implements Billing {
 	
 	public static final String FastBillWSURL = "https://my.fastbill.com/api/1.0/api.php";
@@ -67,6 +71,11 @@ public class BackOfficeSystem implements Billing {
 		return !productive;
 	}
 	
+	/**
+	 * The method takes a String as a input which represents the name of an XML-File. 
+	 * The XML-File contains the Information about configuration of an FastBill-API(API key, API email..) 
+	 * @param xmlFileName a String, which contains the name of the xml file to initialize.
+	 */
 	public static void initialize(String xmlFileName) {
 		//read xml
 		try {
@@ -176,6 +185,7 @@ public class BackOfficeSystem implements Billing {
 		BackOfficeSystem.initialize("config.xml");
 		BackOfficeSystem system = BackOfficeSystem.getSystem();
 		system.addCustomer(new Customer("5", "555", "Mustermann", "Muster", "muster@gmail.com", ""));
+		system.addCustomer(new Customer("6", "666", "Tesperson", "Test", "testperson@gmail.com", ""));
 		/*
 		system.addProduct(new Product("Produkt1", "productId1"));
 		system.addPlan( new Plan("1111", "Deluxe", 11.11,new Product("Produkt1","productId1"),"planId1"));

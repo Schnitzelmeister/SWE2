@@ -77,9 +77,6 @@ public class FastBillInvoiceStorage implements InvoiceStorage {
 						"Failed to call Web Service : HTTP error code : " + connection.getResponseCode());
 			//TODO den Rest implementiere ich heute noch ...
 			
-		} catch (ParseException e) {
-			e.printStackTrace();
-			throw new IllegalArgumentException("ParseException: " + e.getMessage());
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 			throw new IllegalArgumentException("MalformedURLException: " + e.getMessage());
