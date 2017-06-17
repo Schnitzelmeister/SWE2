@@ -12,12 +12,18 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
+import javax.swing.event.ChangeEvent;
 
+import javax.swing.event.*;
+
+import at.ac.univie.swe2.SS2017.team403.datagenerator.*;
 import at.ac.univie.swe2.SS2017.team403.model.Customer;
+import at.ac.univie.swe2.SS2017.team403.model.CustomerStorage;
 
 import javax.swing.JRadioButton;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
+import java.util.Random;
 import java.awt.event.ActionEvent;
 import javax.swing.JList;
 import javax.swing.JTable;
@@ -33,12 +39,12 @@ import javax.swing.JSpinner;
 public class Application {
 
 	private JFrame frame;
-	private JTextField textField;
-	private JTextField textField_1;
-	private JTextField textField_2;
-	private JTextField textField_3;
-	private JTextField textField_4;
+	private JTextField textFieldCustomerEmail;
+	private JTextField textFieldCustomerFirstName;
+	private JTextField textFieldCustomerLastName;
+	private JTextField textFieldCustomerPhoneNr;
 	private JTextField textField_6;
+	private JTextField textFieldSubscriptionBillingDate;
 
 	/**
 	 * Launch the application.
@@ -47,6 +53,7 @@ public class Application {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
+					BackOfficeSystem.initialize("config.xml");
 					Application window = new Application();
 					window.frame.setVisible(true);
 				} catch (Exception e) {
@@ -67,6 +74,7 @@ public class Application {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
+		BackOfficeSystem sys = BackOfficeSystem.getSystem();
 		frame = new JFrame();
 		frame.setBounds(100, 100, 755, 473);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -102,15 +110,15 @@ public class Application {
 		lblNewLabel.setBounds(10, 11, 96, 22);
 		panel.add(lblNewLabel);
 
-		textField = new JTextField();
-		textField.setBounds(116, 12, 146, 20);
-		panel.add(textField);
-		textField.setColumns(10);
+		textFieldCustomerEmail = new JTextField();
+		textFieldCustomerEmail.setBounds(116, 12, 146, 20);
+		panel.add(textFieldCustomerEmail);
+		textFieldCustomerEmail.setColumns(10);
 
-		textField_1 = new JTextField();
-		textField_1.setColumns(10);
-		textField_1.setBounds(116, 43, 146, 20);
-		panel.add(textField_1);
+		textFieldCustomerFirstName = new JTextField();
+		textFieldCustomerFirstName.setColumns(10);
+		textFieldCustomerFirstName.setBounds(116, 43, 146, 20);
+		panel.add(textFieldCustomerFirstName);
 
 		JLabel lblVorname = new JLabel("Vorname:");
 		lblVorname.setFont(new Font("Tahoma", Font.PLAIN, 12));
@@ -122,38 +130,35 @@ public class Application {
 		lblNachname.setBounds(10, 74, 96, 22);
 		panel.add(lblNachname);
 
-		JLabel lblFirma = new JLabel("Firma:");
-		lblFirma.setFont(new Font("Tahoma", Font.PLAIN, 12));
-		lblFirma.setBounds(10, 107, 96, 22);
-		panel.add(lblFirma);
-
-		textField_2 = new JTextField();
-		textField_2.setColumns(10);
-		textField_2.setBounds(116, 76, 146, 20);
-		panel.add(textField_2);
-
-		textField_3 = new JTextField();
-		textField_3.setColumns(10);
-		textField_3.setBounds(116, 109, 146, 20);
-		panel.add(textField_3);
+		textFieldCustomerLastName = new JTextField();
+		textFieldCustomerLastName.setColumns(10);
+		textFieldCustomerLastName.setBounds(116, 76, 146, 20);
+		panel.add(textFieldCustomerLastName);
 
 		JLabel lblTelefonnummer = new JLabel("Telefonnummer:");
 		lblTelefonnummer.setFont(new Font("Tahoma", Font.PLAIN, 12));
-		lblTelefonnummer.setBounds(10, 140, 96, 22);
+		lblTelefonnummer.setBounds(10, 107, 96, 22);
 		panel.add(lblTelefonnummer);
 
-		textField_4 = new JTextField();
-		textField_4.setColumns(10);
-		textField_4.setBounds(116, 140, 146, 20);
-		panel.add(textField_4);
+		textFieldCustomerPhoneNr = new JTextField();
+		textFieldCustomerPhoneNr.setColumns(10);
+		textFieldCustomerPhoneNr.setBounds(116, 109, 146, 20);
+		panel.add(textFieldCustomerPhoneNr);
 
 		JButton btnNewButton_1 = new JButton("Neuen Kunden erstellen");
 		btnNewButton_1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+				Random randomGenerator = new Random();
+				Integer localId = randomGenerator.nextInt(10000);
+				Integer remoteId = randomGenerator.nextInt(10000);
+				String phoneNumber = textFieldCustomerPhoneNr.getText();
+				String firstName = textFieldCustomerFirstName.getText();
+				String lastName = textFieldCustomerLastName.getText();
+				String email = textFieldCustomerEmail.getText();
 
-				BackOfficeSystem sys = null;// BackOfficeSystem.getSystem();;
-				// sys.addCustomer(new Customer("","","","","") );
-
+				sys.addCustomer(
+						new Customer(localId.toString(), remoteId.toString(), lastName, firstName, email, phoneNumber));
+				System.out.println("The customer has been added");
 			}
 		});
 		btnNewButton_1.setBounds(533, 282, 146, 23);
@@ -180,20 +185,17 @@ public class Application {
 		label.setBounds(10, 11, 123, 22);
 		panel_1.add(label);
 
-		Choice choice_1 = new Choice();
-		choice_1.setBounds(139, 13, 123, 22);
-		panel_1.add(choice_1);
+		Choice choiceCustomerForSubscription = new Choice();
+		choiceCustomerForSubscription.setBounds(139, 13, 123, 22);
+		panel_1.add(choiceCustomerForSubscription);
 
 		JLabel lblRechnungsdatum = new JLabel("Rechnungsdatum:");
 		lblRechnungsdatum.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		lblRechnungsdatum.setBounds(10, 44, 123, 22);
 		panel_1.add(lblRechnungsdatum);
 
-		JSpinner spinner = new JSpinner();
-		spinner.setBounds(139, 46, 123, 20);
-		panel_1.add(spinner);
-
-		JLabel lblArtikelnummer = new JLabel("Plan/Produkt");
+		JLabel lblArtikelnummer = new JLabel("Produkt/Plan");
+		lblArtikelnummer.setToolTipText("\r\n");
 		lblArtikelnummer.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		lblArtikelnummer.setBounds(10, 77, 123, 22);
 		panel_1.add(lblArtikelnummer);
@@ -204,6 +206,7 @@ public class Application {
 		panel_1.add(lblEinzelpreis);
 
 		textField_6 = new JTextField();
+		textField_6.setEnabled(false);
 		textField_6.setColumns(10);
 		textField_6.setBounds(139, 111, 123, 22);
 		panel_1.add(textField_6);
@@ -211,6 +214,11 @@ public class Application {
 		Choice choice_2 = new Choice();
 		choice_2.setBounds(139, 79, 123, 20);
 		panel_1.add(choice_2);
+
+		textFieldSubscriptionBillingDate = new JTextField();
+		textFieldSubscriptionBillingDate.setColumns(10);
+		textFieldSubscriptionBillingDate.setBounds(139, 44, 123, 22);
+		panel_1.add(textFieldSubscriptionBillingDate);
 
 		JPanel panel_2 = new JPanel();
 		tabbedPane_2.addTab("Offene Rechnungen", null, panel_2, null);
@@ -238,8 +246,16 @@ public class Application {
 		lblListeOffenerRechnungen.setBounds(250, 11, 185, 22);
 		panel_2.add(lblListeOffenerRechnungen);
 
-		JList list_3 = new JList();
-		tabbedPane_2.addTab("Alle Kunden", null, list_3, null);
+		JList listAllCustomers = new JList();
+		tabbedPane_2.addTab("Alle Kunden", null, listAllCustomers, null);
+
+		tabbedPane_2.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				if (tabbedPane_2.getSelectedIndex() == 4) {
+					listAllCustomers.setListData(sys.getCustomers());
+				}
+			}
+		});
 
 		JPanel productsPanel = new JPanel();
 		tabbedPane.addTab("Produkte", null, productsPanel, null);

@@ -85,7 +85,7 @@ public class Customer implements Billing, CustomerReportNotifier {
 	}
 	
 	public Subscription[] getSubscriptions() {
-		return factory.CreateSubscriptionStorage().getSubscriptionsByCustomer(this);
+		return factory.createSubscriptionStorage().getSubscriptionsByCustomer(this);
 	}
 	
 	@Override

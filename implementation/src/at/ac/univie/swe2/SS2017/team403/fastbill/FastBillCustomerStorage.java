@@ -28,119 +28,124 @@ import at.ac.univie.swe2.SS2017.team403.model.Subscription;
 public class FastBillCustomerStorage implements CustomerStorage {
 
 	private FastBillDataStorageFactory factory;
-	
+
 	public FastBillCustomerStorage(FastBillDataStorageFactory factory) {
 		this.factory = factory;
 	}
-	
+
 	private enum QueryKind {
 		GetAllCustomers, GetCustomerByRemoteId, GetCustomerByLocalId, CreateCustomer
 	}
-	
+
 	private Customer[] sentQuery(QueryKind queryKind, Object param) throws IllegalArgumentException {
 		try {
-            URL url = new URL(BackOfficeSystem.FastBillWSURL);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setDoOutput(true);
-            connection.setRequestMethod("POST");
-            connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-            
-            String encoded = Base64.getEncoder().encodeToString((BackOfficeSystem.getSystem().getAPIEmail()+":"+BackOfficeSystem.getSystem().getAPIKey()).getBytes(StandardCharsets.UTF_8));
-            connection.setRequestProperty("Authorization", "Basic "+encoded);
-            
-            OutputStream os = connection.getOutputStream();
-            StringBuilder query = new StringBuilder("{");
-            
-            switch (queryKind) {
-            case GetAllCustomers:
-                query.append("\"SERVICE\":\"customer.get\",");
-                query.append("\"FILTER\":{}");
-            	break;
-            case GetCustomerByRemoteId:
-                query.append("\"SERVICE\":\"customer.get\",");
-                query.append("\"FILTER\":{\"CUSTOMER_ID\":\"" + param.toString() + "\"}");
-            	break;
-            case GetCustomerByLocalId:
-                query.append("\"SERVICE\":\"customer.get\",");
-                query.append("\"FILTER\":{\"CUSTOMER_NUMBER\":\"" + param.toString() + "\"}");
-            	break;
-            case CreateCustomer:
-            	Customer newCustomer = (Customer)param;
-                query.append("\"SERVICE\":\"customer.create\",");
-                query.append("\"DATA\":{");
-                query.append("\"CUSTOMER_TYPE\":\"consumer\",");
-                query.append("\"CUSTOMER_NUMBER\":\"" + newCustomer.getLocalId()+"\",");
-                query.append("\"LAST_NAME\":\"" + newCustomer.getLastName()+"\",");
-                query.append("\"FIRST_NAME\":\"" + newCustomer.getFirstName()+"\",");
-                query.append("\"EMAIL\":\"" + newCustomer.getEmail()+"\",");
-                query.append("\"PHONE\":\"" + newCustomer.getPhone() + "\"");
-                query.append("}");
-            	break;
-            default:
-                throw new IllegalArgumentException("at.ac.univie.swe2.SS2017.team403.fastbill.FastBillCustomerStorage queryKind=" + queryKind + " not implemented");
-            }
-            
-            query.append("}");
-            
-            os.write(query.toString().getBytes("UTF-8"));
-            os.close();
+			URL url = new URL(BackOfficeSystem.FastBillWSURL);
+			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+			connection.setDoOutput(true);
+			connection.setRequestMethod("POST");
+			connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
 
-            if (connection.getResponseCode() != 200)
-                throw new IllegalArgumentException("Failed to call Web Service : HTTP error code : " + connection.getResponseCode());
+			String encoded = Base64.getEncoder().encodeToString(
+					(BackOfficeSystem.getSystem().getAPIEmail() + ":" + BackOfficeSystem.getSystem().getAPIKey())
+							.getBytes(StandardCharsets.UTF_8));
+			connection.setRequestProperty("Authorization", "Basic " + encoded);
 
-            BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            // get Data from Server
-            String output;
-            StringBuilder outputB = new StringBuilder();
-            while ((output = br.readLine()) != null)
-                outputB.append(output);
-            connection.disconnect();
+			OutputStream os = connection.getOutputStream();
+			StringBuilder query = new StringBuilder("{");
 
-            //System.out.println(outputB);
-            
-            List<Customer> ret = new ArrayList<Customer>();
-            
-            JSONParser parser = new JSONParser();
-            JSONObject json = (JSONObject)parser.parse(outputB.toString());
-            
-            if (((JSONObject)json.get("RESPONSE")).get("ERRORS") != null)
-                throw new IllegalArgumentException("FastBill error: " + ((JSONObject)json.get("RESPONSE")).get("ERRORS").toString() );
-            
-            if (queryKind == QueryKind.GetAllCustomers || queryKind == QueryKind.GetCustomerByRemoteId || queryKind == QueryKind.GetCustomerByLocalId)
-            {
-	            JSONArray customers = (JSONArray) ((JSONObject)json.get("RESPONSE")).get("CUSTOMERS");
-	            for (Object customer : customers)
-	            {
-	                String remoteId = (String) ((JSONObject)customer).get("CUSTOMER_ID");
-	                String localId = (String) ((JSONObject)customer).get("CUSTOMER_NUMBER");
-	                String lastName = (String) ((JSONObject)customer).get("LAST_NAME");
-	                String firstName = (String) ((JSONObject)customer).get("FIRST_NAME");
-	                String email = (String) ((JSONObject)customer).get("EMAIL");
-	                String phone = (String) ((JSONObject)customer).get("PHONE");
-	
-	                ret.add( new Customer(factory, localId, remoteId, lastName, firstName, email, phone) );
-	            }
-            }
-            else if (queryKind == QueryKind.CreateCustomer) {
-            	String customerId = ((JSONObject)json.get("RESPONSE")).get("CUSTOMER_ID").toString();
-            	Customer newCustomer = (Customer)param;
-            	
-            	ret.add( new Customer(factory, newCustomer.getLocalId(), customerId, newCustomer.getLastName(), newCustomer.getFirstName(), newCustomer.getEmail(), newCustomer.getPhone()) );
-            }
-            return ret.toArray( new Customer[ret.size()] );
+			switch (queryKind) {
+			case GetAllCustomers:
+				query.append("\"SERVICE\":\"customer.get\",");
+				query.append("\"FILTER\":{}");
+				break;
+			case GetCustomerByRemoteId:
+				query.append("\"SERVICE\":\"customer.get\",");
+				query.append("\"FILTER\":{\"CUSTOMER_ID\":\"" + param.toString() + "\"}");
+				break;
+			case GetCustomerByLocalId:
+				query.append("\"SERVICE\":\"customer.get\",");
+				query.append("\"FILTER\":{\"CUSTOMER_NUMBER\":\"" + param.toString() + "\"}");
+				break;
+			case CreateCustomer:
+				Customer newCustomer = (Customer) param;
+				query.append("\"SERVICE\":\"customer.create\",");
+				query.append("\"DATA\":{");
+				query.append("\"CUSTOMER_TYPE\":\"consumer\",");
+				query.append("\"CUSTOMER_NUMBER\":\"" + newCustomer.getLocalId() + "\",");
+				query.append("\"LAST_NAME\":\"" + newCustomer.getLastName() + "\",");
+				query.append("\"FIRST_NAME\":\"" + newCustomer.getFirstName() + "\",");
+				query.append("\"EMAIL\":\"" + newCustomer.getEmail() + "\",");
+				query.append("\"PHONE\":\"" + newCustomer.getPhone() + "\"");
+				query.append("}");
+				break;
+			default:
+				throw new IllegalArgumentException(
+						"at.ac.univie.swe2.SS2017.team403.fastbill.FastBillCustomerStorage queryKind=" + queryKind
+								+ " not implemented");
+			}
 
-        } catch (ParseException e) {
-            e.printStackTrace();
-            throw new IllegalArgumentException("ParseException: " + e.getMessage());
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-            throw new IllegalArgumentException("MalformedURLException: " + e.getMessage());
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new IllegalArgumentException("IOException: " + e.getMessage());
-        }
+			query.append("}");
+
+			os.write(query.toString().getBytes("UTF-8"));
+			os.close();
+
+			if (connection.getResponseCode() != 200)
+				throw new IllegalArgumentException(
+						"Failed to call Web Service : HTTP error code : " + connection.getResponseCode());
+
+			BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+			// get Data from Server
+			String output;
+			StringBuilder outputB = new StringBuilder();
+			while ((output = br.readLine()) != null)
+				outputB.append(output);
+			connection.disconnect();
+
+			// System.out.println(outputB);
+
+			List<Customer> ret = new ArrayList<Customer>();
+
+			JSONParser parser = new JSONParser();
+			JSONObject json = (JSONObject) parser.parse(outputB.toString());
+
+			if (((JSONObject) json.get("RESPONSE")).get("ERRORS") != null)
+				throw new IllegalArgumentException(
+						"FastBill error: " + ((JSONObject) json.get("RESPONSE")).get("ERRORS").toString());
+
+			if (queryKind == QueryKind.GetAllCustomers || queryKind == QueryKind.GetCustomerByRemoteId
+					|| queryKind == QueryKind.GetCustomerByLocalId) {
+				JSONArray customers = (JSONArray) ((JSONObject) json.get("RESPONSE")).get("CUSTOMERS");
+				for (Object customer : customers) {
+					String remoteId = (String) ((JSONObject) customer).get("CUSTOMER_ID");
+					String localId = (String) ((JSONObject) customer).get("CUSTOMER_NUMBER");
+					String lastName = (String) ((JSONObject) customer).get("LAST_NAME");
+					String firstName = (String) ((JSONObject) customer).get("FIRST_NAME");
+					String email = (String) ((JSONObject) customer).get("EMAIL");
+					String phone = (String) ((JSONObject) customer).get("PHONE");
+
+					ret.add(new Customer(factory, localId, remoteId, lastName, firstName, email, phone));
+				}
+			} else if (queryKind == QueryKind.CreateCustomer) {
+				String customerId = ((JSONObject) json.get("RESPONSE")).get("CUSTOMER_ID").toString();
+				Customer newCustomer = (Customer) param;
+
+				ret.add(new Customer(factory, newCustomer.getLocalId(), customerId, newCustomer.getLastName(),
+						newCustomer.getFirstName(), newCustomer.getEmail(), newCustomer.getPhone()));
+			}
+			return ret.toArray(new Customer[ret.size()]);
+
+		} catch (ParseException e) {
+			e.printStackTrace();
+			throw new IllegalArgumentException("ParseException: " + e.getMessage());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+			throw new IllegalArgumentException("MalformedURLException: " + e.getMessage());
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new IllegalArgumentException("IOException: " + e.getMessage());
+		}
 	}
-	
+
 	@Override
 	public Customer[] getCustomers() throws IllegalArgumentException {
 		return sentQuery(QueryKind.GetAllCustomers, null);
@@ -172,28 +177,28 @@ public class FastBillCustomerStorage implements CustomerStorage {
 		return result.getRemoteId();
 	}
 
-	//inner class, which are used for Iterator Pattern
+	// inner class, which are used for Iterator Pattern
 	private class AllCustomerIterator implements Iterator<Customer> {
 		private List<Customer> instanceStorage;
 		private int index = 0;
-		
+
 		AllCustomerIterator() {
-			instanceStorage = new ArrayList<Customer>( Arrays.asList(getCustomers()) );
+			instanceStorage = new ArrayList<Customer>(Arrays.asList(getCustomers()));
 		}
-		
+
 		@Override
 		public boolean hasNext() {
 			return (index < instanceStorage.size());
 		}
-		
+
 		@Override
 		public int count() {
 			return instanceStorage.size();
 		}
-		
+
 		@Override
 		public Customer next() {
-			if(this.hasNext()) {
+			if (this.hasNext()) {
 				return instanceStorage.get(index++);
 			} else {
 				return null;
@@ -201,18 +206,17 @@ public class FastBillCustomerStorage implements CustomerStorage {
 		}
 	}
 
-	//inner class, which are used for Iterator Pattern
+	// inner class, which are used for Iterator Pattern
 	private class DebtCustomerIterator implements Iterator<Customer> {
 		private List<Customer> debtStorage;
 		private int index = 0;
-		
+
 		DebtCustomerIterator() {
 			debtStorage = new ArrayList<Customer>();
 			for (Customer customer : getCustomers()) {
 				boolean hasDebt = false;
-			
-				search:
-				for (Subscription subscription : customer.getSubscriptions()) {
+
+				search: for (Subscription subscription : customer.getSubscriptions()) {
 					for (Invoice invoice : subscription.getInvoices()) {
 						if (invoice.isUnpaid()) {
 							hasDebt = true;
@@ -220,27 +224,26 @@ public class FastBillCustomerStorage implements CustomerStorage {
 						}
 					}
 				}
-				
-				if (hasDebt){
+
+				if (hasDebt) {
 					debtStorage.add(customer);
 				}
 			}
 		}
-		
-		
+
 		@Override
 		public boolean hasNext() {
 			return (index < debtStorage.size());
 		}
-		
+
 		@Override
 		public int count() {
 			return debtStorage.size();
 		}
-		
+
 		@Override
 		public Customer next() {
-			if(this.hasNext()){
+			if (this.hasNext()) {
 				return debtStorage.get(index++);
 			} else {
 				return null;

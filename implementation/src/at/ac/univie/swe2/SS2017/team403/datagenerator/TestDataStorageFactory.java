@@ -15,27 +15,27 @@ public class TestDataStorageFactory implements AbstractDataStorageFactory {
 	private SubscriptionGenerator subscriptionGenerator = new SubscriptionGenerator(this);
 	
 	@Override
-	public CustomerStorage CreateCustomerStorage() {
+	public CustomerStorage createCustomerStorage() {
 		return customerGenarator;
 	}
 
 	@Override
-	public InvoiceStorage CreateInvoiceStorage() {
+	public InvoiceStorage createInvoiceStorage() {
 		return invoiceGenerator;
 	}
 
 	@Override
-	public PlanStorage CreatePlanStorage() {
+	public PlanStorage createPlanStorage() {
 		return planGenerator;
 	}
 
 	@Override
-	public ProductStorage CreateProductStorage() {
+	public ProductStorage createProductStorage() {
 		return productGenerator;
 	}
 
 	@Override
-	public SubscriptionStorage CreateSubscriptionStorage() {
+	public SubscriptionStorage createSubscriptionStorage() {
 		return subscriptionGenerator;
 	}
 

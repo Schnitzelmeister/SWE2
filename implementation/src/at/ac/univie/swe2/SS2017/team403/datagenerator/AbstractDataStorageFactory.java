@@ -11,9 +11,9 @@ import at.ac.univie.swe2.SS2017.team403.model.SubscriptionStorage;
  * Abstract Factory Pattern
  */
 public interface AbstractDataStorageFactory {
-    public CustomerStorage CreateCustomerStorage();
-    public InvoiceStorage CreateInvoiceStorage();
-    public PlanStorage CreatePlanStorage();
-    public ProductStorage CreateProductStorage();
-    public SubscriptionStorage CreateSubscriptionStorage();
+    public CustomerStorage createCustomerStorage();
+    public InvoiceStorage createInvoiceStorage();
+    public PlanStorage createPlanStorage();
+    public ProductStorage createProductStorage();
+    public SubscriptionStorage createSubscriptionStorage();
 }

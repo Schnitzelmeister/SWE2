@@ -25,23 +25,23 @@ public class DataStorageProxy {
 	}
 	
 	public CustomerStorage getCustomerStorage() {
-		return factory.CreateCustomerStorage();
+		return factory.createCustomerStorage();
 	}
 	
 	public InvoiceStorage getInvoiceStorage() {
-		return factory.CreateInvoiceStorage();
+		return factory.createInvoiceStorage();
 	}
 	
 	public PlanStorage getPlanStorage() {
-		return factory.CreatePlanStorage();
+		return factory.createPlanStorage();
 	}
 	
 	public SubscriptionStorage getSubscriptionStorage() {
-		return factory.CreateSubscriptionStorage();
+		return factory.createSubscriptionStorage();
 	}
 	
 	public ProductStorage getProductStorage() {
-		return factory.CreateProductStorage();
+		return factory.createProductStorage();
 	}
 	
 }

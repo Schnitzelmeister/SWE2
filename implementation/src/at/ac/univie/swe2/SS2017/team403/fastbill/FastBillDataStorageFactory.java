@@ -13,30 +13,30 @@ public class FastBillDataStorageFactory implements AbstractDataStorageFactory {
 	private FastBillCustomerStorage customerStorage = new FastBillCustomerStorage(this);
 
 	@Override
-	public CustomerStorage CreateCustomerStorage() {
+	public CustomerStorage createCustomerStorage() {
 		return customerStorage;
 	}
 
 	@Override
-	public InvoiceStorage CreateInvoiceStorage() {
+	public InvoiceStorage createInvoiceStorage() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public PlanStorage CreatePlanStorage() {
+	public PlanStorage createPlanStorage() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public ProductStorage CreateProductStorage() {
+	public ProductStorage createProductStorage() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public SubscriptionStorage CreateSubscriptionStorage() {
+	public SubscriptionStorage createSubscriptionStorage() {
 		// TODO Auto-generated method stub
 		return null;
 	}
