@@ -5,7 +5,6 @@ package at.ac.univie.swe2.SS2017.team403.model;
  */
 public interface PlanStorage {
 	public Plan[] getPlans();
-	public Plan[] getPlansByProductName(String productName) throws IllegalArgumentException;
 	public void addPlan(Plan plan) throws IllegalArgumentException;
-	public Plan getPlanByPlanName(String planName) throws IllegalArgumentException;
+	public Iterator<Plan> getPlanByProductNameIterator(String productName);
 }
