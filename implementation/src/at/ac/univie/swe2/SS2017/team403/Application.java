@@ -35,6 +35,9 @@ import javax.swing.Box;
 import java.awt.Choice;
 import javax.swing.JSplitPane;
 import javax.swing.JSpinner;
+import java.awt.Color;
+import javax.swing.border.BevelBorder;
+import javax.swing.JComboBox;
 
 public class Application {
 
@@ -161,7 +164,7 @@ public class Application {
 				System.out.println("The customer has been added");
 			}
 		});
-		btnNewButton_1.setBounds(533, 282, 146, 23);
+		btnNewButton_1.setBounds(510, 282, 169, 23);
 		panel.add(btnNewButton_1);
 
 		JPanel panel_3 = new JPanel();
@@ -173,11 +176,11 @@ public class Application {
 		panel_3.add(btnRechnungenAusstellen);
 
 		JPanel panel_1 = new JPanel();
-		tabbedPane_2.addTab("Subscription hinzufuegen", null, panel_1, null);
+		tabbedPane_2.addTab("Subscription hinzuf\u00FCgen", null, panel_1, null);
 		panel_1.setLayout(null);
 
 		JButton btnRechnungAusstellen = new JButton("Subscription ausstellen");
-		btnRechnungAusstellen.setBounds(525, 282, 154, 23);
+		btnRechnungAusstellen.setBounds(507, 282, 172, 23);
 		panel_1.add(btnRechnungAusstellen);
 
 		JLabel label = new JLabel("Kunden aus\u00E4hlen:");
@@ -220,39 +223,56 @@ public class Application {
 		textFieldSubscriptionBillingDate.setBounds(139, 44, 123, 22);
 		panel_1.add(textFieldSubscriptionBillingDate);
 
-		JPanel panel_2 = new JPanel();
-		tabbedPane_2.addTab("Offene Rechnungen", null, panel_2, null);
-		panel_2.setLayout(null);
+		JPanel unpaidInvoicesTab = new JPanel();
+		tabbedPane_2.addTab("Offene Rechnungen", null, unpaidInvoicesTab, null);
+		unpaidInvoicesTab.setLayout(null);
 
 		JLabel lblNewLabel_1 = new JLabel("Kunden aus\u00E4hlen:");
 		lblNewLabel_1.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		lblNewLabel_1.setBounds(10, 11, 123, 22);
-		panel_2.add(lblNewLabel_1);
+		unpaidInvoicesTab.add(lblNewLabel_1);
 
-		Choice choice = new Choice();
-		choice.setBounds(10, 39, 123, 20);
-		panel_2.add(choice);
-
-		JButton btnNewButton_2 = new JButton("Best\u00E4tigen");
-		btnNewButton_2.setBounds(139, 38, 89, 22);
-		panel_2.add(btnNewButton_2);
-
-		JList list_1 = new JList();
-		list_1.setBounds(250, 308, 370, -268);
-		panel_2.add(list_1);
+		JList listForOpenInvoices = new JList();
+		listForOpenInvoices.setBackground(Color.WHITE);
+		listForOpenInvoices.setBounds(298, 300, 322, -260);
+		unpaidInvoicesTab.add(listForOpenInvoices);
 
 		JLabel lblListeOffenerRechnungen = new JLabel("Liste offener Rechnungen:");
 		lblListeOffenerRechnungen.setFont(new Font("Tahoma", Font.PLAIN, 12));
-		lblListeOffenerRechnungen.setBounds(250, 11, 185, 22);
-		panel_2.add(lblListeOffenerRechnungen);
+		lblListeOffenerRechnungen.setBounds(298, 11, 185, 22);
+		unpaidInvoicesTab.add(lblListeOffenerRechnungen);
 
-		JList listAllCustomers = new JList();
-		tabbedPane_2.addTab("Alle Kunden", null, listAllCustomers, null);
+		JComboBox comboBoxCustomerInvoice = new JComboBox();
+		comboBoxCustomerInvoice.setBounds(10, 39, 278, 20);
+		unpaidInvoicesTab.add(comboBoxCustomerInvoice);
+
+		tabbedPane_2.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				if (tabbedPane_2.getSelectedIndex() == 3) {
+					comboBoxCustomerInvoice.setModel(new JComboBox(sys.getCustomers()).getModel());
+				}
+			}
+		});
+
+		JButton btnNewButton_2 = new JButton("Best\u00E4tigen");
+		btnNewButton_2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				Customer selectedCustomer = (Customer) comboBoxCustomerInvoice.getModel().getSelectedItem();
+				System.out.println("RemoteID des Kunden: " + selectedCustomer.getRemoteId());
+				// TODO Wie koennen wir Invoices zu einem Kunden zuordnen?
+				// TODO Informationen in Liste übernehmen
+			}
+		});
+		btnNewButton_2.setBounds(170, 12, 118, 22);
+		unpaidInvoicesTab.add(btnNewButton_2);
+
+		JList listAllCustomersTab = new JList();
+		tabbedPane_2.addTab("Alle Kunden", null, listAllCustomersTab, null);
 
 		tabbedPane_2.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				if (tabbedPane_2.getSelectedIndex() == 4) {
-					listAllCustomers.setListData(sys.getCustomers());
+					listAllCustomersTab.setListData(sys.getCustomers());
 				}
 			}
 		});
