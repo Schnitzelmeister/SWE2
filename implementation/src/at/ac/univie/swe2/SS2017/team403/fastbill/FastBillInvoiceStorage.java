@@ -119,9 +119,6 @@ public class FastBillInvoiceStorage implements InvoiceStorage {
 			}
 			return ret.toArray(new Invoice[ret.size()]);
 			
-		} catch (ParseException e) {
-			e.printStackTrace();
-			throw new IllegalArgumentException("ParseException: " + e.getMessage());
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 			throw new IllegalArgumentException("MalformedURLException: " + e.getMessage());

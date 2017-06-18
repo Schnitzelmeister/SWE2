@@ -40,7 +40,7 @@ public class CustomerGenarator implements CustomerStorage {
 	@Override
 	public Customer getCustomerByRemoteId(String remoteId) {
 		for (Customer c : storage){
-			if (c.getLocalId().equals(remoteId)){
+			if (c.getRemoteId().equals(remoteId)){
 				return c;
 			}	
 		}

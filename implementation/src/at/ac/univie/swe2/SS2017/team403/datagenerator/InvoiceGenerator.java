@@ -5,13 +5,13 @@ import java.util.List;
 
 import at.ac.univie.swe2.SS2017.team403.model.Invoice;
 import at.ac.univie.swe2.SS2017.team403.model.InvoiceStorage;
-import at.ac.univie.swe2.SS2017.team403.model.Subscription;
+import at.ac.univie.swe2.SS2017.team403.model.Iterator;
 
 public class InvoiceGenerator implements InvoiceStorage {
 	TestDataStorageFactory factory;
 	List<Invoice> invoiceStorage;
 	String invoiceId;
-	String localId;
+	String remoteId;
 	
 	public InvoiceGenerator(TestDataStorageFactory factory){
 		this.factory = factory;
@@ -28,26 +28,41 @@ public class InvoiceGenerator implements InvoiceStorage {
 	}
 
 	@Override
-	public Invoice[] getInvoicesByRemoteId(String remoteId) throws IllegalArgumentException {
-		ArrayList invoiceList = new ArrayList<Invoice>();
-		for(Invoice i : invoiceStorage) {
-			if(i.getInvoiceId().equals(localId))
-				invoiceList.add(i);
+	public Iterator<Invoice> getInvoicesByRemoteId(String remoteId) throws IllegalArgumentException {
+		return new AllInvoicesByRemoteIdIterator(remoteId);
+	}
+
+	
+	private class AllInvoicesByRemoteIdIterator implements Iterator<Invoice> {
+		private int index = 0;
+		ArrayList<Invoice> invoices = new ArrayList<Invoice>();
+		
+		AllInvoicesByRemoteIdIterator(String id){
+			for (Invoice i:invoiceStorage){
+				if(i.getId().equals(id)){
+					invoices.add(i);
+				}
+			}
 		}
-		if(invoiceList.size()==0) throw new IllegalArgumentException("Es konnte keine Invoice mit der RemoteID: "+remoteId+" gefunden werden");
-		return  (Invoice[]) invoiceList.toArray(new Invoice[invoiceList.size()]);
-	}
-
-	@Override
-	public Invoice[] getLatestInvoiceByRemoteId(String remoteId) throws IllegalArgumentException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Invoice[] getSubscriptionExpiredInvoices() throws IllegalArgumentException {
-		// TODO Auto-generated method stub
-		return null;
+		
+		@Override
+		public boolean hasNext() {
+			return (index < invoices.size());
+		}
+		
+		@Override
+		public int count() {
+			return invoices.size();
+		}
+		
+		@Override
+		public Invoice next() {
+			if(this.hasNext()) {
+				return invoices.get(index++);
+			} else {
+				return null;
+			}
+		}
 	}
 
 	@Override
