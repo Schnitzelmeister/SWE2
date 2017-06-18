@@ -8,6 +8,11 @@ import at.ac.univie.swe2.SS2017.team403.model.PlanStorage;
 import at.ac.univie.swe2.SS2017.team403.model.ProductStorage;
 import at.ac.univie.swe2.SS2017.team403.model.SubscriptionStorage;
 
+/**
+ * 
+ *The factory class is used to store data in FastBill
+ *
+ */
 public class FastBillDataStorageFactory implements AbstractDataStorageFactory {
 
 	private FastBillCustomerStorage customerStorage = new FastBillCustomerStorage(this);

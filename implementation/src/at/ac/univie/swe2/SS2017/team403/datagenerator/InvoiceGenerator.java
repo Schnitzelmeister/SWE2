@@ -6,7 +6,11 @@ import java.util.List;
 import at.ac.univie.swe2.SS2017.team403.model.Invoice;
 import at.ac.univie.swe2.SS2017.team403.model.InvoiceStorage;
 import at.ac.univie.swe2.SS2017.team403.model.Iterator;
-
+/**
+ * 
+ *the class is used to generate and store some invoices and handle with them.
+ *
+ */
 public class InvoiceGenerator implements InvoiceStorage {
 	TestDataStorageFactory factory;
 	List<Invoice> invoiceStorage;

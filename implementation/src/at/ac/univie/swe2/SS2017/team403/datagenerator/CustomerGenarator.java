@@ -8,7 +8,11 @@ import at.ac.univie.swe2.SS2017.team403.model.CustomerStorage;
 import at.ac.univie.swe2.SS2017.team403.model.Invoice;
 import at.ac.univie.swe2.SS2017.team403.model.Iterator;
 import at.ac.univie.swe2.SS2017.team403.model.Subscription;
-
+/**
+ * 
+ *the class is used to generate and store some customer and handle with them.
+ *
+ */
 public class CustomerGenarator implements CustomerStorage {
 	private TestDataStorageFactory factory;
 	private List<Customer> storage;

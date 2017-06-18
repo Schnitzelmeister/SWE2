@@ -10,7 +10,11 @@ import at.ac.univie.swe2.SS2017.team403.model.Product;
 import at.ac.univie.swe2.SS2017.team403.model.Subscription;
 import at.ac.univie.swe2.SS2017.team403.model.SubscriptionStateEnum;
 import at.ac.univie.swe2.SS2017.team403.model.SubscriptionStorage;
-
+/**
+ * 
+ *the class is used to generate and store some subscriptions and handle with them.
+ *
+ */
 public class SubscriptionGenerator implements SubscriptionStorage {
 	TestDataStorageFactory factory;
 	List<Subscription> subscriptionStorage;

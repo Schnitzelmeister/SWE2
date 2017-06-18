@@ -5,7 +5,11 @@ import java.util.List;
 
 import at.ac.univie.swe2.SS2017.team403.model.Product;
 import at.ac.univie.swe2.SS2017.team403.model.ProductStorage;
-
+/**
+ * 
+ *the class is used to generate and store some products and handle with them.
+ *
+ */
 public class ProductGenerator implements ProductStorage {
 	TestDataStorageFactory factory;
 	List<Product> productStorage;

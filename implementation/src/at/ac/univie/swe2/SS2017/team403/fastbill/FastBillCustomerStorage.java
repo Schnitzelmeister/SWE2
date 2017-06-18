@@ -24,7 +24,12 @@ import at.ac.univie.swe2.SS2017.team403.model.CustomerStorage;
 import at.ac.univie.swe2.SS2017.team403.model.Invoice;
 import at.ac.univie.swe2.SS2017.team403.model.Iterator;
 import at.ac.univie.swe2.SS2017.team403.model.Subscription;
-
+/**
+ * 
+ * the class is used to handle the connection with FastBill to get or store customer(s)
+ *  
+ *
+ */
 public class FastBillCustomerStorage implements CustomerStorage {
 
 	private FastBillDataStorageFactory factory;
@@ -37,6 +42,14 @@ public class FastBillCustomerStorage implements CustomerStorage {
 		GetAllCustomers, GetCustomerByRemoteId, GetCustomerByLocalId, CreateCustomer
 	}
 
+	/**
+	 * The method connects to the FastBill and sends a HTTP-Request to get/creat Information about Customer
+	 * 
+	 * @param queryKind the kind of the query. 
+	 * @param param the parameter which specified the customer 
+	 * @return an array of the customers
+	 * @throws IllegalArgumentException if the kind of query and the parameter not used
+	 */
 	private Customer[] sentQuery(QueryKind queryKind, Object param) throws IllegalArgumentException {
 		try {
 			URL url = new URL(BackOfficeSystem.FastBillWSURL);
@@ -177,7 +190,12 @@ public class FastBillCustomerStorage implements CustomerStorage {
 		return result.getRemoteId();
 	}
 
-	// inner class, which are used for Iterator Pattern
+	 
+	/**
+	 * inner class, which are used for Iterator Pattern
+	 * 
+	 *
+	 */
 	private class AllCustomerIterator implements Iterator<Customer> {
 		private List<Customer> instanceStorage;
 		private int index = 0;
@@ -206,7 +224,12 @@ public class FastBillCustomerStorage implements CustomerStorage {
 		}
 	}
 
-	// inner class, which are used for Iterator Pattern
+	// 
+	/**
+	 * inner class, which are used for Iterator Pattern
+	 * 
+	 *
+	 */
 	private class DebtCustomerIterator implements Iterator<Customer> {
 		private List<Customer> debtStorage;
 		private int index = 0;

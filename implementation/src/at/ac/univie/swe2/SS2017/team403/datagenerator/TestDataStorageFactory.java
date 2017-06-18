@@ -5,7 +5,11 @@ import at.ac.univie.swe2.SS2017.team403.model.InvoiceStorage;
 import at.ac.univie.swe2.SS2017.team403.model.PlanStorage;
 import at.ac.univie.swe2.SS2017.team403.model.ProductStorage;
 import at.ac.univie.swe2.SS2017.team403.model.SubscriptionStorage;
-
+/**
+ * 
+ * the factory class is used to generate test data from customer, invoices, plans, products and subscription
+ *
+ */
 public class TestDataStorageFactory implements AbstractDataStorageFactory {
 
 	private CustomerGenarator customerGenarator = new CustomerGenarator(this);

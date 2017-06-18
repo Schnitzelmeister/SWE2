@@ -22,6 +22,12 @@ import at.ac.univie.swe2.SS2017.team403.model.Customer;
 import at.ac.univie.swe2.SS2017.team403.model.Invoice;
 import at.ac.univie.swe2.SS2017.team403.model.InvoiceStorage;
 
+/**
+ * 
+ * the class is used to handle the connection with FastBill to get or store invoice(s)
+ *  
+ *
+ */
 public class FastBillInvoiceStorage implements InvoiceStorage {
 
 	private FastBillDataStorageFactory factory;
@@ -34,6 +40,14 @@ public class FastBillInvoiceStorage implements InvoiceStorage {
 		GetAllInvoices, GetInvoicesByRemoteId, GetLatestInvoiceByRemoteId, GetSubscriptionExpiredInvoices, AddInvoice
 	}
 	
+	/**
+	 * The method connects to the FastBill and sends a HTTP-Request to get/creat Information about invoices
+	 * 
+	 * @param queryKind the kind of the query
+	 * @param param the parameter which specified the invoice 
+	 * @return an array of the invoices
+	 * @throws IllegalArgumentException if the kind of query and the parameter not used
+	 */
 	private Invoice[] sentQuery(QueryKind queryKind, Object param) throws IllegalArgumentException {
 		try{
 			URL url = new URL(BackOfficeSystem.FastBillWSURL);
@@ -118,6 +132,10 @@ public class FastBillInvoiceStorage implements InvoiceStorage {
 				ret.add( new Invoice(factory, newInvoice.getId(), newInvoice.getInvoiceId()) );	
 			}
 			return ret.toArray(new Invoice[ret.size()]);
+			
+		} catch (ParseException e) {
+			e.printStackTrace();
+			throw new IllegalArgumentException("ParseException: " + e.getMessage());
 			
 		} catch (MalformedURLException e) {
 			e.printStackTrace();

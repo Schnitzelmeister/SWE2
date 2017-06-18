@@ -8,7 +8,11 @@ import at.ac.univie.swe2.SS2017.team403.model.Plan;
 import at.ac.univie.swe2.SS2017.team403.model.PlanStorage;
 import at.ac.univie.swe2.SS2017.team403.model.Product;
 
-
+/**
+ * 
+ *the class is used to generate and store some plans and handle with them.
+ *
+ */
 public class PlanGenerator implements PlanStorage {
 	TestDataStorageFactory factory;
 	List<Plan> planStorage;
