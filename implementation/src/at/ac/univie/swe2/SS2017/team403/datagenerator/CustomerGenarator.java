@@ -69,7 +69,12 @@ public class CustomerGenarator implements CustomerStorage {
 		return customer.getLocalId();
 	}
 
-	//inner class, which are used for Iterator Pattern
+	/**
+	 * 
+	 *This class is used to access the elements of the class customer
+	 *in sequential manner without any need to know its underlying representation.
+	 *
+	 */
 	private class AllCustomerIterator implements Iterator<Customer> {
 		private int index = 0;
 		
@@ -93,7 +98,12 @@ public class CustomerGenarator implements CustomerStorage {
 		}
 	}
 
-	//inner class, which are used for Iterator Pattern
+	/**
+	 * 
+	 *This class is used to access the elements of the class customer who has debt
+	 *in sequential manner without any need to know its underlying representation.
+	 *
+	 */
 	private class DebtCustomerIterator implements Iterator<Customer> {
 		private int index = 0;
 		
