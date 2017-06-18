@@ -22,6 +22,7 @@ import at.ac.univie.swe2.SS2017.team403.datagenerator.AbstractDataStorageFactory
 import at.ac.univie.swe2.SS2017.team403.model.Customer;
 import at.ac.univie.swe2.SS2017.team403.model.Invoice;
 import at.ac.univie.swe2.SS2017.team403.model.InvoiceStorage;
+import at.ac.univie.swe2.SS2017.team403.model.Iterator;
 
 /**
  * 
@@ -154,19 +155,7 @@ public class FastBillInvoiceStorage implements InvoiceStorage {
 	}
 
 	@Override
-	public Invoice[] getInvoicesByRemoteId(String remoteId) throws IllegalArgumentException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Invoice[] getLatestInvoiceByRemoteId(String remoteId) throws IllegalArgumentException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Invoice[] getSubscriptionExpiredInvoices() throws IllegalArgumentException {
+	public Iterator<Invoice> getInvoicesByRemoteId(String remoteId) throws IllegalArgumentException {
 		// TODO Auto-generated method stub
 		return null;
 	}

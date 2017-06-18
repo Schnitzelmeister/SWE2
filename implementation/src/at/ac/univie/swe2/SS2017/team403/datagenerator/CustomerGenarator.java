@@ -7,6 +7,7 @@ import at.ac.univie.swe2.SS2017.team403.model.Customer;
 import at.ac.univie.swe2.SS2017.team403.model.CustomerStorage;
 import at.ac.univie.swe2.SS2017.team403.model.Invoice;
 import at.ac.univie.swe2.SS2017.team403.model.Iterator;
+import at.ac.univie.swe2.SS2017.team403.model.IteratorCreator;
 import at.ac.univie.swe2.SS2017.team403.model.Subscription;
 /**
  * 
@@ -145,10 +146,23 @@ public class CustomerGenarator implements CustomerStorage {
 
 	@Override
 	public Iterator<Customer> getCustomersIterator(boolean onlyWithDebt) {
+		IteratorCreator<Customer> creator;
 		if (onlyWithDebt) {
-			return new DebtCustomerIterator();
+			creator = new DebtCustomerIteratorCreator();
 		} else {
-			return new AllCustomerIterator();
+			creator = new AllCustomerIteratorCreator();
 		}
+		
+		return creator.factoryMethod();
+	}
+	
+	private class DebtCustomerIteratorCreator extends IteratorCreator<Customer> {
+	    @Override
+	    public Iterator<Customer> factoryMethod() { return new DebtCustomerIterator(); }
+	}
+
+	private class AllCustomerIteratorCreator extends IteratorCreator<Customer> {
+	    @Override
+	    public Iterator<Customer> factoryMethod() { return new AllCustomerIterator(); }
 	}
 }
