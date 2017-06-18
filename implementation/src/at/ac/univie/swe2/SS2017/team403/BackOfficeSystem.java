@@ -128,6 +128,10 @@ public class BackOfficeSystem implements Billing {
 		return dataStorage.getInvoiceStorage().getInvoices();
 	}
 	
+	public Invoice[] getInvoice(Customer customer){
+		return dataStorage.getSubscriptionStorage().getInvoicesForCustomer(customer);
+	}
+	
 	public void addPlan(Plan plan) throws IllegalArgumentException {
 		dataStorage.getPlanStorage().addPlan(plan);
 	}

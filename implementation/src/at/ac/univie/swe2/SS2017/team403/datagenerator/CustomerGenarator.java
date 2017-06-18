@@ -47,6 +47,12 @@ public class CustomerGenarator implements CustomerStorage {
 		throw new IllegalArgumentException("The User with remoteId=" + remoteId + " does not exist");
 	}
 
+	public Subscription[] getSubscriptionByCustomer(String localCustomerId){
+		
+		
+		return null;
+	}
+	
 	@Override
 	public String addCustomer(Customer customer) throws IllegalArgumentException {
 		for (Customer c : storage) {

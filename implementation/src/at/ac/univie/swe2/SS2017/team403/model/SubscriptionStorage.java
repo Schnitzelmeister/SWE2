@@ -6,6 +6,7 @@ package at.ac.univie.swe2.SS2017.team403.model;
 public interface SubscriptionStorage {
 	public Subscription[] getSubscriptions();
 	public Subscription[] getSubscriptionsByCustomer(Customer customer);
+	public Invoice[] getInvoicesForCustomer(Customer customer);
 	public Subscription[] getSubScriptionByRemoteId(String remoteId);
 	public void addSubscription(Subscription subscription) throws IllegalArgumentException;
 }

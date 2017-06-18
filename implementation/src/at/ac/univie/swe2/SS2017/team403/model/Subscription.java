@@ -13,9 +13,10 @@ public class Subscription implements Billing {
 	private SubscriptionStateEnum state;
 	private String localId;
 	private String subscriptionId;
+	private String localCustomerId;
 	
 	public Subscription(AbstractDataStorageFactory factory, String name, Plan plan, long validTill, List<Invoice> invoices, 
-			SubscriptionStateEnum state, String localId, String subscriptionId){
+			SubscriptionStateEnum state, String localId, String subscriptionId, String localCustomerId){
 		this.factory = factory;
 		this.name = name;
 		this.plan = plan;
@@ -23,10 +24,11 @@ public class Subscription implements Billing {
 		this.invoices = invoices;
 		this.state = state;
 		this.localId = localId;
+		this.localCustomerId = localCustomerId;
 	}
 	
 	public Subscription(String name, Plan plan, long validTill, List<Invoice> invoices, 
-			SubscriptionStateEnum state, String localId, String subscriptionId){
+			SubscriptionStateEnum state, String localId, String subscriptionId, String localCustomerId){
 		this.name = name;
 		this.plan = plan;
 		this.validTill = validTill;
@@ -34,6 +36,7 @@ public class Subscription implements Billing {
 		this.state = state;
 		this.localId = localId;
 		this.subscriptionId = subscriptionId;
+		this.localCustomerId = localCustomerId;
 	}
 	
 	public void setFactory(AbstractDataStorageFactory factory) {
@@ -66,6 +69,14 @@ public class Subscription implements Billing {
 	
 	public String getSubscriptionId() {
 		return subscriptionId;
+	}
+	
+	public void setLocalCustomerId(String localCustomerId){
+		this.localCustomerId=localCustomerId;
+	}
+	
+	public String getLocalCustomerId(){
+		return this.localCustomerId;
 	}
 	
 	@Override

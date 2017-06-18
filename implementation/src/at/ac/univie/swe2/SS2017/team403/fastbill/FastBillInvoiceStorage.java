@@ -1,16 +1,24 @@
 package at.ac.univie.swe2.SS2017.team403.fastbill;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import at.ac.univie.swe2.SS2017.team403.BackOfficeSystem;
+import at.ac.univie.swe2.SS2017.team403.model.Customer;
 import at.ac.univie.swe2.SS2017.team403.model.Invoice;
 import at.ac.univie.swe2.SS2017.team403.model.InvoiceStorage;
 
@@ -75,7 +83,41 @@ public class FastBillInvoiceStorage implements InvoiceStorage {
 			if (connection.getResponseCode() != 200)
 				throw new IllegalArgumentException(
 						"Failed to call Web Service : HTTP error code : " + connection.getResponseCode());
-			//TODO den Rest implementiere ich heute noch ...
+			
+			BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+			// get Data from Server
+			String output;
+			StringBuilder outputB = new StringBuilder();
+			while ((output = br.readLine()) != null)
+				outputB.append(output);
+			connection.disconnect();	
+			
+			
+			List<Invoice> ret = new ArrayList<Invoice>();
+	
+			JSONParser parser = new JSONParser();
+			JSONObject json = (JSONObject) parser.parse(outputB.toString());
+			
+			if (((JSONObject) json.get("RESPONSE")).get("ERRORS") != null)
+				throw new IllegalArgumentException(
+						"FastBill error: " + ((JSONObject) json.get("RESPONSE")).get("ERRORS").toString());
+
+			if (queryKind == QueryKind.GetAllInvoices || queryKind == QueryKind.GetInvoicesByRemoteId
+					|| queryKind == QueryKind.GetLatestInvoiceByRemoteId) {
+				JSONArray invoices = (JSONArray) ((JSONObject) json.get("RESPONSE")).get("INVOICES");
+				for (Object invoice : invoices) {
+					String remoteId = (String) ((JSONObject) invoice).get("INVOICE_ID");
+					String localId = (String) ((JSONObject) invoice).get("INVOICE_NUMBER");
+
+					ret.add(new Invoice(factory, localId, remoteId));
+				}
+			} else if (queryKind == QueryKind.AddInvoice) {
+				String invoiceId = ((JSONObject) json.get("RESPONSE")).get("INVOICE_ID").toString();
+				Invoice newInvoice = (Invoice) param;
+				
+				ret.add( new Invoice(factory, newInvoice.getId(), newInvoice.getInvoiceId()) );	
+			}
+			return ret.toArray(new Invoice[ret.size()]);
 			
 		} catch (ParseException e) {
 			e.printStackTrace();
@@ -87,7 +129,6 @@ public class FastBillInvoiceStorage implements InvoiceStorage {
 			e.printStackTrace();
 			throw new IllegalArgumentException("IOException: " + e.getMessage());
 		}
-		return null;
 	}
 	
 	@Override
@@ -116,8 +157,7 @@ public class FastBillInvoiceStorage implements InvoiceStorage {
 
 	@Override
 	public void addInvoice(Invoice invoice) throws IllegalArgumentException {
-		// TODO Auto-generated method stub
-		
+		sentQuery(QueryKind.AddInvoice, invoice);		
 	}
 
 }

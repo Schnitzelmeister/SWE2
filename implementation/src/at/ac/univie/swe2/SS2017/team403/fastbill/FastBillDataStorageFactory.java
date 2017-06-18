@@ -11,7 +11,8 @@ import at.ac.univie.swe2.SS2017.team403.model.SubscriptionStorage;
 public class FastBillDataStorageFactory implements AbstractDataStorageFactory {
 
 	private FastBillCustomerStorage customerStorage = new FastBillCustomerStorage(this);
-
+	private FastBillInvoiceStorage invoiceStorage = new FastBillInvoiceStorage(this); 
+	
 	@Override
 	public CustomerStorage createCustomerStorage() {
 		return customerStorage;
@@ -19,8 +20,7 @@ public class FastBillDataStorageFactory implements AbstractDataStorageFactory {
 
 	@Override
 	public InvoiceStorage createInvoiceStorage() {
-		// TODO Auto-generated method stub
-		return null;
+		return invoiceStorage;
 	}
 
 	@Override

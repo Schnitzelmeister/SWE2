@@ -29,8 +29,13 @@ public class InvoiceGenerator implements InvoiceStorage {
 
 	@Override
 	public Invoice[] getInvoicesByRemoteId(String remoteId) throws IllegalArgumentException {
-		// TODO Auto-generated method stub
-		return null;
+		ArrayList invoiceList = new ArrayList<Invoice>();
+		for(Invoice i : invoiceStorage) {
+			if(i.getInvoiceId().equals(localId))
+				invoiceList.add(i);
+		}
+		if(invoiceList.size()==0) throw new IllegalArgumentException("Es konnte keine Invoice mit der RemoteID: "+remoteId+" gefunden werden");
+		return  (Invoice[]) invoiceList.toArray(new Invoice[invoiceList.size()]);
 	}
 
 	@Override
