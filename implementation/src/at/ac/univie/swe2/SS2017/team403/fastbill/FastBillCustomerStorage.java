@@ -238,7 +238,6 @@ public class FastBillCustomerStorage implements CustomerStorage {
 		private int index = 0;
 
 		DebtCustomerIterator() {
-			getCustomers();
 			instanceStorage = new ArrayList<Customer>();
 			for (Customer customer : getCustomers()) {
 				boolean hasDebt = false;
