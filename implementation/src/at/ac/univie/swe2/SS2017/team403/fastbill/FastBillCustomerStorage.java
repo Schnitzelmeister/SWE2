@@ -19,6 +19,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import at.ac.univie.swe2.SS2017.team403.BackOfficeSystem;
+import at.ac.univie.swe2.SS2017.team403.datagenerator.AbstractDataStorageFactory;
 import at.ac.univie.swe2.SS2017.team403.model.Customer;
 import at.ac.univie.swe2.SS2017.team403.model.CustomerStorage;
 import at.ac.univie.swe2.SS2017.team403.model.Invoice;
@@ -32,9 +33,9 @@ import at.ac.univie.swe2.SS2017.team403.model.Subscription;
  */
 public class FastBillCustomerStorage implements CustomerStorage {
 
-	private FastBillDataStorageFactory factory;
+	private AbstractDataStorageFactory factory;
 
-	public FastBillCustomerStorage(FastBillDataStorageFactory factory) {
+	public FastBillCustomerStorage(AbstractDataStorageFactory factory) {
 		this.factory = factory;
 	}
 
@@ -201,6 +202,7 @@ public class FastBillCustomerStorage implements CustomerStorage {
 		private int index = 0;
 
 		AllCustomerIterator() {
+			getCustomers();
 			instanceStorage = new ArrayList<Customer>(Arrays.asList(getCustomers()));
 		}
 
@@ -231,11 +233,12 @@ public class FastBillCustomerStorage implements CustomerStorage {
 	 *
 	 */
 	private class DebtCustomerIterator implements Iterator<Customer> {
-		private List<Customer> debtStorage;
+		private List<Customer> instanceStorage;
 		private int index = 0;
 
 		DebtCustomerIterator() {
-			debtStorage = new ArrayList<Customer>();
+			getCustomers();
+			instanceStorage = new ArrayList<Customer>();
 			for (Customer customer : getCustomers()) {
 				boolean hasDebt = false;
 
@@ -249,25 +252,25 @@ public class FastBillCustomerStorage implements CustomerStorage {
 				}
 
 				if (hasDebt) {
-					debtStorage.add(customer);
+					instanceStorage.add(customer);
 				}
 			}
 		}
 
 		@Override
 		public boolean hasNext() {
-			return (index < debtStorage.size());
+			return (index < instanceStorage.size());
 		}
 
 		@Override
 		public int count() {
-			return debtStorage.size();
+			return instanceStorage.size();
 		}
 
 		@Override
 		public Customer next() {
 			if (this.hasNext()) {
-				return debtStorage.get(index++);
+				return instanceStorage.get(index++);
 			} else {
 				return null;
 			}
@@ -276,7 +279,6 @@ public class FastBillCustomerStorage implements CustomerStorage {
 
 	@Override
 	public Iterator<Customer> getCustomersIterator(boolean onlyWithDebt) {
-		getCustomers();
 		if (onlyWithDebt) {
 			return new DebtCustomerIterator();
 		} else {

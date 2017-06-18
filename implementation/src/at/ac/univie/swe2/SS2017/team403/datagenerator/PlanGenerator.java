@@ -14,10 +14,10 @@ import at.ac.univie.swe2.SS2017.team403.model.Product;
  *
  */
 public class PlanGenerator implements PlanStorage {
-	TestDataStorageFactory factory;
+	AbstractDataStorageFactory factory;
 	List<Plan> planStorage;
 	
-	public PlanGenerator(TestDataStorageFactory factory){
+	public PlanGenerator(AbstractDataStorageFactory factory){
 		this.factory = factory;
 		planStorage = new ArrayList<Plan>();
 		planStorage.add( new Plan(factory,"2222", "Premium", 22.22, new Product(factory,"Produkt2","productId2"), "planId2") );

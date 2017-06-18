@@ -18,6 +18,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import at.ac.univie.swe2.SS2017.team403.BackOfficeSystem;
+import at.ac.univie.swe2.SS2017.team403.datagenerator.AbstractDataStorageFactory;
 import at.ac.univie.swe2.SS2017.team403.model.Customer;
 import at.ac.univie.swe2.SS2017.team403.model.Invoice;
 import at.ac.univie.swe2.SS2017.team403.model.InvoiceStorage;
@@ -30,9 +31,9 @@ import at.ac.univie.swe2.SS2017.team403.model.InvoiceStorage;
  */
 public class FastBillInvoiceStorage implements InvoiceStorage {
 
-	private FastBillDataStorageFactory factory;
+	private AbstractDataStorageFactory factory;
 
-	public FastBillInvoiceStorage(FastBillDataStorageFactory factory) {
+	public FastBillInvoiceStorage(AbstractDataStorageFactory factory) {
 		this.factory = factory;
 	}
 
