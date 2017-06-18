@@ -12,10 +12,10 @@ import at.ac.univie.swe2.SS2017.team403.model.SubscriptionStateEnum;
 import at.ac.univie.swe2.SS2017.team403.model.SubscriptionStorage;
 
 public class SubscriptionGenerator implements SubscriptionStorage {
-	TestDataStorageFactory factory;
+	AbstractDataStorageFactory factory;
 	List<Subscription> subscriptionStorage;
 	
-	public SubscriptionGenerator(TestDataStorageFactory factory){
+	public SubscriptionGenerator(AbstractDataStorageFactory factory){
 		this.factory = factory;
 		subscriptionStorage = new ArrayList<Subscription>();
 		List dummyInvoiceList = new ArrayList<Invoice>(); 

@@ -7,10 +7,10 @@ import at.ac.univie.swe2.SS2017.team403.model.Product;
 import at.ac.univie.swe2.SS2017.team403.model.ProductStorage;
 
 public class ProductGenerator implements ProductStorage {
-	TestDataStorageFactory factory;
+	AbstractDataStorageFactory factory;
 	List<Product> productStorage;
 	
-	public ProductGenerator(TestDataStorageFactory factory){
+	public ProductGenerator(AbstractDataStorageFactory factory){
 		this.factory = factory;
 		productStorage = new ArrayList<Product>();
 		productStorage.add( new Product(factory,"Produkt2","productId2") );

@@ -10,10 +10,10 @@ import at.ac.univie.swe2.SS2017.team403.model.Iterator;
 import at.ac.univie.swe2.SS2017.team403.model.Subscription;
 
 public class CustomerGenarator implements CustomerStorage {
-	private TestDataStorageFactory factory;
+	private AbstractDataStorageFactory factory;
 	private List<Customer> storage;
 	
-	public CustomerGenarator(TestDataStorageFactory factory) {
+	public CustomerGenarator(AbstractDataStorageFactory factory) {
 		this.factory = factory;
 		storage = new ArrayList<Customer>();
 		storage.add( new Customer(factory, "1","111","Zinatulin", "Ayrat", "ayrat@gmail.com", "12345678") );
@@ -91,45 +91,38 @@ public class CustomerGenarator implements CustomerStorage {
 
 	//inner class, which are used for Iterator Pattern
 	private class DebtCustomerIterator implements Iterator<Customer> {
-		private List<Customer> debtStorage;
 		private int index = 0;
 		
-		DebtCustomerIterator() {
-			debtStorage = new ArrayList<Customer>();
-			for (Customer customer : storage) {
-				boolean hasDebt = false;
-			
-				search:
-				for (Subscription subscription : customer.getSubscriptions()) {
+		private boolean getNext() {
+			while (index < storage.size()) {
+				for (Subscription subscription : storage.get(index).getSubscriptions()) {
 					for (Invoice invoice : subscription.getInvoices()) {
 						if (invoice.isUnpaid()) {
-							hasDebt = true;
-							break search;
+							return true;
 						}
 					}
 				}
-				
-				if (hasDebt){
-					debtStorage.add(customer);
-				}
+				++index;
 			}
+			return false;
 		}
-		
+
 		
 		@Override
 		public boolean hasNext() {
-			return (index < debtStorage.size());
+			return (index < storage.size());
 		}
+
 		
 		@Override
 		public int count() {
-			return debtStorage.size();
+			return -1;
 		}
 		
 		@Override
 		public Customer next() {
-			if(this.hasNext()){
-				return debtStorage.get(index++);
+			if(this.getNext()) {
+				return storage.get(index);
 			} else {
 				return null;
 			}

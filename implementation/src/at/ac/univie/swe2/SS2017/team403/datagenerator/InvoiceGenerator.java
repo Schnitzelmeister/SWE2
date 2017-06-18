@@ -8,12 +8,12 @@ import at.ac.univie.swe2.SS2017.team403.model.InvoiceStorage;
 import at.ac.univie.swe2.SS2017.team403.model.Iterator;
 
 public class InvoiceGenerator implements InvoiceStorage {
-	TestDataStorageFactory factory;
+	AbstractDataStorageFactory factory;
 	List<Invoice> invoiceStorage;
 	String invoiceId;
 	String remoteId;
 	
-	public InvoiceGenerator(TestDataStorageFactory factory){
+	public InvoiceGenerator(AbstractDataStorageFactory factory){
 		this.factory = factory;
 		invoiceStorage = new ArrayList<Invoice>();
 		invoiceStorage.add( new Invoice(factory,"1","123") );
